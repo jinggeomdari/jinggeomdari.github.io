@@ -1,0 +1,2592 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>확률과 통계</title>
+  <style>
+    /* ===== 토큰 ===== */
+    :root {
+      /* ★ 단원 테마 색: 이 값 하나만 바꾸면 배너·탭·태그·상자·버튼·그래프 선이 모두 따라 바뀐다.
+         (배너의 흰 글자가 잘 보이도록 충분히 진한 색으로. 주황·빨강·파랑 계열은 강조색과 겹치므로 피하기) */
+      --main: #5b5fc7;
+      /* 아래는 --main에서 자동으로 만들어지는 색 (직접 고치지 않음) */
+      --main-d: color-mix(in srgb, var(--main) 72%, #000);      /* 진한 테마색: 대단원 띠, 강조 글자 */
+      --mint: color-mix(in srgb, var(--main) 12%, #fff);        /* 아주 연한 배경 */
+      --mint-2: color-mix(in srgb, var(--main) 30%, #fff);      /* 태그 배경 */
+      --tint: color-mix(in srgb, var(--main) 5%, #fff);         /* 공식 상자 배경 */
+      --tint-2: color-mix(in srgb, var(--main) 3%, #fff);       /* 탐색기 배경 */
+      --bg: color-mix(in srgb, var(--main) 6%, #f6f6f6);        /* 페이지 바깥 배경 */
+      --rule: color-mix(in srgb, var(--main) 7%, #e5e5e5);      /* 구분선 */
+      --grid: color-mix(in srgb, var(--main) 6%, #eeeeee);      /* 모눈·진행 막대 바탕 */
+      --tag-ink: color-mix(in srgb, var(--main) 22%, #1a1f1e);  /* 태그 글자 */
+      --shadow: color-mix(in srgb, var(--main-d) 8%, transparent);
+      --shadow-2: color-mix(in srgb, var(--main-d) 20%, transparent);
+      --ink: #22302e; --muted: #5d6b69; --paper: #ffffff;
+      --coral: #f2624f; --blue: #2b72d6; --violet: #7656c9; --gold: #e9a417; --hl: #fff1b0;
+      --ok: #1f6fd1; --bad: #e04545;
+      --sans: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      --serif: "Cambria", "Times New Roman", "Batang", serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.6; }
+    i { font-family: var(--serif); font-style: italic; }
+    sup { font-size: .68em; line-height: 0; }
+    math { font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", math, serif; font-size: 1.12em; }
+    button { font-family: var(--sans); }
+
+    /* ===== 레이아웃 ===== */
+    .page { width: min(1180px, calc(100% - 28px)); margin: 24px auto 40px; overflow: hidden; border: 2px solid var(--main); border-radius: 20px; background: var(--paper); box-shadow: 0 10px 30px var(--shadow); }
+    .banner { padding: 12px 16px 10px; background: var(--main); color: #fff; text-align: center; font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.3; }
+    .banner small { display: block; font-size: 13px; font-weight: 600; opacity: .85; letter-spacing: 0; }
+    .tabs { display: flex; gap: 6px; padding: 14px 24px 0; border-bottom: 2px solid var(--main); background: color-mix(in srgb, var(--main) 4%, #fff); }
+    .tab { margin-bottom: -2px; padding: 9px 26px; border: 1.5px solid var(--rule); border-bottom: 2px solid transparent; border-radius: 12px 12px 0 0; background: color-mix(in srgb, var(--main) 4%, #f5f5f5); color: var(--muted); font-size: 16px; font-weight: 700; cursor: pointer; }
+    .tab[aria-selected="true"] { border-color: var(--main); border-bottom-color: var(--paper); background: var(--paper); color: var(--ink); }
+    .tab:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid #ffc9a8; outline-offset: 2px; }
+
+    .zone { display: flex; align-items: center; gap: 12px; padding: 22px 26px 2px; }
+    .zone b { padding: 4px 20px; border-radius: 999px; background: var(--main-d); color: #fff; font-size: 17px; }
+    .zone::after { content: ""; flex: 1; height: 2px; background: var(--mint-2); }
+    .sec { padding: 18px 26px; border-bottom: 1px solid var(--rule); }
+    .cols-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .cols-2 > .col { min-width: 0; padding: 0 22px; }
+    .cols-2 > .col:first-child { padding-left: 0; border-right: 2px dashed var(--rule); }
+    .cols-2 > .col:last-child { padding-right: 0; }
+
+    /* ===== 개념 구성 요소 ===== */
+    .head { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 18px; }
+    .no { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--coral); color: #fff; font-size: 14px; font-weight: 800; flex: none; }
+    .tag { display: inline-block; padding: 2px 15px 3px; border-radius: 999px; background: var(--mint-2); color: var(--tag-ink); font-size: 15.5px; font-weight: 800; line-height: 1.5; white-space: nowrap; }
+    .tag.tag-coral { background: #ffd9d2; color: #6d2219; }
+    .term { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; align-items: baseline; margin: 10px 0; }
+    .term p { margin: 0; font-size: 15px; }
+    .body { margin: 6px 0; font-size: 15px; }
+    .sub { margin: -4px 0 10px 14px; font-size: 14.5px; color: #33413f; }
+    .em { color: var(--blue); font-weight: 700; }
+    .key { color: var(--coral); font-weight: 800; }
+    .blue { color: var(--blue); }
+    .m { font-family: var(--serif); font-size: 1.06em; white-space: nowrap; }
+    .big { font-size: 1.25em; }
+    .fr { display: inline-flex; flex-direction: column; margin: 0 2px; font-size: .86em; line-height: 1.12; text-align: center; vertical-align: middle; }
+    .fr > span:first-child { padding: 0 3px; border-bottom: 1px solid currentColor; }
+    .box { margin: 12px 0; padding: 10px 14px; border: 1.5px dashed var(--main); border-radius: 12px; background: var(--tint); text-align: center; font-size: 15px; line-height: 1.9; }
+    .formula { margin: 4px 0; font-size: 17px; }
+    .small { font-size: 14px; }
+    .tip { margin: 10px 0; padding: 7px 12px; border-left: 4px solid var(--gold); border-radius: 0 8px 8px 0; background: #fff8e3; font-size: 14.5px; }
+    .mini-title { margin: 6px 0 6px; color: var(--main-d); font-size: 14.5px; font-weight: 800; }
+
+    .table-scroll { overflow-x: auto; }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
+    .mini-table th, .mini-table td { padding: 5px 6px; border: 1px solid var(--rule); }
+    .mini-table th { background: var(--mint); font-weight: 700; }
+    .mini-table .t { color: var(--blue); font-weight: 700; }
+    .mini-table .f { color: #9aa5a3; }
+
+    .steps { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: center; margin: 8px 0 4px 6px; }
+    .steps .eqn { font-size: 17px; }
+    .steps .note { padding-left: 10px; border-left: 2px solid var(--coral); color: var(--coral); font-size: 13px; line-height: 1.35; }
+    .steps .note:empty { border-left: 0; }
+    .hl { padding: 0 3px; border-radius: 5px; background: #ffe0da; color: #b4321f; }
+
+    .flow { display: grid; gap: 2px; justify-items: start; margin: 10px auto 0; padding: 12px 16px; width: fit-content; max-width: 100%; border-radius: 12px; background: #fbf7ee; font-size: 14px; }
+    .flow-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .flow-box { padding: 2px 12px; border: 1.5px solid var(--ink); border-radius: 8px; background: #fff; font-size: 16px; }
+    .flow-tag { color: var(--coral); font-weight: 700; }
+    .flow-arrow { margin-left: 26px; color: var(--muted); }
+
+    .ex-list { display: grid; gap: 8px; margin-top: 8px; }
+    .ex { padding: 8px 12px; border-radius: 10px; background: #f7f9f9; font-size: 15px; line-height: 1.9; }
+    .pill { display: inline-block; margin-left: 4px; padding: 0 10px; border-radius: 999px; background: var(--mint-2); font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+    .pill.coral { background: #ffd9d2; }
+
+    .cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .card { min-width: 0; padding: 12px 14px; border: 1.5px solid var(--rule); border-radius: 14px; background: #fff; }
+    .card h4 { margin: 0 0 8px; color: var(--coral); font-size: 16px; }
+    .lines { display: grid; gap: 2px; font-family: var(--serif); font-size: 16.5px; }
+    .lines .why { font-family: var(--sans); color: var(--muted); font-size: 12.5px; }
+    .card .box { margin: 6px 0 10px; }
+
+    .fig { position: relative; max-width: 380px; margin: 8px auto 0; }
+    .fig.small { max-width: 300px; }
+    .fig svg, .mini svg { display: block; width: 100%; height: auto; }
+    .svg-wrap { position: relative; }
+    .fig figcaption { margin-top: 4px; color: var(--muted); font-size: 13px; text-align: center; }
+    .minis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .mini { margin: 0; min-width: 0; text-align: center; }
+    .mini svg, .mini .svg-wrap { max-width: 190px; margin: 2px auto 0; }
+    .mini .svg-wrap svg { margin: 0; }
+    .mini .slot { min-width: 42px; height: 24px; padding: 0 5px; font-size: 12px; }
+    .mini figcaption { font-size: 13.5px; line-height: 1.45; }
+    .badge { display: inline-block; padding: 0 10px; border-radius: 999px; font-family: var(--serif); font-style: italic; font-size: 14px; }
+    .badge.pos { background: #ffe0da; color: #b4321f; }
+    .badge.neg { background: #dce8fb; color: #1d55a6; }
+
+    .qcards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .qcard { min-width: 0; padding: 14px 16px; border: 1.5px solid var(--rule); border-radius: 16px; background: #fff; }
+    .qtitle { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 4px; color: var(--coral); font-size: 16.5px; }
+    .plist { margin: 6px 0; padding: 0; list-style: none; font-size: 14.5px; }
+    .plist li { margin: 3px 0; padding-left: 1.9em; text-indent: -1.9em; }
+
+    /* SVG */
+    /* 글자 기본값은 상속으로만 준다 (요소의 fill·font-size 속성이 우선하도록) */
+    svg { font-family: var(--sans); font-size: 12px; }
+    svg .ax-o { font-family: var(--serif); font-size: 13px; }
+    svg .it { font-family: var(--serif); font-style: italic; font-size: 14px; }
+    svg .grid line { stroke: var(--grid); stroke-width: 1; }
+    svg .axes line { stroke: #3b4644; stroke-width: 1.2; }
+    svg .axes polygon { fill: #3b4644; }
+    svg .tick { font-family: var(--serif); font-size: 10.5px; fill: #6f7c7a; }
+    svg .ax-label { font-family: var(--serif); font-style: italic; font-size: 15px; }
+    svg .plab { font-size: 13px; font-weight: 700; paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+    svg .halo { paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+
+    /* ===== 탐색기 ===== */
+    .explorer { background: var(--tint-2); }
+    .explorer-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .explorer-head .tag { background: var(--main); color: #fff; }
+    .explorer-head p { margin: 0; color: var(--muted); font-size: 14px; }
+    .explorer-body { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+    .explorer-body svg { display: block; width: 100%; max-width: 440px; height: auto; margin: 0 auto; border: 1.5px solid var(--rule); border-radius: 14px; background: #fff; }
+    .slider { display: grid; grid-template-columns: 34px minmax(0, 1fr) 56px; gap: 10px; align-items: center; margin: 6px 0; font-size: 18px; }
+    .slider input { width: 100%; accent-color: var(--main); }
+    .slider output { font-family: var(--serif); text-align: center; font-weight: 700; }
+    .slider-hint { margin: -4px 0 6px 44px; color: var(--muted); font-size: 12.5px; }
+    .readout { margin-top: 12px; padding: 14px 16px; border-radius: 14px; background: #fff; border: 1.5px solid var(--mint-2); }
+    .eq-big { font-size: 24px; color: var(--main-d); }
+    .eq-sub { color: var(--muted); font-size: 16px; }
+    .facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; margin: 10px 0 6px; font-size: 15px; }
+    .facts dt { color: var(--muted); font-weight: 700; }
+    .facts dd { margin: 0; font-family: var(--serif); }
+    .move { margin: 6px 0 0; font-size: 14.5px; }
+    .warn { color: var(--bad); font-weight: 700; }
+
+    /* ===== 퀴즈 ===== */
+    .quiz-guide { margin: 0; padding: 14px 26px; background: #fff8e3; font-size: 14.5px; border-bottom: 1px solid var(--rule); }
+    /* 숨긴 정답과 빈칸 버튼을 같은 칸에 겹쳐 둔다 → 칸 크기만큼 자리를 차지해 옆 글자를 가리지 않음 */
+    .cloze { display: inline-grid; margin: 1px 3px; vertical-align: baseline; }
+    .cloze > .ans-src, .cloze > .blank { grid-area: 1 / 1; }
+    .ans-src { visibility: hidden; padding: 2px 10px; }
+    #quiz-body .qhide, #quiz-body .ans-hidden { visibility: hidden; }
+    .blank { display: inline-flex; align-items: center; justify-content: center; min-width: 2.8em; width: 100%; height: 100%; padding: 2px 8px; border: 1.8px solid var(--ink); border-radius: 8px; background: #fff; color: var(--ink); font: inherit; font-weight: 700; white-space: nowrap; cursor: pointer; line-height: 1.2; }
+    .blank:hover { background: #fffbea; }
+    .blank.ok, .slot.ok { border-color: var(--ok); border-style: solid; color: var(--ok); background: #eef5ff; }
+    .blank.bad, .slot.bad { border-color: var(--bad); border-style: solid; color: var(--bad); background: #fff0f0; }
+    .place-group { margin-top: 8px; }
+    .slot { position: absolute; z-index: 2; transform: translate(-50%, -50%); min-width: 62px; height: 28px; padding: 0 8px; border: 1.8px dashed var(--coral); border-radius: 8px; background: #fff; color: var(--coral); font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .slot.filled { border-style: solid; border-color: var(--ink); color: var(--ink); }
+    .slot.drop-hover { background: #ffeee8; transform: translate(-50%, -50%) scale(1.08); }
+    .bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; padding: 10px; border: 1.5px dashed var(--mint-2); border-radius: 12px; }
+    .bank-hint { width: 100%; margin: 0; color: var(--muted); font-size: 12.5px; text-align: center; }
+    .chip { padding: 5px 14px; border: 1.8px solid var(--main); border-radius: 999px; background: #fff; color: var(--ink); font-size: 14px; font-weight: 700; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+    .chip.selected { background: var(--main); color: #fff; }
+    .ghost { position: fixed; z-index: 70; pointer-events: none; transform: translate(-50%, -50%) rotate(-3deg); box-shadow: 0 8px 20px #0003; }
+    .quiz-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; padding: 26px 20px 32px; }
+    .quiz-summary { width: 100%; margin: 0; min-height: 1.5em; color: var(--muted); font-size: 15px; text-align: center; }
+    .btn { padding: 10px 24px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 3px 4px 0 var(--ink); }
+    .btn:active { transform: translate(2px, 2px); box-shadow: 1px 2px 0 var(--ink); }
+    .btn.primary { border-color: var(--main-d); background: var(--main); color: #fff; box-shadow: 3px 4px 0 var(--main-d); }
+    .btn:disabled { opacity: .45; cursor: default; }
+
+    .modal { position: fixed; z-index: 50; inset: 0; display: grid; place-items: center; padding: 20px; background: #161c1b99; }
+    .dialog { width: min(720px, 100%); max-height: calc(100vh - 40px); overflow: auto; padding: 26px; border: 2px solid var(--main); border-radius: 18px; background: #fffefb; box-shadow: 0 18px 50px #0004; }
+    .dialog h2 { margin: 0 0 16px; font-size: 20px; }
+    .ctx-view { padding: 18px 18px; border-radius: 12px; background: var(--mint); font-size: 19px; line-height: 2; }
+    .ctx-view .term p, .ctx-view .body, .ctx-view .sub, .ctx-view .box { font-size: inherit; }
+    .ctx-view .box { margin: 0; background: #fff; }
+    .ctx-view .formula { font-size: 21px; }
+    .ctx-view .mini-blank { display: inline-block; min-width: 2.6em; padding: 0 8px; border: 1.5px solid #9aa7a5; border-radius: 7px; background: #fff; color: #8a9593; text-align: center; line-height: 1.5; }
+    .ctx-view .mini-blank.active { border: 2.2px solid var(--coral); color: var(--ink); }
+    .ctx-input { width: 8em; padding: 2px 8px; border: 2.2px solid var(--coral); border-radius: 8px; background: #fff; color: var(--ink); font: 700 19px var(--sans); text-align: center; }
+    .choices { display: grid; gap: 10px; margin-top: 16px; }
+    .choice { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 14px; border: 1.5px solid var(--rule); border-radius: 12px; background: #fff; color: var(--ink); font-size: 18px; text-align: left; cursor: pointer; }
+    .choice[aria-checked="true"] { border-color: var(--main); background: var(--mint); }
+    .choice .num { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border: 1.8px solid var(--ink); border-radius: 50%; font-size: 14px; font-weight: 800; }
+    .choice .opt { font-family: var(--sans); }
+    .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .actions button { padding: 9px 20px; border: 1.5px solid #333; border-radius: 10px; background: #fff; color: #333; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .actions .confirm { border-color: var(--main-d); background: var(--main); color: #fff; }
+
+    #quiz-panel { padding-bottom: 40px; }
+    .mid-check { position: fixed; z-index: 40; right: 20px; bottom: 20px; width: 210px; padding: 12px 14px; border: 2px solid var(--main); border-radius: 16px; background: #fffffff2; box-shadow: 0 10px 28px var(--shadow-2); }
+    .mid-progress { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .mid-progress b { color: var(--main-d); }
+    .mid-bar { height: 6px; margin-top: 5px; overflow: hidden; border-radius: 99px; background: var(--grid); }
+    .mid-bar span { display: block; width: 0; height: 100%; background: var(--main); transition: width .3s; }
+    .mid-result { margin: 8px 0 0; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
+    .mid-result.good { color: var(--ok); }
+    .mid-result.warn { color: var(--bad); }
+    .mid-result.info { color: var(--muted); }
+    .mid-btn { width: 100%; margin-top: 9px; padding: 9px 0; border: 0; border-radius: 12px; background: var(--coral); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 0 #a8331f; }
+    .mid-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #a8331f; }
+    .toast { position: fixed; z-index: 80; left: 50%; top: 16%; padding: 18px 34px; border: 2px solid var(--ok); border-radius: 16px; background: #f4f9ff; color: var(--ok); font-size: 25px; font-weight: 800; box-shadow: 0 12px 35px #1f6fd140; opacity: 0; pointer-events: none; transform: translate(-50%, 0); }
+    .toast.show { animation: toast 2.6s ease forwards; }
+    @keyframes toast { 0% { opacity: 0; transform: translate(-50%, -8px) scale(.94); } 14%, 75% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -10px); } }
+
+    /* ===== 게임 ===== */
+    .game { padding: 20px 26px 30px; }
+    .game-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    .game-title { margin: 0; font-size: 24px; }
+    .g-stats { display: flex; flex-wrap: wrap; gap: 6px; }
+    .g-stats span { padding: 3px 12px; border-radius: 999px; background: var(--mint); font-size: 14px; font-weight: 700; }
+    .game-guide { margin: 8px 0 0; color: var(--muted); font-size: 14.5px; }
+    .g-dots { display: flex; gap: 6px; margin-top: 10px; }
+    .g-dot { width: 14px; height: 14px; border-radius: 50%; background: color-mix(in srgb, var(--main) 7%, #e8e8e8); }
+    .g-dot.cur { box-shadow: 0 0 0 2.5px var(--main); background: #fff; }
+    .g-dot.hit { background: var(--main); }
+    .g-dot.miss { background: var(--coral); }
+    .game-body { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; margin-top: 14px; align-items: start; }
+    .game-board svg { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto; border: 1.5px solid var(--rule); border-radius: 14px; background: #fff; }
+    .legend { display: flex; justify-content: center; gap: 18px; margin-top: 6px; color: var(--muted); font-size: 13px; }
+    .legend span::before { content: ""; display: inline-block; width: 26px; height: 0; margin-right: 6px; vertical-align: middle; }
+    .legend .lg-target::before { border-top: 4px dashed var(--coral); }
+    .legend .lg-player::before { border-top: 3px solid var(--main); }
+    .g-eq-card { padding: 12px 16px; border-radius: 14px; background: var(--mint); }
+    .g-eq-card small { display: block; color: var(--muted); font-size: 13px; }
+    .g-eq-card .g-form { color: var(--muted); font-size: 14px; }
+    #g-eq { font-size: 26px; color: var(--main-d); }
+    .g-ctrl { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding: 8px 12px; border: 1.5px solid var(--rule); border-radius: 14px; }
+    .g-ctrl-label b { font-size: 22px; }
+    .g-ctrl-label small { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.3; }
+    .stepper { display: flex; align-items: center; gap: 8px; flex: none; }
+    .stepper button { width: 46px; height: 46px; border: 2px solid var(--main); border-radius: 12px; background: #fff; color: var(--main-d); font-size: 26px; font-weight: 800; line-height: 1; cursor: pointer; touch-action: manipulation; }
+    .stepper button:active { background: var(--mint); }
+    .stepper button:disabled { opacity: .35; cursor: default; }
+    .stepper output { min-width: 58px; font-family: var(--serif); font-size: 22px; font-weight: 700; text-align: center; }
+    .g-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .g-actions .btn { flex: 1; }
+    .btn.fire { border-color: #a8331f; background: var(--coral); color: #fff; box-shadow: 3px 4px 0 #a8331f; font-size: 18px; }
+    .g-feedback { min-height: 70px; margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: #f6f8f8; font-size: 15px; }
+    .g-feedback ul { margin: 6px 0 0; padding-left: 20px; }
+    .g-feedback.hit { background: color-mix(in srgb, var(--main) 9%, #fff); color: var(--main-d); }
+    .g-feedback.miss { background: #fff2ef; }
+    .g-feedback.reveal { background: #fff8e3; }
+    .g-end { display: grid; place-items: center; padding: 30px 10px; }
+    .g-end-card { width: min(560px, 100%); padding: 28px; border: 2px solid var(--main); border-radius: 20px; text-align: center; }
+    .stars { color: var(--gold); font-size: 44px; letter-spacing: 6px; }
+    .g-end-card h3 { margin: 4px 0; font-size: 24px; }
+    .g-end-card ol { margin: 16px 0 20px; padding: 0; list-style: none; text-align: left; font-size: 15px; }
+    .g-end-card li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 4px; border-bottom: 1px dashed var(--rule); }
+
+    /* 게임 메뉴 */
+    .hub-cards { display: grid; margin-top: 16px; }
+    .hub-card { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; width: 100%; min-width: 0; padding: 22px; border: 2px solid #5b5fc7; border-radius: 18px; background: linear-gradient(120deg, #f0f0ff, #fff); color: #34377e; font: inherit; text-align: left; cursor: pointer; }
+    .hub-card:hover { border-color: #34377e; background: #ededff; }
+    .hub-card .icon { font-size: 34px; line-height: 1; }
+    .hub-card-title { font-size: 21px; font-weight: 800; }
+    .hub-card-description { color: var(--muted); font-size: 14px; }
+    .hub-card-action { margin-top: 4px; padding: 8px 16px; border-radius: 999px; background: #5b5fc7; color: #fff; font-weight: 800; }
+    .hub-back { padding: 6px 12px; border: 1.5px solid #5b5fc7; border-radius: 999px; background: #f0f0ff; color: #34377e; font: 700 14px var(--sans); cursor: pointer; }
+    .hub-card:focus-visible, .hub-back:focus-visible { outline: 3px solid #e59426; outline-offset: 3px; }
+
+    /* ===== 반응형 / 인쇄 ===== */
+    @media (max-width: 900px) {
+      .cards3 { grid-template-columns: 1fr; }
+      .qcards { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .page { width: 100%; margin: 0; border-width: 0; border-radius: 0; }
+      .banner { font-size: 24px; }
+      .tabs { padding: 10px 12px 0; }
+      .tab { flex: 1; padding: 8px 6px; }
+      .zone { padding: 18px 16px 2px; }
+      .sec, .game { padding: 16px; }
+      .quiz-guide { padding: 12px 16px; }
+      .cols-2, .explorer-body, .game-body { display: block; }
+      .cols-2 > .col, .cols-2 > .col:first-child, .cols-2 > .col:last-child { padding: 0; border-right: 0; }
+      .cols-2 > .col:first-child { padding-bottom: 14px; margin-bottom: 14px; border-bottom: 2px dashed var(--rule); }
+      .explorer-body > * + *, .game-body > * + * { margin-top: 16px; }
+      .term { grid-template-columns: 1fr; }
+      .term .tag { justify-self: start; }
+      .dialog { padding: 18px; }
+      .ctx-view { font-size: 17px; }
+      #quiz-panel { padding-bottom: 150px; }
+      .mid-check { right: 10px; bottom: 10px; width: 168px; padding: 9px 11px; }
+      .mid-btn { font-size: 15px; padding: 8px 0; }
+      .hub-cards { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: #fff; }
+      .page { width: 100%; margin: 0; border-width: 1px; box-shadow: none; }
+      .tabs, #quiz-panel, #game-panel, .explorer { display: none !important; }
+      #study-panel { display: block !important; }
+      .sec, .qcard, .card { break-inside: avoid; }
+    }
+
+    #study-content p.body, #quiz-body p.body { position: relative; padding-left: 1.1em; }
+    #study-content p.body::before, #quiz-body p.body::before {
+      content: "\2022"; position: absolute; left: 0; color: var(--main); font-size: 0.85em;
+    }
+#linked-data { display:grid; grid-template-columns:1.12fr .98fr 1.1fr; gap:40px; align-items:start; }
+#linked-data .sub { min-width:0; }
+#linked-data .example-note { margin:12px 0 8px; text-align:right; font-size:12px; }
+#linked-data .stem { border:2px solid var(--main); border-radius:13px; overflow:hidden; font-size:15px; }
+#linked-data .stem-head, #linked-data .stem-row { display:grid; grid-template-columns:52px 1fr; }
+#linked-data .stem-head { padding:7px 11px; background:var(--mint-2); font-family:"Hancom MalangMalang","Han Santteut Dotum",sans-serif; font-weight:700; }
+#linked-data .stem-row { padding:5px 11px; min-height:29px; }
+#linked-data .stem-head > span:first-child, #linked-data .stem-row > span:first-child { border-right:1px solid #999; text-align:center; }
+#linked-data .stem-head > span:last-child { padding-left:15px; }
+#linked-data .leaf-input { width:100%; border:0; outline:0; padding:0 0 0 15px; background:transparent; color:var(--ink); font:inherit; letter-spacing:5px; word-spacing:7px; }
+#linked-data .leaf-input:focus { border-radius:4px; background:var(--tint); }
+#linked-data .editor-note { margin:8px 0 0; color:#777; font-size:11px; text-align:center; }
+#linked-data .table-area { position:relative; margin-top:16px; padding:0 13px; }
+#linked-data .table-wrap { overflow:hidden; border:2px solid var(--main); border-radius:13px; }
+#linked-data table { width:100%; border-collapse:collapse; font-size:14px; text-align:center; }
+#linked-data th, #linked-data td { padding:6px 4px; border:1px solid #bbb; }
+#linked-data th { background:var(--mint-2); font-family:"Hancom MalangMalang","Han Santteut Dotum",sans-serif; font-weight:700; }
+#linked-data tfoot td { background:#ececec; }
+#linked-data .selected-class { position:absolute; left:17px; right:calc(50% + 2px); bottom:30px; height:32px; border:2px solid var(--violet); border-radius:7px; pointer-events:none; }
+#linked-data .class-bracket, #linked-data .freq-bracket { position:absolute; top:59px; height:128px; width:19px; border-top:2px solid; border-bottom:2px solid; }
+#linked-data .class-bracket { left:-7px; border-color:var(--main); border-left:2px solid var(--main); border-radius:7px 0 0 7px; }
+#linked-data .freq-bracket { right:-7px; border-color:var(--coral); border-right:2px solid var(--coral); border-radius:0 7px 7px 0; }
+#linked-data .class-label, #linked-data .freq-label { position:absolute; top:106px; font-size:13px; }
+#linked-data .class-label { left:-25px; color:var(--main); }
+#linked-data .freq-label { right:-25px; color:var(--coral); }
+#linked-data .grade-note { margin-top:9px; color:var(--violet); font-size:13px; text-align:center; }
+#linked-data .histogram { width:100%; margin-top:14px; }
+#linked-data .relative-formula { margin-top:18px; text-align:center; font-size:16px; line-height:1.4; }
+#linked-data .fraction { display:inline-block; vertical-align:middle; text-align:center; line-height:1.15; }
+#linked-data .fraction > span { display:block; padding:0 4px; }
+#linked-data .fraction > span:first-child { border-bottom:1px solid currentColor; }
+#linked-data .relative-chart { display:block; width:100%; margin-top:10px; }
+#linked-data .leaf-warning { display:none; margin:5px 0 0; color:var(--coral); font-size:11px; text-align:center; }
+#linked-data .leaf-warning.show { display:block; }
+#linked-data { padding: 24px 36px; }
+#linked-data .subtag { font-size: 16px; padding: 4px 17px 6px; white-space: normal; }
+#linked-data .histogram, #linked-data .relative-chart { display: block; width: 100%; height: auto; }
+#linked-data .stem, #linked-data table { font-family: inherit; }
+#linked-data input:focus-visible { outline: 2px solid var(--main); outline-offset: 2px; }
+@media (max-width:760px) { #linked-data { display:block; padding:18px; } #linked-data .sub { margin:23px 0; } }
+
+
+    .word-group .word-slot { position: static; transform: none; min-width: 90px; min-height: 32px; touch-action: manipulation; }
+    .word-group .word-slot.drop-hover, .word-group .word-slot.drag-over { transform: none; background: var(--mint); border-style: solid; }
+    .word-group .word-bank { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .word-group .word-option[hidden] { display: none; }
+    .word-group .word-option { touch-action: manipulation; }
+    .word-hint { margin: 18px 0 0; color: var(--muted); font-size: 14px; }
+.quiz-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:22px; }
+.quiz-actions button { padding:9px 18px; border:1px solid #333; border-radius:8px; background:#fff; color:#333; font:700 15px "Hancom MalangMalang","Han Santteut Dotum",sans-serif; cursor:pointer; }
+.quiz-actions .quiz-confirm { border-color:var(--main); background:var(--main); color:#fff; }
+.box-options { display:flex; flex-wrap:wrap; justify-content:center; gap:7px; margin:7px 0 0; }
+.box-option { padding:5px 10px; border:1.5px solid var(--main); border-radius:7px; background:#fff; color:#333; font:700 13px "Hancom MalangMalang","Han Santteut Dotum",sans-serif; cursor:grab; }
+.box-option:active { cursor:grabbing; }
+.box-option[hidden] { display:none; }
+.diagram-modal[hidden] { display:none; }
+.diagram-modal { position:fixed; z-index:21; inset:0; display:grid; place-items:center; padding:24px; background:#1d252b99; }
+.diagram-dialog { width:min(780px, 100%); padding:28px; border:2px solid var(--main); border-radius:18px; background:#fffdf9; box-shadow:0 18px 50px #0004; }
+.diagram-dialog h2 { margin:0 0 20px; font-size:20px; }
+.diagram-body { display:grid; place-items:center; min-height:210px; }
+    .box-slot { position:absolute; top:74%; transform:translate(-50%, -50%); min-width:65px; min-height:24px; padding:3px 5px; border:1.5px dashed var(--main); border-radius:6px; background:#fff; color:var(--main); font:700 12px "Hancom MalangMalang","Han Santteut Dotum",sans-serif; text-align:center; white-space:nowrap; }
+    .box-slot.drag-over { background:var(--mint); border-style:solid; }
+    .diagram-word { width:100%; }
+    .diagram-word .box-slot { position:static; transform:none; min-height:32px; min-width:90px; font:inherit; }
+    .diagram-body .box-option { font:inherit; }
+    .diagram-modal { z-index:60; }
+    .diagram-dialog { max-height:calc(100dvh - 48px); overflow-y:auto; }
+    .diagram-body .cols-2 { gap:24px; }
+    @media (max-width:600px) { .diagram-modal { padding:12px; } .diagram-dialog { padding:18px; max-height:calc(100dvh - 24px); } }
+
+
+    .word-group .word-slot, .diagram-word .box-slot {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 2.8em; min-height: 0; width: 100%; height: 100%; padding: 2px 8px;
+      border: 1.8px solid var(--ink); border-radius: 8px; background: #fff;
+      color: var(--ink); font: inherit; font-weight: 700; white-space: nowrap;
+      cursor: pointer; line-height: 1.2; position: static; transform: none; grid-area: 1 / 1;
+    }
+    .diagram-word .box-slot { width: auto; height: auto; min-height: 1.75em; }
+    #study-content .concept-key, #study-content .formula-key, #study-content .formula-key math { font-weight: 700; }
+    #quiz-body .concept-key, #quiz-body .formula-key { font-weight: inherit; }
+    #linked-data .editor-note { font-size: 14px; line-height: 1.7; }
+    #study-content p.body.formula-line::before, #quiz-body p.body.formula-line::before { content: none; }
+    #linked-data .class-label, #linked-data .freq-label { background: #fff; padding: 1px 3px; z-index: 1; }
+    #linked-data .selected-class {
+      position: static; inset: auto; display: inline-block; width: auto; height: auto;
+      padding: 1px 6px; line-height: inherit; vertical-align: middle;
+    }
+    #linked-data > .explorer-head { grid-column: 1 / -1; }
+
+    .property-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; align-items:stretch; }
+    .rule-box { min-width:0; text-align:left; }
+    .rule-box p.body { margin:8px 0; }
+    .rule-box p.body.formula-line { margin-top:0; }
+    @media (max-width:700px) { .property-grid { grid-template-columns:minmax(0,1fr); gap:0; } }
+
+
+    #block-statistics .block-stat-tables { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; }
+    #block-statistics .block-stat-card { min-width:0; background:#fff; border:1.5px solid var(--rule); border-radius:12px; overflow:hidden; }
+    #block-statistics h4 { margin:0; padding:10px 16px; font-size:16px; background:var(--mint); color:var(--main-d); }
+    #block-statistics table, #block-calculation-modal table { width:100%; border-collapse:collapse; font-size:15px; }
+    #block-statistics th, #block-statistics td { padding:10px 16px; border-bottom:1px solid var(--rule); text-align:left; }
+    #block-statistics th { width:38%; background:var(--tint-2); font-weight:600; }
+    #block-statistics td { font-weight:700; font-variant-numeric:tabular-nums; }
+    #block-statistics tr:last-child > * { border-bottom:0; }
+    #block-statistics .block-stat-actions { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin:16px 0; }
+    #block-statistics .block-stat-actions > span, #block-statistics .block-stat-guide { color:var(--muted); font-size:13px; line-height:1.7; }
+    #block-statistics .block-line-scroll { max-width:100%; overflow-x:auto; overscroll-behavior-x:contain; border:1px solid var(--rule); border-radius:12px; background:#fff; }
+    #block-number-line { display:block; width:100%; min-width:760px; height:auto; touch-action:pan-y; user-select:none; }
+    #block-number-line .stat-block { cursor:grab; outline:none; touch-action:none; }
+    #block-number-line .stat-block rect { fill:var(--main); stroke:var(--main-d); stroke-width:1.5; }
+    #block-number-line .stat-block text { fill:#fff; font-size:13px; font-weight:700; pointer-events:none; }
+    #block-number-line .stat-block:focus rect { stroke:var(--coral); stroke-width:4; }
+    #block-number-line .stat-block.is-dragging rect { fill:var(--violet); stroke:var(--ink); stroke-width:3; }
+    #block-number-line .stat-block.is-dragging { cursor:grabbing; }
+    #block-number-line .deviation-label { fill:var(--main-d); font-size:13px; font-weight:700; }
+    #block-number-line .axis-label { fill:var(--ink); font-size:14px; }
+    #block-statistics .block-stat-status { min-height:1.7em; margin:10px 0 0; font-size:14px; color:var(--main-d); }
+    #block-calculation-modal .block-calculation-dialog { width:min(850px,100%); max-height:calc(100dvh - 40px); overflow-y:auto; }
+    #block-calculation-modal .block-calc-scroll { overflow-x:auto; margin:16px 0; }
+    #block-calculation-modal th, #block-calculation-modal td { border:1px solid var(--rule); padding:8px 12px; text-align:center; white-space:nowrap; }
+    #block-calculation-modal th { background:var(--mint); }
+    #block-calculation-modal .block-calc-formula { margin:12px 0; padding:12px 14px; border:1.5px dashed var(--main); border-radius:10px; background:var(--tint); }
+    #block-calculation-modal .block-calc-formula math { font-size:1.05em; }
+    #block-calculation-modal .block-calc-note { color:var(--muted); font-size:13px; }
+    @media (max-width:600px) {
+      #block-statistics .block-stat-tables { gap:10px; }
+      #block-statistics th, #block-statistics td { padding:8px; font-size:13px; }
+      #block-statistics h4 { padding:10px; font-size:14px; }
+      #block-calculation-modal .block-calculation-dialog { padding:18px; }
+    }
+
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="banner">확률과 통계<small>확률과 통계 개념 확인</small></header>
+  <nav class="tabs" role="tablist" aria-label="활동 선택">
+    <button class="tab" type="button" role="tab" id="tab-study" aria-selected="true" aria-controls="study-panel">정리</button>
+    <button class="tab" type="button" role="tab" id="tab-quiz" aria-selected="false" aria-controls="quiz-panel">퀴즈</button>
+    <button class="tab" type="button" role="tab" id="tab-game" aria-selected="false" aria-controls="game-panel">게임</button>
+  </nav>
+
+  <!-- ================= 정리 ================= -->
+  <section class="tab-panel" id="study-panel" role="tabpanel" aria-labelledby="tab-study"><nav class="toc" id="study-toc" aria-label="단원 차례"></nav>
+    <div id="study-content"><div class="zone" data-sec="u3-1" data-toc="Ⅰ 확률"><b>Ⅰ. 확률</b></div><section class="sec"><h3 class="head">1. 경우의 수</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q2">사건</span></span><p><span><strong class="concept-key">동일한 조건</strong>에서 <strong class="concept-key">여러 번 반복</strong>할 수 있는 실험이나 관찰에 의하여 <strong class="concept-key">나타나는 결과</strong></span></p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q4">경우의 수</span></span><p><span><strong class="concept-key">사건이 일어나는 가짓수</strong></span></p></div></div></div><div class="property-grid"><div class="box rule-box"><p class="body ctx"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 <strong class="concept-key">동시에 일어나지 않고</strong> 각각 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span>, <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span>가지이면:</p><p class="body ctx formula-line">A 또는 B가 일어나는 경우의 수 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>+</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">m+n</annotation></semantics></math></span></span></span></p></div><div class="box rule-box"><p class="body ctx"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>가 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span>가지이고 <strong class="concept-key">그 각각에 대하여</strong> B가 n가지이면:</p><p class="body ctx formula-line"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 동시에 일어나는 경우의 수 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>×</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">m\times n</annotation></semantics></math></span></span></span></p></div></div></section><section class="sec"><h3 class="head">2. 확률의 뜻과 성질</h3><div class="property-grid"><div class="box rule-box"><p class="body ctx"><strong class="concept-key">각 경우가 일어날 가능성이 같을 때</strong>, 모든 경우의 수가 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span>, 사건 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>가 일어나는 경우의 수가 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi></mrow><annotation encoding="application/x-tex">a</annotation></semantics></math></span>이면:</p><p class="body ctx formula-line">사건 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>가 일어날 확률 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span> = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mi>a</mi><mi>n</mi></mfrac></mrow><annotation encoding="application/x-tex">\frac{a}{n}</annotation></semantics></math></span></span></span></p></div><div class="box rule-box"><p class="body ctx"><span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>≤</mo><mi>p</mi><mo>≤</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0\le p\le 1</annotation></semantics></math></span></span></span>. <strong class="concept-key">절대로 일어나지 않을</strong> 사건의 확률은 <span data-q="key-impossible">0</span>, <strong class="concept-key">반드시 일어날</strong> 사건의 확률은 <span data-q="key-certain">1</span>.</p><p class="body ctx">사건 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>가 일어나지 않을 확률은 <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">1-p</annotation></semantics></math></span></span></span>.</p></div></div></section><section class="sec"><h3 class="head">3. 확률의 계산</h3><div class="property-grid"><div class="box rule-box"><p class="body ctx"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 <strong class="concept-key">동시에 일어나지 않고</strong> 각각 일어날 확률이 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span>, <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span>이면:</p><p class="body ctx formula-line">A 또는 B가 일어날 확률 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>+</mo><mi>q</mi></mrow><annotation encoding="application/x-tex">p+q</annotation></semantics></math></span></span></span></p></div><div class="box rule-box"><p class="body ctx"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 <strong class="concept-key">서로 영향을 끼치지 않고</strong> 각각 일어날 확률이 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span>, <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span>이면:</p><p class="body ctx formula-line"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 동시에 일어날 확률 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>×</mo><mi>q</mi></mrow><annotation encoding="application/x-tex">p\times q</annotation></semantics></math></span></span></span></p></div></div></section><div class="zone" data-sec="u3-2" data-toc="Ⅱ 통계"><b>Ⅱ. 통계</b></div><section class="sec"><h3 class="head">1. 줄기와 잎 그림 · 도수분포표</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q13">변량</span></span><p><span>자료를 <strong class="concept-key">수량으로 나타낸 것</strong></span></p></div><div class="term ctx"><span class="tag"><span data-q="q16">줄기와 잎 그림</span></span><p><span>변량의 자릿수를 <strong class="concept-key">줄기와 잎으로 나누어</strong> 나타낸 그림</span>. 잎은 <span><strong class="concept-key">작은 값부터 순서대로 쓴다</strong></span>.</p></div><div class="term ctx"><span class="tag"><span data-q="q20">계급</span></span><p><span>변량을 <strong class="concept-key">일정한 간격으로 나눈 구간</strong></span>. 계급의 크기는 <span><strong class="concept-key">구간의 너비</strong></span>, 도수는 <span><strong class="concept-key">각 계급에 속하는 자료의 수</strong></span>.</p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q22">도수분포표</span></span><p><span>자료를 몇 개의 계급으로 나누고 <strong class="concept-key">각 계급의 도수</strong>를 나타낸 표</span></p></div><div class="term ctx"><span class="tag"><span data-q="q24">계급값</span></span><p><span>도수분포표에서 <strong class="concept-key">각 계급의 가운데 값</strong></span></p></div></div></div><div class="box rule-box"><p class="body ctx">도수의 총합은 <span><strong class="concept-key">자료의 개수</strong></span>.</p></div></section><section class="sec"><h3 class="head">2. 히스토그램 · 도수분포다각형</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q28">히스토그램</span></span><p><span><strong class="concept-key">가로축에 계급, 세로축에 도수</strong>를 나타낸 그래프</span>. 직사각형 사이에 <span><strong class="concept-key">틈이 없다</strong></span>.</p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q30">도수분포다각형</span></span><p><span>히스토그램에서 각 직사각형 <strong class="concept-key">윗변의 가운데 점</strong>을 <strong class="concept-key">선분으로 이은</strong> 그래프</span></p></div></div></div></section><section class="sec explorer data-grid" id="linked-data" aria-label="줄기와 잎 그림과 표·그래프 연동 탐색기"><div class="explorer-head"><span class="tag">직접 움직여 보기 ①</span><p>잎을 0~9 숫자로 추가하거나 수정하고, Enter를 눌러보세요!</p></div>
+      <div class="sub"><p class="example-note">(1 | 6은 16세)</p><div class="stem"><div class="stem-head"><span>줄기</span><span>잎</span></div><div class="stem-row"><span>1</span><input class="leaf-input" data-stem="1" value="6 7 9 9" aria-label="줄기 1의 잎"></div><div class="stem-row"><span>2</span><input class="leaf-input" data-stem="2" value="2 3 3 4 5 5 6 7 8 9" aria-label="줄기 2의 잎"></div><div class="stem-row"><span>3</span><input class="leaf-input" data-stem="3" value="0 5 6 8 9" aria-label="줄기 3의 잎"></div><div class="stem-row"><span>4</span><input class="leaf-input" data-stem="4" value="1" aria-label="줄기 4의 잎"></div></div><p id="leaf-warning" class="leaf-warning">잎에는 수가 크기순으로 나열되어야 합니다.</p></div>
+      <div class="sub"><div class="table-area"><div class="table-wrap"><table><thead><tr><th>나이(세)</th><th>참가자 수(명)</th></tr></thead><tbody><tr><td>10 이상 ~ 20 미만</td><td id="freq-10">4</td></tr><tr><td>20 ~ 30</td><td id="freq-20">10</td></tr><tr><td>30 ~ 40</td><td id="freq-30">5</td></tr><tr><td><span class="selected-class">40 ~ 50</span></td><td id="freq-40">1</td></tr></tbody><tfoot><tr><td>합계</td><td id="freq-total">20</td></tr></tfoot></table></div><i class="class-bracket"></i><span class="class-label">계급</span><i class="freq-bracket"></i><span class="freq-label">도수</span></div><div class="grade-note">계급의 크기: 10세</div></div>
+      <div class="sub"><svg class="histogram" viewBox="0 0 230 230" aria-label="히스토그램과 도수분포다각형"><defs><marker id="arrow-cyan" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--main)"/></marker><marker id="arrow-red" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--coral)"/></marker></defs><g fill="none" stroke="#aab0b0" stroke-width=".8"><path d="M31 19V190H209M31 53H209M31 87H209M31 121H209M31 155H209M67 19V190M102 19V190M138 19V190M173 19V190"/></g><g id="hist-bars" fill="var(--mint-2)" stroke="var(--main)" stroke-width="2"></g><polyline id="freq-polygon" fill="none" stroke="var(--violet)" stroke-width="3"></polyline><g id="freq-points" fill="#222"></g><g class="chart-label" fill="#333" font-size="12"><text x="2" y="13">(명)</text><text x="25" y="207">0</text><text x="61" y="207">10</text><text x="96" y="207">20</text><text x="132" y="207">30</text><text x="167" y="207">40</text><text x="197" y="207">50</text><text x="211" y="207">(세)</text><text x="7" y="158">2</text><text x="7" y="124">4</text><text x="7" y="90">6</text><text x="7" y="56">8</text><text x="2" y="24">10</text></g></svg></div>
+      </section><section class="sec"><h3 class="head">3. 상대도수</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q32">상대도수</span></span><p><span><strong class="concept-key">도수의 총합에 대한</strong> 그 계급의 도수의 <strong class="concept-key">비율</strong></span></p></div></div><div class="col"></div></div><div class="box rule-box"><p class="body ctx">상대도수 <span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo></mrow><annotation encoding="application/x-tex">=</annotation></semantics></math></span></span> <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mtext>그 계급의 도수</mtext><mtext>도수의 총합</mtext></mfrac></mrow><annotation encoding="application/x-tex">\frac{\text{그 계급의 도수}}{\text{도수의 총합}}</annotation></semantics></math></span></span></span></p></div><div class="box rule-box"><p class="body ctx">상대도수의 합은 <span data-q="key-total">1</span>. <strong class="concept-key">도수의 총합이 서로 다른 두 자료</strong>는 상대도수로 비교한다.</p></div></section><div class="zone" data-sec="u3-3" data-toc="Ⅲ 대푯값"><b>Ⅲ. 대푯값</b></div><section class="sec"><h3 class="head">1. 대푯값</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span>대푯값</span></span><p><span>자료 전체의 특징을 <strong class="concept-key">하나의 수</strong>로 나타낸 값</span></p></div><div class="term ctx"><span class="tag"><span data-q="q38">평균</span></span><p><span>변량의 총합 ÷ 변량의 개수</span></p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q40">중앙값</span></span><p><span>자료를 <strong class="concept-key">작은 값부터 크기순</strong>으로 나열했을 때 <strong class="concept-key">가운데 위치한 값</strong></span>. <strong class="concept-key">자료의 개수</strong>가 짝수이면 <strong class="concept-key">가운데 두 값의 평균</strong>.</p></div><div class="term ctx"><span class="tag"><span data-q="q42">최빈값</span></span><p><span>자료의 값 중에서 <strong class="concept-key">가장 많이 나타나는 값</strong></span></p></div></div></div><div class="box rule-box"><p class="body ctx"><strong class="concept-key">매우 크거나 작은 값</strong>이 있을 때에는 <span>중앙값</span>이 평균보다 자료 전체의 특징을 더 잘 나타낼 수 있다.</p></div></section><section class="sec"><h3 class="head">2. 분산과 표준편차</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span>산포도</span></span><p><span>자료들이 대푯값 주위에 <strong class="concept-key">흩어져 있는 정도</strong>를 <strong class="concept-key">하나의 수</strong>로 나타낸 값</span></p></div><div class="term ctx"><span class="tag"><span>편차</span></span><p><span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>변량</mtext><mo>−</mo><mtext>평균</mtext></mrow><annotation encoding="application/x-tex">\text{변량}-\text{평균}</annotation></semantics></math></span></span></span>. <strong class="concept-key">편차의 합은</strong> <span data-q="key-deviation">0</span>.</p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q50">분산</span></span><p><span>편차 제곱의 총합을 변량의 개수로 나눈 값</span>. 분산 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mtext>편차 제곱의 총합</mtext><mtext>변량의 개수</mtext></mfrac></mrow><annotation encoding="application/x-tex">\frac{\text{편차 제곱의 총합}}{\text{변량의 개수}}</annotation></semantics></math></span></span></span>.</p></div><div class="term ctx"><span class="tag"><span data-q="q53">표준편차</span></span><p><span><strong class="concept-key">분산의 음이 아닌 제곱근</strong></span>. <span data-q-mirror="q53">표준편차</span> = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msqrt><mtext>분산</mtext></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{\text{분산}}</annotation></semantics></math></span></span></span>.</p></div></div></div><div class="box rule-box"><p class="body ctx">분산과 <span data-q-mirror="q53">표준편차</span>가 작을수록 자료는 <span><strong class="concept-key">평균에 가까이 모여 있고</strong></span>, 클수록 <strong class="concept-key">평균에서 멀리 흩어져 있다</strong>.</p></div><div class="box rule-box"><p class="body ctx"><span data-q-mirror="q53">표준편차</span>는 <span><strong class="concept-key">변량과 같은 단위</strong></span>.</p></div></section>
+<section class="sec explorer" id="block-statistics" aria-label="블록으로 대푯값과 산포도 살펴보기">
+  <div class="explorer-head"><span class="tag">직접 움직여 보기 ②</span><p>블록을 정수 위치로 옮겨 보세요! 대푯값과 편차, 분산, 표준편차가 함께 바뀝니다!</p></div>
+  <div class="block-stat-tables">
+    <div class="block-stat-card"><h4>대푯값</h4><table><tbody>
+      <tr><th scope="row">평균</th><td id="block-mean"></td></tr>
+      <tr><th scope="row">중앙값</th><td id="block-median"></td></tr>
+      <tr><th scope="row">최빈값</th><td id="block-mode"></td></tr>
+    </tbody></table></div>
+    <div class="block-stat-card"><h4>분산과 표준편차</h4><table><tbody>
+      <tr><th scope="row">분산</th><td id="block-variance"></td></tr>
+      <tr><th scope="row">표준편차</th><td id="block-std"></td></tr>
+      <tr><th scope="row">자료의 개수</th><td id="block-count"></td></tr>
+    </tbody></table></div>
+  </div>
+  <div class="block-stat-actions"><button type="button" class="btn" id="block-calculation-open">계산 과정 보기</button><span>소수는 소수점 아래 넷째 자리까지 표시합니다.</span></div>
+  <div class="block-line-scroll" tabindex="0" role="region" aria-label="블록 수직선. 좁은 화면에서는 좌우로 이동해 볼 수 있습니다.">
+    <svg id="block-number-line" viewBox="0 0 1120 340" role="group" aria-label="0부터 20까지의 수직선. 블록을 끌거나 방향키로 옮겨 보세요."></svg>
+  </div>
+  <p class="block-stat-guide">블록 1개는 자료 1개입니다. 블록 위에 숫자는 편차입니다.</p>
+  <p class="block-stat-status" id="block-stat-status" role="status" aria-live="polite"></p>
+</section>
+<section class="sec"><h3 class="head">3. 산점도와 상관관계</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q57">산점도</span></span><p><span>두 변량 <span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo separator="true">,</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">x,y</annotation></semantics></math></span></span>를 <strong class="concept-key">순서쌍</strong> <span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(x,y)</annotation></semantics></math></span></span>로 하여 <strong class="concept-key">좌표평면</strong> 위에 나타낸 그림</span></p></div><div class="term ctx"><span class="tag"><span>상관관계</span></span><p><span>두 변량 중 한쪽이 증가할 때 다른 한쪽이 <strong class="concept-key">증가 또는 감소</strong>하는 경향을 나타내는 관계</span></p></div></div><div class="col"><div class="term ctx"><span class="tag"><span>양의 상관관계</span></span><p><span>x가 증가함에 따라 y도 <strong class="concept-key">대체로 증가</strong>하는 경향</span></p></div><div class="term ctx"><span class="tag"><span>음의 상관관계</span></span><p><span>x가 증가함에 따라 y는 <strong class="concept-key">대체로 감소</strong>하는 경향</span></p></div></div></div><div class="box rule-box"><p class="body ctx">산점도에서 점들이 <strong class="concept-key">한 직선 주위에 가까이</strong> 모일수록 <span><strong class="concept-key">상관관계가 강하고</strong></span>, <strong class="concept-key">흩어져 있을수록 약하다</strong>.</p></div><div class="box rule-box"><p class="body ctx">증가·감소 경향이 분명하지 않으면 <span><strong class="concept-key">상관관계가 없다</strong></span>.</p></div></section></div></section>
+  <section class="tab-panel" id="quiz-panel" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+    <p class="quiz-guide">💡 단답 8문항 · 객관식 4문항 · 용어 드래그 8문항. <b>?</b> 빈칸을 눌러 답을 넣으세요. 그림의 빈 이름표는 아래 이름표를 <b>끌어다 놓거나</b>, <b>눌러서 고른 뒤 자리를 누르면</b> 됩니다. 다 채웠으면 맨 아래 <b>[정답 확인]</b>!</p>
+    <nav class="toc" id="quiz-toc" aria-label="단원 차례"></nav>
+    <div id="quiz-body"></div>
+    <div class="quiz-bar">
+      <button id="quiz-check" class="btn primary" type="button">정답 확인</button>
+      <button id="quiz-reset" class="btn" type="button">다시 풀기</button>
+      <p id="quiz-summary" class="quiz-summary" aria-live="polite"></p>
+    </div>
+    <!-- 화면을 따라다니는 중간 점검 (퀴즈 탭에서만 보임) -->
+    <aside class="mid-check" aria-label="중간 점검">
+      <div class="mid-progress"><span>채운 빈칸</span><b><span id="mid-filled">0</span> / <span id="mid-total">0</span></b></div>
+      <div class="mid-bar" aria-hidden="true"><span id="mid-bar-fill"></span></div>
+      <p class="mid-result" id="mid-result" aria-live="polite" hidden></p>
+      <button id="mid-check" class="mid-btn" type="button">✔ 중간 점검</button>
+    </aside>
+  </section>
+
+  <!-- ================= 게임 ================= -->
+  <section class="tab-panel" id="game-panel" role="tabpanel" aria-labelledby="tab-game" hidden>
+    <div class="game" id="game-root">
+      <div id="hub-menu">
+        <h2 class="game-title">🎮 개념 게임</h2>
+        <div class="hub-cards">
+          <button type="button" class="hub-card" id="castle-launch" aria-controls="hist-defense">
+            <span class="icon" aria-hidden="true">🏰</span>
+            <span class="hub-card-title">히스토그램 성벽 디펜스</span>
+            <span class="hub-card-description">벽돌을 알맞은 잎 사이에 놓고 성벽을 지켜 보세요.</span>
+            <span class="hub-card-action">게임 들어가기 →</span>
+          </button>
+          <button type="button" class="hub-card" id="probability-launch" aria-controls="probability-lab" style="margin-top:16px">
+            <span class="icon" aria-hidden="true">🎲 🪙 🎯</span>
+            <span class="hub-card-title">주사위, 동전, 룰렛 확률 알아보기 게임</span>
+            <span class="hub-card-description">직접 시행하고 이론적 확률과 실험의 상대도수를 비교해 보세요.</span>
+            <span class="hub-card-action">게임 들어가기 →</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+  <div class="diagram-modal" id="diagram-modal" role="dialog" aria-modal="true" aria-labelledby="diagram-dialog-title" hidden>
+    <div class="diagram-dialog">
+      <h2 id="diagram-dialog-title">도표의 빈칸을 채우세요.</h2>
+      <div id="diagram-body" class="diagram-body"></div>
+      <div class="quiz-actions"><button id="diagram-cancel" type="button">취소</button><button id="diagram-confirm" class="quiz-confirm" type="button">확인</button></div>
+    </div>
+  </div>
+
+<div class="modal" id="block-calculation-modal" role="dialog" aria-modal="true" aria-labelledby="block-calculation-title" hidden>
+  <div class="dialog block-calculation-dialog">
+    <h2 id="block-calculation-title">블록 자료의 계산 과정</h2>
+    <div id="block-calculation-content"></div>
+    <div class="actions"><button type="button" class="confirm" id="block-calculation-close">닫기</button></div>
+  </div>
+</div>
+
+<!-- 모달: 글자 입력 -->
+<div class="modal" id="text-modal" role="dialog" aria-modal="true" aria-labelledby="text-modal-title" hidden>
+  <div class="dialog">
+    <h2 id="text-modal-title">빈칸에 알맞은 말을 써 넣으세요.</h2>
+    <div class="ctx-view" id="text-ctx"></div>
+    <div class="actions"><button type="button" data-close>취소</button><button type="button" class="confirm" id="text-confirm">확인</button></div>
+  </div>
+</div>
+<!-- 모달: 고르기 -->
+<div class="modal" id="choice-modal" role="dialog" aria-modal="true" aria-labelledby="choice-modal-title" hidden>
+  <div class="dialog">
+    <h2 id="choice-modal-title">빈칸에 알맞은 것을 고르세요.</h2>
+    <div class="ctx-view" id="choice-ctx"></div>
+    <div class="choices" id="choice-list" role="radiogroup" aria-label="보기"></div>
+    <div class="actions"><button type="button" data-close>취소</button><button type="button" class="confirm" id="choice-confirm">확인</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite">참 잘했어요! 🎉</div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ---------- 공통 도구 ---------- */
+  const NS = 'http://www.w3.org/2000/svg';
+  const MINUS = '−';
+  const C = { main: 'var(--main)', mainD: 'var(--main-d)', coral: '#f2624f', blue: '#2b72d6', violet: '#7656c9', gold: '#e9a417', gray: '#9aa7a5', ink: '#2b3533', muted: '#5d6b69', ok: '#1f9d55' };
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+  function shuffle(list) {
+    const a = [...list];
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+
+  /* ---------- 수와 식 표기 ---------- */
+  function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a || 1; }
+  function frac(n, d) {
+    if (d < 0) { n = -n; d = -d; }
+    const g = gcd(n, d); n /= g; d /= g;
+    const sign = n < 0 ? MINUS : '';
+    n = Math.abs(n);
+    return d === 1 ? sign + n : `${sign}<span class="fr"><span>${n}</span><span>${d}</span></span>`;
+  }
+  const num = (v) => frac(Math.round(v * 4), 4);
+  function plain(v) {
+    let n = Math.round(v * 4), d = 4;
+    const g = gcd(n, d); n /= g; d /= g;
+    const s = n < 0 ? MINUS : '';
+    return d === 1 ? s + Math.abs(n) : `${s}${Math.abs(n)}/${d}`;
+  }
+  const X = '<i>x</i>', Y = '<i>y</i>';
+  function poly(terms) {
+    let out = '';
+    terms.filter(([c]) => c !== 0).forEach(([c, v], i) => {
+      const abs = Math.abs(c);
+      const body = v ? (abs === 1 ? v : num(abs) + v) : num(abs);
+      out += i === 0 ? (c < 0 ? MINUS : '') + body : (c < 0 ? ` ${MINUS} ` : ' + ') + body;
+    });
+    return out || '0';
+  }
+  const linEq = (a, b) => `${Y} = ${poly([[a, X], [b, '']])}`;
+  function quadEq(a, p, q) {
+    const sq = p === 0 ? `${X}<sup>2</sup>` : `(${X} ${p > 0 ? MINUS : '+'} ${Math.abs(p)})<sup>2</sup>`;
+    const lead = a === 1 ? '' : a === -1 ? MINUS : num(a);
+    let s = `${Y} = ${lead}${sq}`;
+    if (q) s += q > 0 ? ` + ${num(q)}` : ` ${MINUS} ${num(-q)}`;
+    return s;
+  }
+  const quadStd = (a, p, q) => `${Y} = ${poly([[a, `${X}<sup>2</sup>`], [-2 * a * p, X], [a * p * p + q, '']])}`;
+
+  /* ---------- MathML ---------- */
+  function qfMath(variant) {
+    const negB = variant === 2 ? '' : '<mo>−</mo>';
+    const disc = `<msup><mi>b</mi><mn>2</mn></msup><mo>${variant === 1 ? '+' : '−'}</mo><mn>4</mn><mi>a</mi><mi>c</mi>`;
+    const den = variant === 3 ? '<mi>a</mi>' : '<mrow><mn>2</mn><mi>a</mi></mrow>';
+    return `<math><mi>x</mi><mo>=</mo><mfrac><mrow>${negB}<mi>b</mi><mo>±</mo><msqrt>${disc}</msqrt></mrow>${den}</mfrac></math>`;
+  }
+  function slopeMath(variant) {
+    const part = (v, what) => `<mrow><mo>(</mo><mi>${v}</mi><mtext>${what}</mtext><mo>)</mo></mrow>`;
+    const yi = part('y', '의 값의 증가량'), xi = part('x', '의 값의 증가량');
+    if (variant === 0) return `<math><mfrac>${yi}${xi}</mfrac></math>`;
+    if (variant === 1) return `<math><mfrac>${xi}${yi}</mfrac></math>`;
+    return `<math><mfrac>${part('y', '의 값')}${part('x', '의 값')}</mfrac></math>`;
+  }
+  // x = … 꼴 MathML (이차방정식 풀이의 답과 보기)
+  const mx = (body) => `<math><mi>x</mi><mo>=</mo>${body}</math>`;
+  const rootFrac = (negB, disc) => mx(`<mfrac><mrow>${negB ? '<mo>−</mo>' : ''}<mn>3</mn><mo>±</mo><msqrt><mn>${disc}</mn></msqrt></mrow><mn>2</mn></mfrac>`);
+  const SOL2 = [
+    mx('<mn>2</mn><mo>±</mo><msqrt><mn>3</mn></msqrt>'),
+    mx('<mo>−</mo><mn>2</mn><mo>±</mo><msqrt><mn>3</mn></msqrt>'),
+    mx('<mn>2</mn><mo>±</mo><mn>3</mn>'),
+    mx('<mo>±</mo><msqrt><mn>3</mn></msqrt>'),
+  ];
+  const SOL3 = [rootFrac(true, 5), rootFrac(false, 5), rootFrac(true, 13), mx('<mo>−</mo><mn>3</mn><mo>±</mo><msqrt><mn>5</mn></msqrt>')];
+  const MATH = { qf0: qfMath(0), slope0: slopeMath(0), sol2: SOL2[0], sol3: SOL3[0] };
+
+  /* ---------- 퀴즈 문항 (정리 탭의 data-q / data-place-fig 와 id로 연결) ---------- */
+  const AX = '<i>ax</i>', BX = '<i>bx</i>', AX2 = '<i>ax</i><sup>2</sup>';
+  const EQUALITY = ['등식', '부등식', '다항식', '일차식'];
+  const STEP_NAMES = ['이항하기', '동류항끼리 정리하기', '양변을 <i>x</i>의 계수로 나누기'];
+  const UP_DOWN = ['아래로', '위로'];
+  const P_Q = ['<i>p</i>', '<i>q</i>', '−<i>p</i>', '−<i>q</i>'];
+  const FLOW = ['일차방정식', '일차방정식의 해', '일차식', '이차방정식'];
+  const METHODS = ['인수분해', '완전제곱식', '근의 공식'];
+  const XP2 = '(<i>x</i> − <i>p</i>)<sup>2</sup>';
+  const FORMS = [`<i>y</i> = ${AX2}`, `<i>y</i> = ${AX2} + <i>q</i>`, `<i>y</i> = <i>a</i>${XP2}`, `<i>y</i> = <i>a</i>${XP2} + <i>q</i>`, `<i>y</i> = ${AX2} + ${BX} + <i>c</i>`];
+  const QUIZ = [
+  {
+    "id": "q2",
+    "type": "text",
+    "answers": [
+      "사건"
+    ]
+  },
+  {
+    "id": "q4",
+    "type": "text",
+    "answers": [
+      "경우의 수"
+    ]
+  },
+  {
+    "id": "q13",
+    "type": "drag",
+    "answers": [
+      "변량"
+    ],
+    "group": "distribution"
+  },
+  {
+    "id": "q20",
+    "type": "drag",
+    "answers": [
+      "계급"
+    ],
+    "group": "distribution"
+  },
+  {
+    "id": "q22",
+    "type": "drag",
+    "answers": [
+      "도수분포표"
+    ],
+    "group": "distribution"
+  },
+  {
+    "id": "q24",
+    "type": "drag",
+    "answers": [
+      "계급값"
+    ],
+    "group": "distribution"
+  },
+  {
+    "id": "q28",
+    "type": "text",
+    "answers": [
+      "히스토그램"
+    ]
+  },
+  {
+    "id": "q30",
+    "type": "text",
+    "answers": [
+      "도수분포다각형"
+    ]
+  },
+  {
+    "id": "q32",
+    "type": "text",
+    "answers": [
+      "상대도수"
+    ]
+  },
+  {
+    "id": "q38",
+    "type": "drag",
+    "answers": [
+      "평균"
+    ],
+    "group": "representative"
+  },
+  {
+    "id": "q40",
+    "type": "drag",
+    "answers": [
+      "중앙값"
+    ],
+    "group": "representative"
+  },
+  {
+    "id": "q42",
+    "type": "drag",
+    "answers": [
+      "최빈값"
+    ],
+    "group": "representative"
+  },
+  {
+    "id": "q50",
+    "type": "text",
+    "answers": [
+      "분산"
+    ]
+  },
+  {
+    "id": "q53",
+    "type": "text",
+    "answers": [
+      "표준편차"
+    ]
+  },
+  {
+    "id": "q57",
+    "type": "text",
+    "answers": [
+      "산점도"
+    ]
+  },
+  {
+    "id": "key-impossible",
+    "type": "choice",
+    "options": [
+      "0",
+      "1",
+      "0.5",
+      "자료의 개수"
+    ],
+    "answer": 0
+  },
+  {
+    "id": "key-certain",
+    "type": "choice",
+    "options": [
+      "0",
+      "1",
+      "0.5",
+      "자료의 개수"
+    ],
+    "answer": 1
+  },
+  {
+    "id": "key-total",
+    "type": "choice",
+    "options": [
+      "0",
+      "1",
+      "0.5",
+      "자료의 개수"
+    ],
+    "answer": 1
+  },
+  {
+    "id": "key-deviation",
+    "type": "choice",
+    "options": [
+      "0",
+      "1",
+      "0.5",
+      "자료의 개수"
+    ],
+    "answer": 0
+  },
+  {
+    "id": "q16",
+    "type": "drag",
+    "answers": [
+      "줄기와 잎 그림"
+    ],
+    "group": "distribution"
+  }
+];
+    const QUIZ_BY_ID = Object.fromEntries(QUIZ.map((item) => [item.id, item]));
+
+  /* ---------- SVG 좌표평면 ---------- */
+  function svgEl(tag, attrs = {}, parent) {
+    const el = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === undefined || v === null || v === false) continue;
+      // 'var(--main)' 같은 CSS 변수 색은 속성으로는 안 되므로 style로 넣는다 (테마 색이 그래프에도 적용)
+      if (typeof v === 'string' && v.startsWith('var(')) el.style.setProperty(k, v);
+      else el.setAttribute(k, v);
+    }
+    if (parent) parent.append(el);
+    return el;
+  }
+  function label(parent, x, y, text, attrs = {}) {
+    const t = svgEl('text', { x, y, ...attrs }, parent);
+    t.textContent = text;
+    return t;
+  }
+  function arrow(parent, x1, y1, x2, y2, color, width = 2, head = 7) {
+    const g = svgEl('g', {}, parent);
+    const ang = Math.atan2(y2 - y1, x2 - x1);
+    const bx = x2 - head * Math.cos(ang), by = y2 - head * Math.sin(ang);
+    if (color) svgEl('line', { x1, y1, x2: bx.toFixed(2), y2: by.toFixed(2), stroke: color, 'stroke-width': width }, g);
+    else svgEl('line', { x1, y1, x2: bx.toFixed(2), y2: by.toFixed(2) }, g);
+    const w = head * 0.55;
+    const pts = [[x2, y2], [bx + w * Math.sin(ang), by - w * Math.cos(ang)], [bx - w * Math.sin(ang), by + w * Math.cos(ang)]];
+    svgEl('polygon', { points: pts.map((p) => p.map((n) => (+n).toFixed(2)).join(',')).join(' '), fill: color }, g);
+    return g;
+  }
+  function plane(svg, options = {}) {
+    // uy: y축 한 칸의 크기(기본은 u와 같음), ystep: y축 모눈·눈금 간격
+    const opt = { xmin: -5, xmax: 5, ymin: -5, ymax: 5, u: 20, pad: 18, grid: false, ticks: false, axes: true, ystep: 1, ...options };
+    const uy = opt.uy || opt.u;
+    const ys = [];
+    for (let y = Math.ceil(opt.ymin / opt.ystep) * opt.ystep; y <= opt.ymax; y += opt.ystep) ys.push(y);
+    const W = (opt.xmax - opt.xmin) * opt.u + opt.pad * 2;
+    const H = (opt.ymax - opt.ymin) * uy + opt.pad * 2;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.replaceChildren();
+    const Xp = (x) => +(opt.pad + (x - opt.xmin) * opt.u).toFixed(2);
+    const Yp = (y) => +(opt.pad + (opt.ymax - y) * uy).toFixed(2);
+    const P = { svg, opt, X: Xp, Y: Yp, W, H };
+    P.grid = svgEl('g', { class: 'grid' }, svg);
+    P.axes = svgEl('g', { class: 'axes' }, svg);
+    P.plot = svgEl('g', {}, svg);
+    P.top = svgEl('g', {}, svg);
+    if (opt.grid) {
+      for (let x = Math.ceil(opt.xmin); x <= opt.xmax; x++) svgEl('line', { x1: Xp(x), y1: Yp(opt.ymin), x2: Xp(x), y2: Yp(opt.ymax) }, P.grid);
+      ys.forEach((y) => svgEl('line', { x1: Xp(opt.xmin), y1: Yp(y), x2: Xp(opt.xmax), y2: Yp(y) }, P.grid));
+    }
+    if (opt.axes) {
+      const ext = 10;
+      arrow(P.axes, Xp(opt.xmin), Yp(0), Xp(opt.xmax) + ext, Yp(0), null, 1.2, 7);
+      arrow(P.axes, Xp(0), Yp(opt.ymin), Xp(0), Yp(opt.ymax) - ext, null, 1.2, 7);
+      label(P.axes, Xp(opt.xmax) + ext - 1, Yp(0) + 16, 'x', { class: 'ax-label', 'text-anchor': 'end' });
+      label(P.axes, Xp(0) + 8, Yp(opt.ymax) - ext + 8, 'y', { class: 'ax-label' });
+      label(P.axes, Xp(0) - 4, Yp(0) + 14, 'O', { class: 'ax-o', 'text-anchor': 'end' });
+      if (opt.ticks) {
+        for (let x = Math.ceil(opt.xmin); x <= opt.xmax; x++) {
+          if (x === 0) continue;
+          svgEl('line', { x1: Xp(x), y1: Yp(0) - 3, x2: Xp(x), y2: Yp(0) + 3 }, P.axes);
+          label(P.axes, Xp(x), Yp(0) + 14, plain(x), { class: 'tick', 'text-anchor': 'middle' });
+        }
+        for (const y of ys) {
+          if (y === 0) continue;
+          svgEl('line', { x1: Xp(0) - 3, y1: Yp(y), x2: Xp(0) + 3, y2: Yp(y) }, P.axes);
+          label(P.axes, Xp(0) - 6, Yp(y) + 4, plain(y), { class: 'tick', 'text-anchor': 'end' });
+        }
+      }
+    }
+    return P;
+  }
+  // 함수 그래프를 그림 영역 안에서만 그린다 (clipPath 없이 직접 잘라냄)
+  function plotFn(P, f, attrs, layer = P.plot) {
+    const { xmin, xmax, ymin, ymax } = P.opt;
+    const n = 480;
+    const edge = (inn, out) => {
+      const yb = out.y > ymax ? ymax : ymin;
+      const t = (yb - inn.y) / (out.y - inn.y);
+      return { x: inn.x + t * (out.x - inn.x), y: yb };
+    };
+    let d = '', prev = null;
+    for (let i = 0; i <= n; i++) {
+      const x = xmin + ((xmax - xmin) * i) / n;
+      const y = f(x);
+      const cur = { x, y, inside: y >= ymin && y <= ymax };
+      if (cur.inside) {
+        if (prev && prev.inside) d += `L${P.X(x)} ${P.Y(y)}`;
+        else if (prev) { const b = edge(cur, prev); d += `M${P.X(b.x)} ${P.Y(b.y)}L${P.X(x)} ${P.Y(y)}`; }
+        else d += `M${P.X(x)} ${P.Y(y)}`;
+      } else if (prev && prev.inside) {
+        const b = edge(prev, cur);
+        d += `L${P.X(b.x)} ${P.Y(b.y)}`;
+      }
+      prev = cur;
+    }
+    return svgEl('path', { d, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', ...attrs }, layer);
+  }
+  const dot = (P, x, y, color, r = 4) => svgEl('circle', { cx: P.X(x), cy: P.Y(y), r, fill: color, stroke: '#fff', 'stroke-width': 1.5 }, P.top);
+  const vline = (P, x, attrs) => svgEl('line', { x1: P.X(x), y1: P.Y(P.opt.ymin), x2: P.X(x), y2: P.Y(P.opt.ymax), ...attrs }, P.plot);
+  const seg = (P, x1, y1, x2, y2, attrs, layer = P.plot) => svgEl('line', { x1: P.X(x1), y1: P.Y(y1), x2: P.X(x2), y2: P.Y(y2), ...attrs }, layer);
+  // 퀴즈에서 이름표 자리가 되는 글자
+  function placeAt(P, sx, sy, text, color) {
+    return label(P.top, sx, sy, text, { class: 'plab', 'text-anchor': 'middle', 'dominant-baseline': 'middle', 'data-place': text, fill: color });
+  }
+  function placeLabel(P, x, y, text, toX, toY) {
+    if (toX !== undefined) seg(P, x, y, toX, toY, { stroke: '#7d8a88', 'stroke-width': 1 }, P.top);
+    return placeAt(P, P.X(x), P.Y(y), text);
+  }
+
+  /* ---------- 정리 탭 그림 ---------- */
+  const FIGS = {
+    shift(svg) {
+      const P = plane(svg, { xmin: -4, xmax: 4, ymin: -3, ymax: 4.5, u: 26 });
+      const a = 0.5, b = 2;
+      plotFn(P, (x) => a * x, { stroke: C.blue, 'stroke-width': 2.4 });
+      plotFn(P, (x) => a * x + b, { stroke: C.coral, 'stroke-width': 2.4 });
+      [-3, -1.2, 0.8].forEach((x) => {
+        arrow(P.top, P.X(x), P.Y(a * x), P.X(x), P.Y(a * x + b) + 2, C.gold, 2);
+        label(P.top, P.X(x) + 5, P.Y(a * x + b / 2) + 4, 'b', { class: 'it halo', fill: '#a8740a' });
+      });
+      label(P.top, P.X(3.95), P.Y(a * 3.95) + 18, 'y = ax', { class: 'it halo', 'text-anchor': 'end', fill: C.blue });
+      label(P.top, P.X(3.95), P.Y(a * 3.95 + b) - 10, 'y = ax + b', { class: 'it halo', 'text-anchor': 'end', fill: C.coral });
+    },
+    intercept(svg) {
+      const P = plane(svg, { xmin: -4, xmax: 3, ymin: -2, ymax: 5, u: 28, grid: true, ticks: true });
+      plotFn(P, (x) => 1.5 * x + 3, { stroke: C.main, 'stroke-width': 2.8 });
+      dot(P, -2, 0, C.coral, 5);
+      dot(P, 0, 3, C.blue, 5);
+      placeLabel(P, -3, 1.3, 'x절편', -2.1, 0.15);
+      placeLabel(P, 1.55, 3.7, 'y절편', 0.15, 3.05);
+    },
+    slopeUp(svg) {
+      const P = plane(svg, { xmin: -1.5, xmax: 4, ymin: -1.5, ymax: 4, u: 24 });
+      plotFn(P, (x) => 0.75 * x + 1, { stroke: C.coral, 'stroke-width': 2.4 });
+      arrow(P.top, P.X(0), P.Y(1), P.X(2), P.Y(1), C.blue, 2);
+      arrow(P.top, P.X(2), P.Y(1), P.X(2), P.Y(2.5), C.coral, 2);
+      placeAt(P, P.X(1), P.Y(1) + 11, '증가', C.blue);
+      placeAt(P, P.X(2) + 18, P.Y(1.75), '증가', C.coral);
+      label(P.top, P.X(0) - 5, P.Y(1) + 4, 'b', { class: 'it', 'text-anchor': 'end' });
+    },
+    slopeDown(svg) {
+      const P = plane(svg, { xmin: -1.5, xmax: 4, ymin: -1.5, ymax: 4, u: 24 });
+      plotFn(P, (x) => -0.75 * x + 2.5, { stroke: C.blue, 'stroke-width': 2.4 });
+      arrow(P.top, P.X(0), P.Y(2.5), P.X(2), P.Y(2.5), C.blue, 2);
+      arrow(P.top, P.X(2), P.Y(2.5), P.X(2), P.Y(1), C.coral, 2);
+      placeAt(P, P.X(1), P.Y(2.5) - 11, '증가', C.blue);
+      placeAt(P, P.X(2) + 18, P.Y(1.75), '감소', C.coral);
+      label(P.top, P.X(0) - 5, P.Y(2.5) + 4, 'b', { class: 'it', 'text-anchor': 'end' });
+    },
+    parts(svg) {
+      const P = plane(svg, { xmin: -3.4, xmax: 5, ymin: -2.8, ymax: 3.2, u: 30, axes: false });
+      vline(P, 0, { stroke: C.violet, 'stroke-width': 1.6, 'stroke-dasharray': '6 5' });
+      seg(P, -2, 0, 2, 0, { stroke: '#7d8a88', 'stroke-width': 1.2 });
+      [-1, 1].forEach((x) => seg(P, x - 0.08, -0.15, x + 0.08, 0.15, { stroke: '#7d8a88', 'stroke-width': 1.4 }));
+      svgEl('path', { d: `M${P.X(0) + 8} ${P.Y(0)}V${P.Y(0) - 8}H${P.X(0)}`, fill: 'none', stroke: '#7d8a88', 'stroke-width': 1.1 }, P.plot);
+      plotFn(P, (x) => 0.5 * x * x - 2, { stroke: C.coral, 'stroke-width': 2.8 });
+      dot(P, 0, -2, C.ink, 5);
+      placeLabel(P, 1.1, 2.75, '축', 0.08, 2.5);
+      placeLabel(P, 4, 0.9, '포물선', 2.7, 1.55);
+      placeLabel(P, 2, -2.3, '꼭짓점', 0.18, -2.02);
+    },
+    quad(svg) {
+      const d = svg.dataset;
+      const a = +d.a, p = +(d.p || 0), q = +(d.qv || 0);
+      const [xmin, xmax, ymin, ymax] = d.range.split(',').map(Number);
+      const marks = (d.marks || '').split(',');
+      const P = plane(svg, { xmin, xmax, ymin, ymax, u: 20, pad: 16 });
+      const color = a > 0 ? C.coral : C.blue;
+      if (marks.includes('ref')) plotFn(P, (x) => a * x * x, { stroke: C.gray, 'stroke-width': 1.5, 'stroke-dasharray': '4 4' });
+      if (marks.includes('axis')) vline(P, p, { stroke: C.violet, 'stroke-width': 1.3, 'stroke-dasharray': '5 4' });
+      if (marks.includes('guide')) seg(P, 0, q, p, q, { stroke: '#7d8a88', 'stroke-width': 1, 'stroke-dasharray': '3 3' });
+      plotFn(P, (x) => a * (x - p) ** 2 + q, { stroke: color, 'stroke-width': 2.6 });
+      dot(P, p, q, C.ink, 3.5);
+      if (marks.includes('p')) label(P.top, P.X(p) + 4, P.Y(0) + (a > 0 ? 15 : -6), 'p', { class: 'it halo' });
+      if (marks.includes('q')) label(P.top, P.X(0) - 5, P.Y(q) + 5, 'q', { class: 'it halo', 'text-anchor': 'end' });
+      if (marks.includes('c')) {
+        const c = a * p * p + q;
+        dot(P, 0, c, C.gold, 5);
+        label(P.top, P.X(0) - 7, P.Y(c) + 5, '(0, c)', { class: 'it halo qhide', 'text-anchor': 'end' });
+        label(P.top, P.X(p), P.Y(q) + 18, '꼭짓점', { 'text-anchor': 'middle', class: 'halo', 'font-size': 11, fill: C.muted });
+      }
+    },
+  };
+
+  /* ---------- 탐색기 ① 일차함수 ---------- */
+  function initLinearExplorer() {
+    const svg = $('#lin-svg'), ia = $('#lin-a'), ib = $('#lin-b');
+    function draw() {
+      const a = +ia.value, b = +ib.value;
+      $('#lin-a-out').innerHTML = num(a);
+      $('#lin-b-out').innerHTML = num(b);
+      const P = plane(svg, { xmin: -6, xmax: 6, ymin: -6, ymax: 6, u: 26, grid: true, ticks: true });
+      plotFn(P, (x) => a * x, { stroke: C.gray, 'stroke-width': 1.6, 'stroke-dasharray': '5 5' });
+      if (b !== 0) {
+        const x0 = [4, -4, 3, -3, 2, -2].find((x) => Math.abs(a * x) <= 5.6 && Math.abs(a * x + b) <= 5.6);
+        if (x0 !== undefined) arrow(P.top, P.X(x0), P.Y(a * x0), P.X(x0), P.Y(a * x0 + b) + (b > 0 ? 2 : -2), C.gold, 2);
+      }
+      plotFn(P, (x) => a * x + b, { stroke: C.main, 'stroke-width': 3.2 });
+      let slopeHtml = '';
+      if (a !== 0) {
+        const r = Number.isInteger(a) ? 1 : 2, rise = a * r;
+        const x0 = [0, 1, -1, 2, -2, 3, -3, -4, 4].find((x) => x >= -6 && x + r <= 6 && Math.abs(a * x + b) <= 5.8 && Math.abs(a * x + b + rise) <= 5.8);
+        if (x0 !== undefined) {
+          const y0 = a * x0 + b;
+          arrow(P.top, P.X(x0), P.Y(y0), P.X(x0 + r), P.Y(y0), C.blue, 2.2);
+          arrow(P.top, P.X(x0 + r), P.Y(y0), P.X(x0 + r), P.Y(y0 + rise), C.coral, 2.2);
+          label(P.top, P.X(x0 + r / 2), P.Y(y0) + (rise > 0 ? 16 : -8), `+${r}`, { 'text-anchor': 'middle', fill: C.blue, class: 'halo', 'font-weight': 700 });
+          label(P.top, P.X(x0 + r) + 6, P.Y(y0 + rise / 2) + 4, (rise > 0 ? '+' : '') + plain(rise), { fill: C.coral, class: 'halo', 'font-weight': 700 });
+        }
+        slopeHtml = `<span class="fr"><span>(<i>y</i>의 증가량) ${plain(rise)}</span><span>(<i>x</i>의 증가량) ${r}</span></span> = ${num(a)}`;
+      }
+      dot(P, 0, b, C.blue, 5);
+      label(P.top, P.X(0) + 8, P.Y(b) - 8, 'y절편', { fill: C.blue, class: 'halo', 'font-weight': 700 });
+      if (a !== 0) {
+        const xi = -b / a;
+        if (Math.abs(xi) <= 6) {
+          dot(P, xi, 0, C.coral, 5);
+          label(P.top, P.X(xi), P.Y(0) - 10, 'x절편', { fill: C.coral, class: 'halo', 'font-weight': 700, 'text-anchor': 'middle' });
+        }
+      }
+      $('#lin-eq').innerHTML = a === 0 ? `${Y} = ${num(b)}` : linEq(a, b);
+      $('#lin-slope').innerHTML = a === 0 ? '0' : slopeHtml;
+      $('#lin-yint').innerHTML = num(b);
+      $('#lin-xint').innerHTML = a === 0 ? (b === 0 ? '−' : '없음') : frac(-2 * b, Math.round(2 * a)) + (Math.abs(b / a) > 6 ? ' <small>(그림 밖)</small>' : '');
+      $('#lin-dir').innerHTML = a > 0
+        ? `<b class="em">↗ <i>a</i> &gt; 0</b> 이므로 오른쪽 위로 향하는 직선이에요.<br>점선 <span class="m">${linEq(a, 0)}</span>의 그래프를 <i>y</i>축의 방향으로 ${num(b)}만큼 평행이동했어요.`
+        : a < 0
+          ? `<b class="key">↘ <i>a</i> &lt; 0</b> 이므로 오른쪽 아래로 향하는 직선이에요.<br>점선 <span class="m">${linEq(a, 0)}</span>의 그래프를 <i>y</i>축의 방향으로 ${num(b)}만큼 평행이동했어요.`
+          : '<span class="warn"><i>a</i> = 0이면 일차함수가 아니에요! (<i>x</i>축에 평행한 직선)</span>';
+    }
+    ia.addEventListener('input', draw);
+    ib.addEventListener('input', draw);
+    draw();
+  }
+
+  /* ---------- 탐색기 ② 이차함수 ---------- */
+  const A_EXPLORE = [-2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2];
+  function initQuadExplorer() {
+    const svg = $('#quad-svg'), ia = $('#quad-a'), ip = $('#quad-p'), iq = $('#quad-q');
+    function draw() {
+      const a = A_EXPLORE[+ia.value], p = +ip.value, q = +iq.value;
+      const c = a * p * p + q;
+      $('#quad-a-out').innerHTML = num(a);
+      $('#quad-p-out').innerHTML = num(p);
+      $('#quad-q-out').innerHTML = num(q);
+      const P = plane(svg, { xmin: -6, xmax: 6, ymin: -6, ymax: 6, u: 26, grid: true, ticks: true });
+      plotFn(P, (x) => a * x * x, { stroke: C.gray, 'stroke-width': 1.8, 'stroke-dasharray': '5 5' });
+      vline(P, p, { stroke: C.violet, 'stroke-width': 1.5, 'stroke-dasharray': '6 5' });
+      if (p !== 0) arrow(P.top, P.X(0), P.Y(0), P.X(p), P.Y(0), C.blue, 2.6, 9);
+      if (q !== 0) arrow(P.top, P.X(p), P.Y(0), P.X(p), P.Y(q), C.coral, 2.6, 9);
+      plotFn(P, (x) => a * (x - p) ** 2 + q, { stroke: C.main, 'stroke-width': 3.2 });
+      if (p !== 0 && Math.abs(c) <= 6) {
+        dot(P, 0, c, C.gold, 4.5);
+        label(P.top, P.X(0) + (p > 0 ? -7 : 7), P.Y(c) + (a > 0 ? -6 : 14), `(0, ${plain(c)})`, { class: 'halo', 'text-anchor': p > 0 ? 'end' : 'start', 'font-size': 12, fill: '#a8740a', 'font-weight': 700 });
+      }
+      dot(P, p, q, C.ink, 5.5);
+      label(P.top, P.X(p) + 9, P.Y(q) + (a > 0 ? 18 : -10), `(${plain(p)}, ${plain(q)})`, { class: 'halo', 'font-weight': 700, 'font-size': 13 });
+      $('#quad-eq').innerHTML = quadEq(a, p, q);
+      $('#quad-std').innerHTML = `= ${quadStd(a, p, q).replace(/^.*? = /, '')}`;
+      $('#quad-vertex').innerHTML = `(${num(p)}, ${num(q)})`;
+      $('#quad-axis').innerHTML = `직선 <i>x</i> = ${num(p)}`;
+      $('#quad-shape').innerHTML = `${a > 0 ? '아래로 볼록 ∪' : '위로 볼록 ∩'} <small>(|<i>a</i>| = ${num(Math.abs(a))}, 클수록 폭이 좁아요)</small>`;
+      $('#quad-c').innerHTML = `(0, ${num(c)})`;
+      $('#quad-move').innerHTML = p === 0 && q === 0
+        ? `점선 <span class="m">${quadEq(a, 0, 0)}</span>의 그래프 그대로예요. (꼭짓점이 원점)`
+        : `점선 <span class="m">${quadEq(a, 0, 0)}</span>의 그래프를 <b class="em"><i>x</i>축의 방향으로 ${num(p)}만큼</b>, <b class="key"><i>y</i>축의 방향으로 ${num(q)}만큼</b> 평행이동한 그래프예요.`;
+    }
+    [ia, ip, iq].forEach((input) => input.addEventListener('input', draw));
+    draw();
+  }
+
+  /* ---------- 퀴즈 ---------- */
+  const quizBody = $('#quiz-body');
+  const checkBtn = $('#quiz-check');
+  const summary = $('#quiz-summary');
+
+  function makePlace(root, item) {
+    const fig = root.querySelector(`[data-place-fig="${item.id}"]`);
+    if (!fig) { console.warn('퀴즈 그림을 찾을 수 없음:', item.id); return; }
+    const group = document.createElement('div');
+    group.className = 'place-group';
+    fig.replaceWith(group);
+    group.append(fig);
+    // 한 묶음에 그림이 여러 개일 수 있다 (예: 기울기 a>0, a<0). 이름표 은행은 하나로 합친다.
+    const labels = [];
+    $$('.svg-wrap', fig).forEach((wrap) => {
+      const svg = wrap.querySelector('svg');
+      const [, , W, H] = svg.getAttribute('viewBox').split(' ').map(Number);
+      $$('[data-place]', svg).forEach((t) => {
+        labels.push(t);
+        t.classList.add('ans-hidden');
+        const slot = document.createElement('button');
+        slot.type = 'button';
+        slot.className = 'slot';
+        slot.dataset.answer = t.dataset.place;
+        slot.dataset.value = '';
+        slot.textContent = '?';
+        slot.setAttribute('aria-label', '이름표를 놓을 자리');
+        slot.style.left = `${(+t.getAttribute('x') / W) * 100}%`;
+        slot.style.top = `${(+t.getAttribute('y') / H) * 100}%`;
+        wrap.append(slot);
+      });
+    });
+    const bank = document.createElement('div');
+    bank.className = 'bank';
+    shuffle([...labels.map((t) => t.dataset.place), ...(item.extra || [])]).forEach((value) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip';
+      chip.dataset.value = value;
+      chip.textContent = value;
+      bank.append(chip);
+    });
+    const hint = document.createElement('p');
+    hint.className = 'bank-hint';
+    hint.textContent = `이름표를 끌어다 놓거나, 눌러서 고른 뒤 자리를 누르세요.${item.extra ? ' (필요 없는 이름표도 있어요)' : ''}`;
+    bank.append(hint);
+    group.append(bank);
+  }
+
+  function buildWordDragGroups(clone) {
+    for (const groupId of ['distribution', 'representative']) {
+      const items = QUIZ.filter(item => item.type === 'drag' && item.group === groupId);
+      const first = clone.querySelector(`[data-q="${items[0].id}"]`);
+      const section = first.closest('.sec');
+      section.classList.add('place-group', 'word-group');
+      section.dataset.wordGroup = groupId;
+      items.forEach(item => {
+        const source = clone.querySelector(`[data-q="${item.id}"]`);
+        const cloze = document.createElement('span'); cloze.className = 'cloze'; source.replaceWith(cloze);
+        source.classList.add('ans-src'); source.setAttribute('aria-hidden', 'true'); cloze.append(source);
+        const slot = document.createElement('button'); slot.type = 'button'; slot.className = 'slot word-slot';
+        slot.dataset.qid = item.id; slot.dataset.answer = item.answers[0]; slot.dataset.value = '';
+        slot.textContent = '?'; slot.setAttribute('aria-label', '용어를 끌어 놓는 빈칸'); cloze.append(slot);
+      });
+
+    }
+  }
+
+  function buildQuiz() {
+    const clone = $('#study-content').cloneNode(true);
+    clone.removeAttribute('id');
+    $$('.explorer', clone).forEach((el) => el.remove());
+    $$('[id]', clone).forEach((el) => el.removeAttribute('id'));
+    QUIZ.forEach((item) => {
+      if (item.type === 'drag') return;
+      if (item.type === 'place') { makePlace(clone, item); return; }
+      const sources = $$(`[data-q="${item.id}"], [data-q-mirror="${item.id}"]`, clone);
+      if (!sources.length) { console.warn('퀴즈 빈칸을 찾을 수 없음:', item.id); return; }
+      sources.forEach(src => {
+      const cloze = document.createElement('span');
+      cloze.className = 'cloze';
+      src.replaceWith(cloze);
+      src.classList.add('ans-src');
+      src.setAttribute('aria-hidden', 'true');
+      cloze.append(src);
+      const blank = document.createElement('button');
+      blank.type = 'button';
+      blank.className = src.hasAttribute('data-q-mirror') ? 'blank linked-blank' : 'blank';
+      blank.dataset.qid = item.id;
+      blank.textContent = '?';
+      blank.setAttribute('aria-label', '빈칸 (눌러서 답하기)');
+      cloze.append(blank);
+      });
+      if (item.type === 'choice') item.order = shuffle(item.options.map((_, i) => i));
+    });
+    buildWordDragGroups(clone);
+    quizBody.replaceChildren(clone);
+    selectedChip = null;
+    draggedBoxOption = null;
+
+    resetCheckState();
+  }
+
+  function resetCheckState() {
+    checkBtn.textContent = '정답 확인';
+    summary.textContent = '';
+    $('#mid-result').hidden = true;
+    updateProgress();
+  }
+  // 채운 빈칸 수 (중간 점검 패널의 진행 막대)
+  function updateProgress() {
+    const blanks = $$('.blank:not(.linked-blank), .slot', quizBody);
+    const filled = blanks.filter((el) => el.dataset.value || el.dataset.pick !== undefined).length;
+    $('#mid-filled').textContent = filled;
+    $('#mid-total').textContent = blanks.length;
+    $('#mid-bar-fill').style.width = `${blanks.length ? (filled / blanks.length) * 100 : 0}%`;
+  }
+  function clearMark(el) {
+    el.classList.remove('ok', 'bad');
+    resetCheckState();
+  }
+
+  // 모달에 보여 줄 문장: 현재 빈칸은 입력칸으로, 나머지 빈칸은 작은 칸으로 바꾼다
+  function contextView(blank, activeNode) {
+    const ctx = blank.closest('.ctx');
+    const copy = ctx.cloneNode(true);
+    const originals = $$('.cloze', ctx);
+    $$('.cloze', copy).forEach((cloze, i) => {
+      if (originals[i].contains(blank)) { cloze.replaceWith(activeNode); return; }
+      const other = cloze.querySelector('.blank');
+      const span = document.createElement('span');
+      span.className = 'mini-blank';
+      span.innerHTML = other.innerHTML;
+      cloze.replaceWith(span);
+    });
+    return copy;
+  }
+
+  const textModal = $('#text-modal'), choiceModal = $('#choice-modal');
+  let activeBlank = null, pickedIndex = null;
+
+  function openModal(modal) { modal.hidden = false; }
+  function closeModals() {
+    textModal.hidden = true;
+    choiceModal.hidden = true;
+    if (activeBlank) activeBlank.focus();
+    activeBlank = null;
+  }
+
+  function openTextBlank(blank) {
+    const input = document.createElement('input');
+    input.className = 'ctx-input';
+    input.id = 'text-input';
+    input.autocomplete = 'off';
+    input.setAttribute('aria-label', '답 입력');
+    input.value = blank.dataset.value || '';
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); confirmText(); } });
+    $('#text-ctx').replaceChildren(contextView(blank, input));
+    openModal(textModal);
+    input.focus();
+    input.select();
+  }
+  function confirmText() {
+    const value = $('#text-input').value.trim();
+    if (value) { activeBlank.dataset.value = value; activeBlank.textContent = value; }
+    else { delete activeBlank.dataset.value; activeBlank.textContent = '?'; }
+    const peers = $$(`[data-qid="${activeBlank.dataset.qid}"].blank`, quizBody);
+    peers.forEach(peer => {
+      if (value) { peer.dataset.value = value; peer.textContent = value; }
+      else { delete peer.dataset.value; peer.textContent = '?'; }
+      clearMark(peer);
+    });
+    closeModals();
+  }
+
+  function openChoiceBlank(blank, item) {
+    pickedIndex = blank.dataset.pick !== undefined ? +blank.dataset.pick : null;
+    const preview = document.createElement('span');
+    preview.className = 'mini-blank active';
+    preview.id = 'choice-preview';
+    preview.innerHTML = pickedIndex === null ? '?' : item.options[pickedIndex];
+    $('#choice-ctx').replaceChildren(contextView(blank, preview));
+    const list = $('#choice-list');
+    list.replaceChildren();
+    item.order.forEach((orig, n) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'choice';
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', String(orig === pickedIndex));
+      btn.dataset.index = orig;
+      btn.innerHTML = `<span class="num">${n + 1}</span><span class="opt">${item.options[orig]}</span>`;
+      btn.addEventListener('click', () => {
+        pickedIndex = orig;
+        $$('.choice', list).forEach((b) => b.setAttribute('aria-checked', String(b === btn)));
+        $('#choice-preview').innerHTML = item.options[orig];
+      });
+      list.append(btn);
+    });
+    openModal(choiceModal);
+    (list.querySelector('[aria-checked="true"]') || list.firstElementChild).focus();
+  }
+  function confirmChoice() {
+    const item = QUIZ_BY_ID[activeBlank.dataset.qid];
+    if (pickedIndex !== null) {
+      activeBlank.dataset.pick = pickedIndex;
+      activeBlank.innerHTML = item.options[pickedIndex];
+      clearMark(activeBlank);
+    }
+    closeModals();
+  }
+
+  $('#text-confirm').addEventListener('click', confirmText);
+  $('#choice-confirm').addEventListener('click', confirmChoice);
+  $$('[data-close]').forEach((btn) => btn.addEventListener('click', closeModals));
+  [textModal, choiceModal].forEach((modal) => modal.addEventListener('click', (e) => { if (e.target === modal) closeModals(); }));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && (!textModal.hidden || !choiceModal.hidden)) closeModals();
+  });
+
+  /* 이름표 놓기 (마우스 드래그 + 터치 드래그 + 눌러서 놓기) */
+  let selectedChip = null, drag = null, suppressClick = false;
+  const groupOf = (el) => el.closest('.place-group');
+  function selectChip(chip) {
+    if (selectedChip) selectedChip.classList.remove('selected');
+    selectedChip = chip && chip !== selectedChip ? chip : null;
+    if (selectedChip) selectedChip.classList.add('selected');
+  }
+  // 같은 글자의 이름표가 여러 장일 수 있으므로(증가 ×3) 숨겨진 것을 먼저 돌려준다
+  function chipFor(group, value) {
+    const chips = $$('.chip', group).filter((c) => c.dataset.value === value);
+    return chips.find((c) => c.hidden) || chips[0];
+  }
+  function unplace(slot) {
+    const chip = chipFor(groupOf(slot), slot.dataset.value);
+    if (chip) chip.hidden = false;
+    slot.dataset.value = '';
+    slot.textContent = '?';
+    slot.classList.remove('filled');
+    clearMark(slot);
+  }
+  function place(chip, slot) {
+    if (slot.dataset.value) unplace(slot);
+    slot.dataset.value = chip.dataset.value;
+    slot.textContent = chip.dataset.value;
+    slot.classList.add('filled');
+    chip.hidden = true;
+    selectChip(null);
+    clearMark(slot);
+  }
+
+  quizBody.addEventListener('click', (e) => {
+    const blank = e.target.closest('.blank');
+    if (blank) {
+      const item = QUIZ_BY_ID[blank.dataset.qid];
+      activeBlank = blank;
+      if (item.type === 'text') openTextBlank(blank);
+      else openChoiceBlank(blank, item);
+      return;
+    }
+    const chip = e.target.closest('.chip');
+    if (chip) {
+      if (suppressClick) return;
+      selectChip(chip);
+      return;
+    }
+    const slot = e.target.closest('.slot');
+    if (slot) {
+      if (selectedChip && groupOf(selectedChip) === groupOf(slot)) place(selectedChip, slot);
+      else if (slot.dataset.value) unplace(slot);
+    }
+  });
+
+  quizBody.addEventListener('pointerdown', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip || e.button > 0) return;
+    drag = { chip, x0: e.clientX, y0: e.clientY, ghost: null, over: null };
+    chip.setPointerCapture(e.pointerId);
+  });
+  quizBody.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    if (!drag.ghost) {
+      if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 6) return;
+      drag.ghost = drag.chip.cloneNode(true);
+      drag.ghost.classList.add('ghost', 'selected');
+      document.body.append(drag.ghost);
+    }
+    drag.ghost.style.left = `${e.clientX}px`;
+    drag.ghost.style.top = `${e.clientY}px`;
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    const slot = target && target.closest('.slot');
+    const over = slot && groupOf(slot) === groupOf(drag.chip) ? slot : null;
+    if (over !== drag.over) {
+      if (drag.over) drag.over.classList.remove('drop-hover');
+      if (over) over.classList.add('drop-hover');
+      drag.over = over;
+    }
+  });
+  function endDrag(e, cancelled) {
+    if (!drag) return;
+    const { chip, ghost, over } = drag;
+    drag = null;
+    if (!ghost) return;
+    ghost.remove();
+    if (over) over.classList.remove('drop-hover');
+    if (!cancelled && over) place(chip, over);
+    suppressClick = true;
+    setTimeout(() => { suppressClick = false; }, 0);
+  }
+  quizBody.addEventListener('pointerup', (e) => endDrag(e, false));
+  quizBody.addEventListener('pointercancel', (e) => endDrag(e, true));
+
+  const diagramModal = $('#diagram-modal'), diagramBody = $('#diagram-body');
+  let draggedBoxOption = null, activeDiagram = null, activeDiagramKind = null;
+  function closeDiagramModal() {
+    diagramModal.hidden = true;
+    activeDiagram = null;
+    activeDiagramKind = null;
+  }
+  function openWordDiagram(source) {
+    activeDiagram = source;
+    activeDiagramKind = source.dataset.wordGroup;
+    draggedBoxOption = null;
+    const frame = source.querySelector('.cols-2').cloneNode(true);
+    frame.classList.add('diagram-word');
+    const slots = frame.querySelectorAll('.word-slot');
+    slots.forEach(slot => {
+      slot.className = 'box-slot';
+      slot.textContent = slot.dataset.value || '?';
+    });
+    const options = document.createElement('div'); options.className = 'box-options';
+    const labels = QUIZ.filter(item => item.type === 'drag' && item.group === activeDiagramKind).map(item => item.answers[0]);
+    const shuffledLabels = [...labels];
+    for (let index = shuffledLabels.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [shuffledLabels[index], shuffledLabels[randomIndex]] = [shuffledLabels[randomIndex], shuffledLabels[index]];
+    }
+    shuffledLabels.forEach((label) => {
+      const option = document.createElement('button');
+      option.type = 'button'; option.className = 'box-option'; option.draggable = true;
+      option.dataset.value = label; option.textContent = label;
+      if ([...slots].some((slot) => slot.dataset.value === label)) option.hidden = true;
+      options.append(option);
+    });
+    diagramBody.replaceChildren(frame, options);
+    $('#diagram-dialog-title').textContent = activeDiagramKind === 'distribution'
+      ? '다섯 용어를 알맞은 설명 앞에 끌어 놓으세요.' : '세 대푯값을 알맞은 설명 앞에 끌어 놓으세요.';
+    diagramModal.hidden = false;
+    $('#diagram-cancel').focus();
+  }
+  quizBody.addEventListener('click', event => {
+    const slot = event.target.closest('.word-slot');
+    if (!slot) return;
+    event.stopImmediatePropagation();
+    openWordDiagram(slot.closest('.word-group'));
+  }, true);
+  $('#diagram-confirm').addEventListener('click', () => {
+    if (!activeDiagram) return;
+    const blanks = activeDiagram.querySelectorAll('.word-slot');
+    diagramBody.querySelectorAll('.box-slot').forEach((slot, index) => {
+      blanks[index].dataset.value = slot.dataset.value || '';
+      blanks[index].textContent = slot.dataset.value || '?';
+    });
+    blanks.forEach(clearMark);
+    closeDiagramModal();
+  });
+  $('#diagram-cancel').addEventListener('click', closeDiagramModal);
+  diagramModal.addEventListener('click', (event) => { if (event.target === diagramModal) closeDiagramModal(); });
+  diagramModal.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); $('#diagram-confirm').click(); } });
+    diagramBody.addEventListener('dragstart', (event) => {
+      const option = event.target.closest('.box-option');
+      if (!option) return;
+      draggedBoxOption = option;
+      event.dataTransfer.setData('text/plain', option.dataset.value);
+      event.dataTransfer.effectAllowed = 'move';
+    });
+    diagramBody.addEventListener('dragover', (event) => {
+      const slot = event.target.closest('.box-slot');
+      if (!slot) return;
+      event.preventDefault();
+      slot.classList.add('drag-over');
+    });
+    diagramBody.addEventListener('dragleave', (event) => event.target.closest('.box-slot')?.classList.remove('drag-over'));
+    diagramBody.addEventListener('drop', (event) => {
+      const slot = event.target.closest('.box-slot');
+      if (!slot || !draggedBoxOption) return;
+      event.preventDefault();
+      const previousValue = slot.dataset.value;
+      if (previousValue) {
+        const previousOption = diagramBody.querySelector(`.box-option[data-value="${previousValue}"]`);
+        if (previousOption) previousOption.hidden = false;
+      }
+      slot.dataset.value = draggedBoxOption.dataset.value;
+      slot.textContent = draggedBoxOption.dataset.value;
+      slot.classList.remove('drag-over');
+      draggedBoxOption.hidden = true;
+      draggedBoxOption = null;
+    });
+  const norm = (s) => s.replace(/\s+/g, '').replace(/（/g, '(').replace(/）/g, ')').replace(/[−–]/g, '-').replace(/＝/g, '=').toLowerCase();
+  // 채운 칸만 채점해서 색을 칠하고, 개수를 돌려준다 (빈 칸은 표시하지 않음)
+  function grade() {
+    let total = 0, correct = 0, empty = 0;
+    const mark = (el, ok) => { el.classList.toggle('ok', ok); el.classList.toggle('bad', !ok); if (ok) correct++; };
+    $$('.blank:not(.linked-blank)', quizBody).forEach((blank) => {
+      total++;
+      const item = QUIZ_BY_ID[blank.dataset.qid];
+      const filled = item.type === 'text' ? !!blank.dataset.value : blank.dataset.pick !== undefined;
+      if (!filled) { empty++; blank.classList.remove('ok', 'bad'); return; }
+      mark(blank, item.type === 'text'
+        ? item.answers.some((ans) => norm(ans) === norm(blank.dataset.value))
+        : +blank.dataset.pick === item.answer);
+    });
+    $$('.slot', quizBody).forEach((slot) => {
+      total++;
+      if (!slot.dataset.value) { empty++; slot.classList.remove('ok', 'bad'); return; }
+      mark(slot, slot.dataset.value === slot.dataset.answer);
+    });
+    $$('.linked-blank', quizBody).forEach(peer => {
+      const primary = quizBody.querySelector(`.blank:not(.linked-blank)[data-qid="${peer.dataset.qid}"]`);
+      peer.classList.toggle('ok', primary.classList.contains('ok'));
+      peer.classList.toggle('bad', primary.classList.contains('bad'));
+    });
+    return { total, correct, empty, filled: total - empty };
+  }
+  function celebrate() {
+    checkBtn.textContent = '참 잘했어요!';
+    const toast = $('#toast');
+    toast.classList.remove('show');
+    void toast.offsetWidth;
+    toast.classList.add('show');
+  }
+  checkBtn.addEventListener('click', () => {
+    const { total, correct, empty } = grade();
+    summary.textContent = `${total}개 중 ${correct}개 정답${empty ? ` · 아직 빈칸 ${empty}개` : ''}`;
+    if (correct === total) celebrate();
+  });
+  $('#mid-check').addEventListener('click', () => {
+    const { total, correct, filled } = grade();
+    const result = $('#mid-result');
+    const wrong = filled - correct;
+    if (filled === 0) {
+      result.className = 'mid-result info';
+      result.textContent = '아직 채운 빈칸이 없어요.';
+    } else if (wrong === 0) {
+      result.className = 'mid-result good';
+      result.textContent = correct === total ? '모두 정답! 🎉' : `채운 ${filled}개 모두 정답! 👍`;
+      if (correct === total) celebrate();
+    } else {
+      result.className = 'mid-result warn';
+      result.textContent = `채운 ${filled}개 중 ${correct}개 정답. 빨간 칸 ${wrong}개를 다시 봐요!`;
+    }
+    result.hidden = false;
+  });
+  $('#toast').addEventListener('animationend', (e) => e.currentTarget.classList.remove('show'));
+  $('#quiz-reset').addEventListener('click', () => {
+    buildQuiz();
+    $('#quiz-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  /* ---------- 탭 ---------- */
+  function initTabs() {
+    $$('.tab').forEach((tab) => tab.addEventListener('click', () => {
+      $$('.tab').forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+      $$('.tab-panel').forEach((panel) => { panel.hidden = panel.id !== tab.getAttribute('aria-controls'); });
+    }));
+  }
+
+  /* ---------- 시작 ---------- */
+  $$('[data-math]').forEach((el) => { el.innerHTML = MATH[el.dataset.math]; });
+
+  buildQuiz();
+  initTabs();
+})();
+</script>
+<script>
+(() => {
+  const mathMarkup={"0":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>0</mn></mrow><annotation encoding=\"application/x-tex\">0</annotation></semantics></math></span>","1":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mn>1</mn></mrow><annotation encoding=\"application/x-tex\">1</annotation></semantics></math></span>","A":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>A</mi></mrow><annotation encoding=\"application/x-tex\">A</annotation></semantics></math></span>","B":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>B</mi></mrow><annotation encoding=\"application/x-tex\">B</annotation></semantics></math></span>","m":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>m</mi></mrow><annotation encoding=\"application/x-tex\">m</annotation></semantics></math></span>","n":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>n</mi></mrow><annotation encoding=\"application/x-tex\">n</annotation></semantics></math></span>","a":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>a</mi></mrow><annotation encoding=\"application/x-tex\">a</annotation></semantics></math></span>","p":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>p</mi></mrow><annotation encoding=\"application/x-tex\">p</annotation></semantics></math></span>","q":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>q</mi></mrow><annotation encoding=\"application/x-tex\">q</annotation></semantics></math></span>","x":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>x</mi></mrow><annotation encoding=\"application/x-tex\">x</annotation></semantics></math></span>","y":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mi>y</mi></mrow><annotation encoding=\"application/x-tex\">y</annotation></semantics></math></span>","=":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mo>=</mo></mrow><annotation encoding=\"application/x-tex\">=</annotation></semantics></math></span>","변량의 총합 ÷ 변량의 개수":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mfrac><mtext>변량의 총합</mtext><mtext>변량의 개수</mtext></mfrac></mrow><annotation encoding=\"application/x-tex\">\\frac{\\text{변량의 총합}}{\\text{변량의 개수}}</annotation></semantics></math></span>","그 계급의 도수 ÷ 도수의 총합":"<span class=\"katex\"><math xmlns=\"http://www.w3.org/1998/Math/MathML\"><semantics><mrow><mfrac><mtext>그 계급의 도수</mtext><mtext>도수의 총합</mtext></mfrac></mrow><annotation encoding=\"application/x-tex\">\\frac{\\text{그 계급의 도수}}{\\text{도수의 총합}}</annotation></semantics></math></span>"};
+  const pattern=/변량의 총합 ÷ 변량의 개수|그 계급의 도수 ÷ 도수의 총합|(?<![A-Za-z0-9])(?:[ABmnapqxy]|[01]|=)(?![A-Za-z0-9])/g;
+  function typeset(root) {
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT), texts=[];
+    let node;
+    while ((node=walker.nextNode())) {
+      if (!node.parentElement || node.parentElement.closest('math,svg,script,style,input,textarea,.head,.zone,.tag,#block-statistics,#block-calculation-modal,#hist-defense,#probability-lab')) continue;
+      pattern.lastIndex=0;
+      if (pattern.test(node.nodeValue)) texts.push(node);
+    }
+    for (const text of texts) {
+      const fragment=document.createDocumentFragment(); let last=0; pattern.lastIndex=0;
+      for (const match of text.nodeValue.matchAll(pattern)) {
+        fragment.append(document.createTextNode(text.nodeValue.slice(last,match.index)));
+        const template=document.createElement('template'); template.innerHTML=mathMarkup[match[0]];
+        fragment.append(template.content); last=match.index+match[0].length;
+      }
+      fragment.append(document.createTextNode(text.nodeValue.slice(last))); text.replaceWith(fragment);
+    }
+  }
+  const roots=['study-panel','quiz-panel','game-panel','text-modal','choice-modal'].map(id=>document.getElementById(id));
+  const observer=new MutationObserver(()=>{
+    observer.disconnect(); roots.forEach(typeset); watch();
+  });
+  function watch(){ roots.forEach(root=>observer.observe(root,{childList:true,characterData:true,subtree:true})); }
+  roots.forEach(typeset); watch();
+})();
+</script>
+<script>
+(() => {
+    const groups = [10, 20, 30, 40];
+    const chart = { left: 31, right: 209, top: 19, bottom: 190, max: 10 };
+
+    function readData() {
+      const values = [];
+      document.querySelectorAll('#linked-data .leaf-input').forEach((input) => {
+        const stem = Number(input.dataset.stem);
+        const leaves = input.value.match(/[0-9]/g) || [];
+        leaves.forEach((leaf) => values.push(stem * 10 + Number(leaf)));
+      });
+      return values;
+    }
+
+    function validateLeaves() {
+      let ordered = true;
+      document.querySelectorAll('#linked-data .leaf-input').forEach((input) => {
+        const leaves = (input.value.match(/[0-9]/g) || []).map(Number);
+        if (leaves.some((leaf, index) => index > 0 && leaf < leaves[index - 1])) ordered = false;
+      });
+      document.getElementById('leaf-warning').classList.toggle('show', !ordered);
+    }
+
+    function frequencies(values) {
+      return groups.map((start) => values.filter((value) => value >= start && value < start + 10).length);
+    }
+
+    function updateHistogram(counts) {
+      const x = (value) => chart.left + (value / 50) * (chart.right - chart.left);
+      const y = (count) => chart.bottom - (count / chart.max) * (chart.bottom - chart.top);
+      const bars = document.getElementById('hist-bars');
+      bars.replaceChildren();
+      counts.forEach((count, index) => {
+        const start = 10 + index * 10;
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', x(start)); rect.setAttribute('y', y(count));
+        rect.setAttribute('width', x(start + 10) - x(start)); rect.setAttribute('height', chart.bottom - y(count));
+        bars.append(rect);
+      });
+      // The first point is the midpoint of 0~10, not the origin.
+      const polygon = [[5, 0], ...counts.map((count, index) => [15 + index * 10, count]), [50, 0]];
+      document.getElementById('freq-polygon').setAttribute('points', polygon.map(([value, count]) => `${x(value)},${y(count)}`).join(' '));
+      const points = document.getElementById('freq-points');
+      points.replaceChildren();
+      polygon.forEach(([value, count]) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', x(value)); circle.setAttribute('cy', y(count)); circle.setAttribute('r', 3);
+        points.append(circle);
+      });
+    }
+
+    function updateLinkedData() {
+      const counts = frequencies(readData());
+      groups.forEach((start, index) => document.getElementById(`freq-${start}`).textContent = counts[index]);
+      document.getElementById('freq-total').textContent = counts.reduce((total, count) => total + count, 0);
+      updateHistogram(counts);
+    }
+
+    document.querySelectorAll('#linked-data .leaf-input').forEach((input) => {
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          input.blur();
+          return;
+        }
+        if (event.ctrlKey || event.metaKey || event.altKey) return;
+        if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Tab'].includes(event.key)) return;
+        if (!/^\d$/.test(event.key)) event.preventDefault();
+      });
+      input.addEventListener('paste', (event) => {
+        event.preventDefault();
+        const digits = (event.clipboardData.getData('text').match(/[0-9]/g) || []).join('');
+        input.setRangeText(digits, input.selectionStart, input.selectionEnd, 'end');
+      });
+      input.addEventListener('input', () => {
+        // Keep the active field numeric only; spacing is restored when editing ends.
+        input.value = (input.value.match(/[0-9]/g) || []).join('');
+      });
+      input.addEventListener('blur', () => {
+        const leaves = input.value.match(/[0-9]/g) || [];
+        input.value = leaves.join(' ');
+        updateLinkedData();
+        validateLeaves();
+      });
+    });
+    updateLinkedData();
+
+
+})();
+</script>
+
+<script>
+(() => {
+  const root = document.getElementById('block-statistics');
+  const svg = document.getElementById('block-number-line');
+  const modal = document.getElementById('block-calculation-modal');
+  const openButton = document.getElementById('block-calculation-open');
+  const closeButton = document.getElementById('block-calculation-close');
+  const values = [2, 2, 3, 3, 4, 4, 4, 5, 6, 7];
+  const minimum = 0, maximum = 20, left = 60, right = 1060, spacing = (right - left) / (maximum - minimum);
+  let dragging = null, stats = null;
+  function format(value) {
+    return (Math.abs(value) < 0.0000001 ? 0 : value).toFixed(4).replace(/\.?(?:0+)$/, '');
+  }
+  function compute() {
+    const sorted = [...values].sort((first, second) => first - second);
+    const sum = values.reduce((total, value) => total + value, 0);
+    const mean = sum / values.length;
+    const middle = Math.floor(sorted.length / 2);
+    const median = sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+    const frequencies = new Map();
+    sorted.forEach(value => frequencies.set(value, (frequencies.get(value) || 0) + 1));
+    const highest = Math.max(...frequencies.values());
+    const modes = highest > 1 ? [...frequencies].filter(entry => entry[1] === highest).map(entry => entry[0]) : [];
+    const deviations = values.map(value => value - mean);
+    const squares = deviations.map(value => value * value);
+    const squaredSum = squares.reduce((total, value) => total + value, 0);
+    const variance = squaredSum / values.length;
+    return { sorted, sum, mean, median, frequencies, modes, deviations, squares, squaredSum, variance, std: Math.sqrt(variance) };
+  }
+  const position = value => left + (value - minimum) * spacing;
+  function draw() {
+    stats = compute();
+    document.getElementById('block-mean').textContent = format(stats.mean);
+    document.getElementById('block-median').textContent = format(stats.median);
+    document.getElementById('block-mode').textContent = stats.modes.length ? stats.modes.join(', ') : '없음';
+    document.getElementById('block-variance').textContent = format(stats.variance);
+    document.getElementById('block-std').textContent = format(stats.std);
+    document.getElementById('block-count').textContent = `${values.length}개`;
+    const highest = Math.max(...stats.frequencies.values());
+    const axis = Math.max(196, 46 + highest * 34);
+    svg.setAttribute('viewBox', `0 0 1120 ${axis + 124}`);
+    const parts = [
+      '<defs><marker id="block-axis-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="var(--ink)"/></marker><marker id="block-mean-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="var(--blue)"/></marker><marker id="block-median-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="var(--coral)"/></marker></defs>',
+      `<line x1="34" y1="${axis}" x2="1090" y2="${axis}" stroke="var(--ink)" stroke-width="2" marker-end="url(#block-axis-head)"/>`
+    ];
+    for (let value = minimum; value <= maximum; value++) {
+      const horizontal = position(value);
+      parts.push(`<line x1="${horizontal}" y1="${axis - 5}" x2="${horizontal}" y2="${axis + 5}" stroke="var(--ink)"/><text class="axis-label" x="${horizontal}" y="${axis + 24}" text-anchor="middle">${value}</text>`);
+      if (stats.frequencies.has(value)) {
+        const count = stats.frequencies.get(value), top = axis - 12 - count * 34;
+        parts.push(`<text class="deviation-label" x="${horizontal}" y="${top - 15}" text-anchor="middle">${format(value - stats.mean)}</text>`);
+      }
+    }
+    const levels = new Map();
+    values.forEach((value, index) => {
+      const level = levels.get(value) || 0; levels.set(value, level + 1);
+      const horizontal = position(value), top = axis - 12 - (level + 1) * 34;
+      parts.push(`<g class="stat-block${dragging && dragging.index === index ? ' is-dragging' : ''}" data-index="${index}" tabindex="0" role="button" aria-label="자료 ${index + 1}, 변량 ${value}, 편차 ${format(value - stats.mean)}. 왼쪽 또는 오른쪽 방향키로 이동"><rect x="${horizontal - 15}" y="${top}" width="30" height="28" rx="4"/><text x="${horizontal}" y="${top + 19}" text-anchor="middle">${value}</text></g>`);
+    });
+    parts.push(`<line x1="${position(stats.mean)}" y1="${axis + 47}" x2="${position(stats.mean)}" y2="${axis + 8}" stroke="var(--blue)" stroke-width="2.5" marker-end="url(#block-mean-head)"/><text x="${position(stats.mean)}" y="${axis + 63}" text-anchor="middle" fill="var(--blue)" font-size="14" font-weight="700">평균 ${format(stats.mean)}</text>`);
+    parts.push(`<line x1="${position(stats.median)}" y1="${axis + 86}" x2="${position(stats.median)}" y2="${axis + 8}" stroke="var(--coral)" stroke-width="2.5" stroke-dasharray="5 3" marker-end="url(#block-median-head)"/><text x="${position(stats.median)}" y="${axis + 106}" text-anchor="middle" fill="var(--coral)" font-size="14" font-weight="700">중앙값 ${format(stats.median)}</text>`);
+    svg.innerHTML = parts.join('');
+  }
+  function announce(index) {
+    document.getElementById('block-stat-status').textContent = `자료 ${index + 1}: 변량 ${values[index]} · 편차 ${format(values[index] - stats.mean)}`;
+  }
+  function valueAt(event) {
+    const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(svg.getScreenCTM().inverse());
+    return Math.max(minimum, Math.min(maximum, Math.round((point.x - left) / spacing + minimum)));
+  }
+  svg.addEventListener('pointerdown', event => {
+    const block = event.target.closest('.stat-block');
+    if (!block || (event.pointerType === 'mouse' && event.button !== 0)) return;
+    event.preventDefault();
+    dragging = { index: +block.dataset.index, original: values[+block.dataset.index], pointer: event.pointerId };
+    svg.setPointerCapture(event.pointerId); draw();
+  });
+  svg.addEventListener('pointermove', event => {
+    if (!dragging || event.pointerId !== dragging.pointer) return;
+    event.preventDefault();
+    const value = valueAt(event);
+    if (value !== values[dragging.index]) { values[dragging.index] = value; draw(); }
+  });
+  function finishDrag(event, cancelled) {
+    if (!dragging || event.pointerId !== dragging.pointer) return;
+    const index = dragging.index;
+    if (cancelled) values[index] = dragging.original;
+    dragging = null;
+    if (svg.hasPointerCapture(event.pointerId)) svg.releasePointerCapture(event.pointerId);
+    draw(); svg.querySelector(`[data-index="${index}"]`).focus({ preventScroll: true }); announce(index);
+  }
+  svg.addEventListener('pointerup', event => finishDrag(event, false));
+  svg.addEventListener('pointercancel', event => finishDrag(event, true));
+  svg.addEventListener('lostpointercapture', event => finishDrag(event, true));
+  svg.addEventListener('keydown', event => {
+    const block = event.target.closest('.stat-block');
+    if (!block || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+    event.preventDefault();
+    const index = +block.dataset.index;
+    values[index] = Math.max(minimum, Math.min(maximum, values[index] + (event.key === 'ArrowRight' ? 1 : -1)));
+    draw(); svg.querySelector(`[data-index="${index}"]`).focus(); announce(index);
+  });
+  const math = body => `<math xmlns="http://www.w3.org/1998/Math/MathML"><mrow>${body}</mrow></math>`;
+  const number = value => `<mn>${format(value)}</mn>`;
+  const comparison = value => `<mo>${Math.abs(Number(format(value)) - value) < 1e-12 ? '=' : '≈'}</mo>`;
+  function calculation() {
+    const rows = values.map((value, index) => `<tr><td>${index + 1}</td><td>${value}</td><td>${format(stats.deviations[index])}</td><td>${format(stats.squares[index])}</td></tr>`).join('');
+    const content = document.getElementById('block-calculation-content');
+    content.innerHTML = `<p>작은 값부터 나열한 자료: <b>${stats.sorted.join(', ')}</b></p>
+      <div class="block-calc-formula">${math(`<mtext>평균</mtext><mo>=</mo><mfrac>${number(stats.sum)}${number(values.length)}</mfrac>${comparison(stats.mean)}${number(stats.mean)}`)}</div>
+      <p>가운데 위치한 다섯 번째 값 ${stats.sorted[4]}와 여섯 번째 값 ${stats.sorted[5]}의 평균이므로 중앙값은 <b>${stats.median}</b>입니다. 최빈값은 <b>${stats.modes.length ? stats.modes.join(', ') : '없음'}</b>입니다.</p>
+      <div class="block-calc-scroll"><table><thead><tr><th>자료</th><th>변량</th><th>편차<br>(변량 − 평균)</th><th>편차의 제곱</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><th>합계</th><td>${format(stats.sum)}</td><td>0</td><td>${format(stats.squaredSum)}</td></tr></tfoot></table></div>
+      <div class="block-calc-formula">${math(`<mtext>분산</mtext><mo>=</mo><mfrac><mtext>편차 제곱의 총합</mtext><mtext>변량의 개수</mtext></mfrac><mo>=</mo><mfrac>${number(stats.squaredSum)}${number(values.length)}</mfrac>${comparison(stats.variance)}${number(stats.variance)}`)}</div>
+      <div class="block-calc-formula">${math(`<mtext>표준편차</mtext><mo>=</mo><msqrt><mtext>분산</mtext></msqrt><mo>=</mo><msqrt><mfrac>${number(stats.squaredSum)}${number(values.length)}</mfrac></msqrt>${comparison(stats.std)}${number(stats.std)}`)}</div>
+      <p class="block-calc-note">표의 소수는 표시할 때만 반올림합니다. 편차·분산·표준편차는 반올림 전 값으로 계산하며, 편차의 합은 0입니다.</p>`;
+  }
+  function closeCalculation() { modal.hidden = true; openButton.focus(); }
+  openButton.addEventListener('click', () => { calculation(); modal.hidden = false; closeButton.focus(); });
+  closeButton.addEventListener('click', closeCalculation);
+  modal.addEventListener('click', event => { if (event.target === modal) closeCalculation(); });
+  modal.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { event.preventDefault(); closeCalculation(); }
+    if (event.key === 'Tab') { event.preventDefault(); closeButton.focus(); }
+  });
+  draw();
+})();
+</script>
+
+<style>
+#hist-defense { margin: 22px 26px; padding: 20px; border: 2px solid var(--main); border-radius: 16px; background: radial-gradient(ellipse at top right, var(--mint), transparent 65%), var(--tint-2); color: var(--main-d); }
+#hist-defense * { box-sizing: border-box; }
+#hist-defense h2 { margin: 0; font-size: clamp(20px, 3vw, 29px); }
+#hist-defense h3 { margin: 0 0 10px; font-size: 16px; }
+#hist-defense p { margin: 8px 0; }
+#hist-defense .hd-top, #hist-defense .hd-controls, #hist-defense .hd-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+#hist-defense .hd-top { justify-content: space-between; }
+#hist-defense button { cursor: pointer; color: var(--main-d); border: 2px solid var(--main); border-radius: 8px; background: #fff; padding: 8px 12px; font-weight: 700; min-height: 44px; touch-action: manipulation; }
+#hist-defense button:disabled { cursor: default; opacity: .6; }
+#hist-defense button:focus-visible { outline: 3px solid var(--main-d); outline-offset: 3px; }
+#hist-defense .hd-start { background: var(--main); color: white; }
+#hist-defense .hd-stats { margin: 12px 0 8px; font-size: 14px; font-weight: 700; }
+#hist-defense .hd-stats span { padding: 4px 8px; border-radius: 6px; background: var(--mint); }
+#hist-defense .hd-wave { min-height: 24px; font-weight: 700; }
+#hist-defense .hd-arena { position: relative; isolation: isolate; background: linear-gradient(var(--tint-2), var(--mint) 45%, var(--paper)); display: grid; grid-template-columns: repeat(var(--hd-stems, 4), minmax(0, 1fr)); margin: 10px 0 52px; padding-top: 34px; }
+#hist-defense .hd-column { min-width: 0; text-align: center; }
+
+#hist-defense .hd-lane { height: 350px; position: relative;  }
+#hist-defense .hd-stack { position: absolute; inset: auto 0 0; display: flex; flex-direction: column-reverse; height: var(--hd-height, 0px); }
+#hist-defense .hd-unit { flex: 1 1 0; min-height: 0; background: repeating-linear-gradient(110deg, #ffffff12 0 1px, transparent 1px 7px), linear-gradient(#8588df, #5b5fc7 55%, #454899); box-shadow: inset 0 1px #bfc1f6, inset 0 -1px #34377e, inset 2px 0 #ffffff40, inset -2px 0 #292b6438; }
+#hist-defense .hd-count { position: absolute; left: 0; bottom: calc(var(--hd-height, 0px) + 3px); width: 100%; font-size: 12px; font-weight: 700; color: var(--main-d); }
+#hist-defense .hd-group { position: absolute; width: 0; height: 0; color: var(--main-d); z-index: 2; pointer-events: none; }
+#hist-defense .hd-monster { position: absolute; bottom: 0; width: var(--hd-monster-size); height: calc(var(--hd-monster-size) * 30 / 28); transform: translateX(-50%); }
+#hist-defense .hd-monster svg { display: block; width: 100%; height: 100%; }
+#hist-defense .hd-field { position: absolute; top: 34px; left: 0; width: 100%; height: 350px; overflow: visible; z-index: -1; color: var(--main-d); pointer-events: none; font-size: 12px; }
+#hist-defense [data-hd="lives"] { color: var(--bad); }
+@media (prefers-reduced-motion: reduce) { #hist-defense .hd-monster { will-change: auto; } }
+#hist-defense .hd-lower { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+#hist-defense .hd-panel { min-width: 0; padding: 14px; background: var(--paper); border: 1px solid var(--mint-2); border-radius: 10px; }
+#hist-defense table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 15px; }
+#hist-defense th, #hist-defense td { text-align: left; padding: 7px 5px; border-bottom: 1px solid var(--rule); }
+#hist-defense th:first-child { width: 48px; }
+#hist-defense td { border-left: 2px solid var(--main); overflow-wrap: anywhere; }
+#hist-defense .hd-note { font-size: 12px; color: var(--main-d); }
+#hist-defense .hd-instruction { font-weight: 800; font-size: 14px; }
+#hist-defense .hd-inventory { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(44px, auto)); gap: 8px; }
+#hist-defense button.hd-brick, #hist-defense .hd-leaf, #hist-defense .hd-drag-ghost { border: 2px solid #454899; border-top-color: #bfc1f6; border-left-color: #a3a6ed; border-radius: 3px; color: white; background: repeating-linear-gradient(115deg, #ffffff12 0 1px, transparent 1px 8px), linear-gradient(#8588df, #5b5fc7 55%, #454899); box-shadow: inset 2px 2px #ffffff38, inset -2px -3px #292b6450, 0 2px 0 #292b6450; font-weight: 800; }
+#hist-defense .hd-brick { min-width: 0; font-size: 22px; padding: 8px 2px; }
+#hist-defense .hd-brick[aria-pressed="true"] { background: var(--main); color: #fff; border-color: var(--main); box-shadow: 0 0 0 3px var(--mint-2); }
+#hist-defense .hd-brick { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; cursor: grab; }
+#hist-defense .hd-leaves { display: flex; align-items: center; overflow-x: auto; overflow-y: hidden; min-height: 64px; padding: 8px 0; overscroll-behavior-x: contain; scrollbar-width: thin; }
+#hist-defense .hd-leaf { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 32px; height: 44px; font-size: 20px; }
+#hist-defense .hd-gap { position: relative; flex: 0 0 18px; height: 44px; }
+#hist-defense .hd-gap:first-child, #hist-defense .hd-gap:last-child { flex-basis: 26px; }
+#hist-defense .hd-gap:only-child { flex: 1 0 100%; border: 2px dashed #a3a6ed; border-radius: 4px; text-align: center; line-height: 40px; font-size: 12px; }
+#hist-defense .hd-gap-active::after { content: ''; position: absolute; left: calc(50% - 3px); top: 0; bottom: 0; width: 6px; background: #e59426; border-radius: 3px; box-shadow: 0 0 0 2px #fff; }
+#hist-defense .hd-leaf.hd-neighbor { outline: 3px solid #e59426; outline-offset: 1px; filter: brightness(1.25); animation: hd-glow .65s ease-in-out infinite alternate; }
+@keyframes hd-glow { to { box-shadow: 0 0 10px #e59426; } }
+@media (prefers-reduced-motion: reduce) { #hist-defense .hd-leaf.hd-neighbor { animation: none; } }
+#hist-defense .hd-drag-ghost { position: fixed; z-index: 10000; pointer-events: none; padding: 8px 14px; font-size: 22px; transform: translate(-50%, -110%); }
+#hist-defense .hd-feedback { min-height: 24px; font-size: 14px; font-weight: 700; }
+@media (max-width: 600px) { #hist-defense { margin: 14px 8px; padding: 12px; } #hist-defense .hd-lower { grid-template-columns: minmax(0, 1fr); gap: 12px; } #hist-defense .hd-panel { padding: 12px; } }
+#hist-defense .hd-controls label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; }
+#hist-defense select { max-width: 100%; min-height: 44px; border: 1px solid var(--main); border-radius: 8px; padding: 6px; background: var(--paper); color: var(--main-d); font: inherit; }
+#hist-defense .hd-dialog { width: min(420px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 26px; border: 3px solid #5b5fc7; border-radius: 16px; background: var(--paper); color: var(--main-d); text-align: center; }
+#hist-defense .hd-dialog::backdrop { background: #17183cb8; }
+#hist-defense .hd-dialog h3 { font-size: 25px; }
+#hist-defense .hd-dialog button { display: block; width: 100%; margin-top: 12px; }
+</style>
+<script>
+(() => {
+  const panel = document.getElementById('game-panel');
+  const menu = document.getElementById('hub-menu');
+  const launcher = document.getElementById('castle-launch');
+  let mounted = false;
+  const root = document.createElement('section');
+  root.hidden = true;
+  root.id = 'hist-defense';
+  root.setAttribute('aria-label', '히스토그램 성벽 디펜스');
+  root.innerHTML = `<button type="button" class="hub-back" data-hd="back">← 게임 목록으로</button><div class="hd-top"><h2>🏰 히스토그램 성벽 디펜스</h2><div class="hd-controls"><label>난이도 <select data-hd="difficulty" aria-label="난이도와 줄기 개수"><option value="3">쉬움 · 줄기 3개</option><option value="4" selected>보통 · 줄기 4개</option><option value="5">어려움 · 줄기 5개</option></select></label><button type="button" class="hd-start" data-hd="start">시작</button></div></div>
+    <div class="hd-stats"><span data-hd="lives"></span><span data-hd="score"></span><span data-hd="phase"></span></div>
+    <p class="hd-wave" data-hd="wave" role="status"></p>
+    <div class="hd-arena" aria-label="각 줄기 열을 따라 다가오는 몬스터와 히스토그램 성벽"></div>
+    <div class="hd-lower"><div class="hd-panel"><h3>줄기와 잎 · 남아 있는 성벽</h3><table><thead><tr><th scope="col">줄기</th><th scope="col">잎</th></tr></thead><tbody></tbody></table><p class="hd-note">2 | 0 = 20 · 잎 1개 = 도수 1 = 성벽 1칸</p><p class="hd-note">무리는 한 번에 방어 · 뚫려도 생명 1개</p></div>
+    <div class="hd-panel"><h3>벽돌 12개</h3><p class="hd-instruction" id="hd-instruction">벽돌을 끌어 같은 줄기의 잎 사이에 놓으세요. 작은 잎 → 큰 잎 순서!</p><div class="hd-inventory" role="group" aria-label="4열 3행 드래그 벽돌" aria-describedby="hd-instruction"></div><p class="hd-note">십의 자리 = 줄기 · 일의 자리 = 잎 · 긴 줄은 좌우로 밀기</p></div></div>
+    <p class="hd-feedback" role="status" aria-live="polite"></p>
+    <dialog class="hd-dialog" aria-labelledby="hd-dialog-title" aria-describedby="hd-dialog-description"><h3 id="hd-dialog-title"></h3><p id="hd-dialog-description"></p><button type="button" class="hd-start" data-hd="continue"></button><button type="button" data-hd="choose">취소</button><button type="button" class="hub-back" data-hd="menu">게임 목록으로</button></dialog>`;
+  function launch() {
+    if (mounted) return;
+    mounted = true;
+    document.getElementById('game-root').hidden = true;
+    panel.append(root);
+    menu.hidden = true;
+    root.hidden = false;
+    reset(false);
+  }
+  function returnToMenu() {
+    cancelDrag();
+    stopClock();
+    if (dialog.open) dialog.close();
+    dialogSpaceArmed = false;
+    spaceHeld = false;
+    state.monsters.forEach(group => group.node.remove());
+    state.monsters = [];
+    state.pending = [];
+    state.phase = 'ready';
+    clearGap();
+    root.hidden = true;
+    root.remove();
+    mounted = false;
+    document.getElementById('game-root').hidden = false;
+    menu.hidden = false;
+    launcher.focus({preventScroll: true});
+  }
+  launcher.addEventListener('click', launch);
+  const get = name => root.querySelector(`[data-hd="${name}"]`);
+  const inventory = root.querySelector('.hd-inventory');
+  const feedback = root.querySelector('.hd-feedback');
+  const arena = root.querySelector('.hd-arena');
+  const dialog = root.querySelector('dialog');
+  inventory.innerHTML = Array.from({length: 12}, (_, index) => `<button type="button" class="hd-brick" data-cell="${index}" aria-pressed="false" tabindex="-1" draggable="false"></button>`).join('');
+  const buttons = Array.from(inventory.children);
+  const stages = [
+    {sizes: [1, 2, 3, 1, 1], gap: 3.0, speed: 23, grace: 8},
+    {sizes: [2, 1, 3, 2, 2, 1], gap: 2.6, speed: 29, grace: 5},
+    {sizes: [2, 3, 1, 2, 3, 2, 1], gap: 2.2, speed: 36, grace: 4.5},
+    {sizes: [3, 2, 1, 3, 2, 3, 1, 3], gap: 1.85, speed: 44, grace: 4},
+    {sizes: [3, 2, 3, 1, 3, 2, 3, 2, 3], gap: 1.5, speed: 53, grace: 3.5}
+  ];
+  let state;
+  let columns = [];
+  let field;
+  let frame = null;
+  let lastTime = null;
+  let spaceHeld = false;
+  let dialogSpaceArmed = false;
+  let drag = null;
+  const visible = () => mounted && !root.hidden && !panel.hidden && !document.hidden;
+  const message = text => { feedback.textContent = text; };
+  function refillSlot(slot) {
+    const remaining = state.inventory.filter((value, index) => index !== slot && Number.isFinite(value));
+    const missing = Array.from({length: state.stems}, (_, stem) => stem).filter(stem => !remaining.some(value => Math.floor(value / 10) - 1 === stem));
+    const eligible = missing.length >= 12 - remaining.length ? missing : Array.from({length: state.stems}, (_, stem) => stem);
+    const stem = eligible[Math.floor(Math.random() * eligible.length)];
+    state.inventory[slot] = (stem + 1) * 10 + Math.floor(Math.random() * 10);
+  }
+  function buildColumns() {
+    root.style.setProperty('--hd-stems', state.stems);
+    arena.innerHTML = `<svg class="hd-field" preserveAspectRatio="none" role="img" aria-label="가로축: 변량의 계급 경계, 세로축: 도수 (잎 1개는 도수 1)"></svg>` + Array.from({length: state.stems}, (_, stem) => `<div class="hd-column" data-stem="${stem}"><div class="hd-lane"><div class="hd-stack" role="img"></div><span class="hd-count"></span></div></div>`).join('');
+    field = arena.querySelector('.hd-field');
+    columns = Array.from(arena.querySelectorAll('.hd-column'));
+    root.querySelector('tbody').innerHTML = Array.from({length: state.stems}, (_, stem) => `<tr><th scope="row">${stem + 1}</th><td><div class="hd-leaves" data-drop-stem="${stem}" data-leaves="${stem}" aria-label="줄기 ${stem + 1}의 잎, 작은 수부터 큰 수 순서"></div></td></tr>`).join('');
+    drawField();
+  }
+  function project(stem, depth) {
+    return {x: arena.clientWidth * (stem + .5) / state.stems, y: 18 + 332 * depth};
+  }
+  function drawField() {
+    const width = arena.clientWidth;
+    if (!width || !field) return;
+    field.setAttribute('viewBox', `0 0 ${width} 350`);
+    const step = Math.max(1, Math.ceil(state.axisMax / 4));
+    const frequencies = Array.from({length: Math.floor(state.axisMax / step) + 1}, (_, index) => index * step);
+    field.innerHTML = `<path d="M0 0V350H${width}" fill="none" stroke="currentColor"/>` +
+      Array.from({length: state.stems + 1}, (_, index) => {
+        const boundaryX = width * index / state.stems;
+        return `<g class="hd-boundary" data-boundary="${(index + 1) * 10}"><line x1="${boundaryX}" y1="350" x2="${boundaryX}" y2="355" stroke="currentColor"/><text x="${boundaryX}" y="371" text-anchor="middle" fill="currentColor">${(index + 1) * 10}</text></g>`;
+      }).join('') + frequencies.map(count => {
+        const frequencyY = 350 - count * 176 / state.axisMax;
+        return `<g class="hd-frequency"><line x1="-4" y1="${frequencyY}" x2="0" y2="${frequencyY}" stroke="currentColor"/><text x="-4" y="${frequencyY + 3}" text-anchor="end" font-size="10" ${count >= 1000 ? 'textLength="18" lengthAdjust="spacingAndGlyphs"' : ''} fill="currentColor">${count}</text></g>`;
+      }).join('') + `<text x="0" y="-12" fill="currentColor">도수</text><text x="${width}" y="391" text-anchor="end" fill="currentColor">변량</text>`;
+    root.style.setProperty('--hd-monster-size', `${Math.min(width <= 600 ? 32 : 36, width / state.stems - 8)}px`);
+    state.monsters.forEach(positionGroup);
+  }
+  function collisionDepth(stem) {
+    const unit = 176 / state.axisMax;
+    return (332 - state.leaves[stem].length * unit) / 332;
+  }
+  function positionGroup(group) {
+    const depth = Math.min(group.depth, collisionDepth(group.stem));
+    const size = parseFloat(root.style.getPropertyValue('--hd-monster-size'));
+    const laneWidth = arena.clientWidth / state.stems;
+    const perRow = Math.max(1, Math.min(group.size, Math.floor((laneWidth - 4) / (size + 4))));
+    const rows = Math.ceil(group.size / perRow);
+    const height = rows * (size * 30 / 28 + 4) - 4;
+    const point = project(group.stem, Math.max(depth, (height + 4 - 18) / 332));
+    group.node.style.left = `${point.x}px`;
+    group.node.style.top = `${34 + point.y}px`;
+    Array.from(group.node.children).forEach((monster, index) => {
+      const row = Math.floor(index / perRow);
+      const count = Math.min(perRow, group.size - row * perRow);
+      monster.style.left = ((index % perRow - (count - 1) / 2) * (size + 4)) + 'px';
+      monster.style.bottom = ((rows - row - 1) * (size * 30 / 28 + 4)) + 'px';
+    });
+  }
+  function spawnGroup(incoming) {
+    const node = document.createElement('span');
+    node.className = 'hd-group';
+    node.setAttribute('role', 'img');
+    node.setAttribute('aria-label', `${(incoming.stem + 1) * 10}대 몬스터 ${incoming.size}마리 무리`);
+    node.innerHTML = Array.from({length: incoming.size}, (_, index) => `<span class="hd-monster" style="left:calc((var(--hd-monster-size) + 2px) * ${index - (incoming.size - 1) / 2})"><svg viewBox="0 0 28 30" aria-hidden="true"><path fill="currentColor" d="M5 9 2 3 8 6Q14 1 20 6L26 3 23 9 26 15 24 25 19 23 15 28 11 24 5 26 2 16Z"/><path fill="white" d="M7 12h5v5H7zM17 12h5v5h-5z"/><path fill="var(--main)" d="M10 20h9v3h-9z"/></svg></span>`).join('');
+    const group = {stem: incoming.stem, size: incoming.size, depth: 0, node, resolved: false};
+    arena.append(node);
+    state.monsters.push(group);
+    positionGroup(group);
+    group.depth = (parseFloat(node.style.top) - 34 - 18) / 332;
+    return group;
+  }
+  function stopClock() {
+    if (frame !== null) cancelAnimationFrame(frame);
+    frame = null;
+    lastTime = null;
+  }
+  function scheduleFrame() {
+    if (frame === null && state.phase === 'running' && visible() && !state.suspended) frame = requestAnimationFrame(tick);
+  }
+  function select(index, focus = false) {
+    state.selected = index;
+    buttons.forEach((button, cell) => {
+      button.setAttribute('aria-pressed', String(cell === index));
+      button.tabIndex = cell === index ? 0 : -1;
+    });
+    if (focus) buttons[index].focus({preventScroll: true});
+  }
+  function renderData() {
+    state.axisMax = Math.max(state.axisMax, ...state.leaves.map(items => items.length));
+    const unit = 176 / state.axisMax;
+    root.style.setProperty('--hd-unit', `${unit}px`);
+    columns.forEach((column, stem) => {
+      const leaves = state.leaves[stem];
+      column.style.setProperty('--hd-height', `${leaves.length * unit}px`);
+      const stack = column.querySelector('.hd-stack');
+      stack.innerHTML = leaves.map(leaf => `<span class="hd-unit" data-leaf="${leaf}"></span>`).join('');
+      stack.setAttribute('aria-label', `${(stem + 1) * 10}대 도수 ${leaves.length}, 성벽 ${leaves.length}칸`);
+      column.querySelector('.hd-count').textContent = `도수 ${leaves.length}`;
+      const row = root.querySelector(`[data-leaves="${stem}"]`);
+      row.innerHTML = leaves.map((leaf, index) => `<span class="hd-gap" data-gap="${index}" aria-hidden="true"></span><span class="hd-leaf" data-index="${index}">${leaf}</span>`).join('') + `<span class="hd-gap" data-gap="${leaves.length}" aria-hidden="true">${leaves.length ? '' : '여기에 놓기'}</span>`;
+    });
+    buttons.forEach((button, cell) => {
+      button.textContent = state.inventory[cell];
+      button.setAttribute('aria-label', `${Math.floor(cell / 4) + 1}행 ${cell % 4 + 1}열, ${state.inventory[cell]}, 잎 사이로 드래그`);
+      button.disabled = state.phase !== 'running' || state.suspended;
+    });
+    drawField();
+    select(state.selected);
+    renderStats();
+  }
+  function renderStats() {
+    get('lives').textContent = `생명 ${'♥'.repeat(state.lives)}${'♡'.repeat(3 - state.lives)}`;
+    get('score').textContent = `점수 ${state.score}`;
+    get('phase').textContent = state.suspended ? '화면 복귀 대기' : {ready: '준비', running: '방어 중', transition: '스테이지 완료', won: '승리!', lost: '게임 오버'}[state.phase];
+    get('start').textContent = state.phase === 'ready' ? '시작' : '다시 시작';
+    get('difficulty').disabled = ['running', 'transition'].includes(state.phase);
+    get('wave').textContent = `스테이지 ${Math.max(1, state.stage)} / ${stages.length}`;
+  }
+  function prepareStage() {
+    state.stage++;
+    state.stageTime = 0;
+    const stage = stages[state.stage - 1];
+    state.pending = stage.sizes.map((size, index) => ({stem: (index + state.stage - 1) % state.stems, size, at: stage.grace + index * stage.gap}));
+    state.phase = 'running';
+    state.suspended = !visible();
+    message(state.stage === 1 ? '성벽을 준비하세요. 각 줄기 열의 움직임을 살펴보세요.' : '더 빠른 무리가 다가옵니다. 여러 줄기의 성벽을 함께 살펴보세요.');
+    renderData();
+    if (visible()) select(state.selected, true);
+    scheduleFrame();
+  }
+  function showAnnouncement(phase) {
+    if (state.phase !== 'running') return;
+    cancelDrag();
+    state.phase = phase;
+    stopClock();
+    if (phase !== 'transition') {
+      state.monsters.forEach(group => group.node.remove());
+      state.monsters = [];
+      state.pending = [];
+    }
+    const title = phase === 'transition' ? `스테이지 ${state.stage} 완료! 다음 스테이지 ${state.stage + 1}` : phase === 'won' ? '승리! 모든 스테이지 완료' : '게임 오버';
+    root.querySelector('#hd-dialog-title').textContent = title;
+    root.querySelector('#hd-dialog-description').textContent = phase === 'transition' ? '다음에는 몬스터가 더 빠르게, 더 거세게 몰려옵니다. 준비되면 시작하세요.' : `점수 ${state.score} · 스테이지 ${state.stage} / ${stages.length}. ${phase === 'won' ? '마지막 성벽까지 지켰어요!' : '성벽을 정비하고 다시 도전해 보세요.'}`;
+    get('continue').textContent = phase === 'transition' ? '다음 스테이지 시작' : '다시 도전';
+    get('choose').hidden = false;
+    dialogSpaceArmed = false;
+    message(title);
+    renderData();
+    if (!dialog.open) dialog.showModal();
+    get('continue').focus({preventScroll: true});
+  }
+  function insert(slot, stem, index) {
+    if (state.phase !== 'running' || state.suspended || !visible() || dialog.open) return;
+    const value = state.inventory[slot];
+    if (!Number.isFinite(value) || stem !== Math.floor(value / 10) - 1) { message('십의 자리와 같은 줄기에 놓아 주세요.'); return; }
+    const leaves = state.leaves[stem];
+    const leaf = value % 10;
+    if (!Number.isInteger(index) || index < 0 || index > leaves.length) return;
+    if ((index > 0 && leaves[index - 1] > leaf) || (index < leaves.length && leaf > leaves[index])) { message('잎의 순서가 맞지 않아요. 왼쪽 잎 ≤ 새 잎 ≤ 오른쪽 잎으로 놓으세요.'); return; }
+    leaves.splice(index, 0, leaf);
+    refillSlot(slot);
+    renderData();
+    message(`${value} → ${stem + 1} | ${leaf} · 성벽 +1`);
+  }
+  function impact(group) {
+    if (state.phase !== 'running' || group.resolved) return;
+    group.resolved = true;
+    group.node.remove();
+    state.monsters = state.monsters.filter(item => item !== group);
+    const leaves = state.leaves[group.stem];
+    const blocked = Math.min(group.size, leaves.length);
+    leaves.splice(leaves.length - blocked, blocked);
+    state.score += blocked * 10;
+    const breached = blocked < group.size;
+    if (breached) state.lives--;
+    message(`${(group.stem + 1) * 10}대 · 성벽 ${blocked}칸 소모${breached ? ' · 생명 -1' : ' · 무리 방어!'}`);
+    if (state.lives === 0) showAnnouncement('lost');
+    else renderData();
+  }
+  function tick(time) {
+    frame = null;
+    if (state.phase !== 'running') return;
+    if (!visible()) { syncVisibility(); return; }
+    const delta = lastTime === null ? 0 : Math.min((time - lastTime) / 1000, .1);
+    lastTime = time;
+    state.stageTime += delta;
+    while (state.pending.length && state.pending[0].at <= state.stageTime) spawnGroup(state.pending.shift());
+    for (const group of [...state.monsters]) {
+      const endpoint = collisionDepth(group.stem);
+      group.depth = Math.min(endpoint, group.depth + delta * stages[state.stage - 1].speed / 332);
+      positionGroup(group);
+      if (group.depth >= endpoint) {
+        impact(group);
+        if (state.phase !== 'running') break;
+      }
+    }
+    if (state.phase === 'running' && !state.pending.length && !state.monsters.length) showAnnouncement(state.stage === stages.length ? 'won' : 'transition');
+    scheduleFrame();
+  }
+  function syncVisibility() {
+    if (!state) return;
+    if (!visible()) cancelDrag();
+    if (state.phase !== 'running') return;
+    const suspended = !visible();
+    if (suspended === state.suspended) return;
+    state.suspended = suspended;
+    stopClock();
+    renderData();
+    if (!suspended) scheduleFrame();
+  }
+  function reset(start) {
+    cancelDrag();
+    stopClock();
+    if (dialog.open) dialog.close();
+    dialogSpaceArmed = false;
+    const stems = Number(get('difficulty').value);
+    state = {phase: 'ready', stems, axisMax: 8, suspended: false, leaves: Array.from({length: stems}, () => []), inventory: [], selected: 0, lives: 3, score: 0, stage: 0, stageTime: 0, pending: [], monsters: []};
+    for (let slot = 0; slot < 12; slot++) refillSlot(slot);
+    buildColumns();
+    renderData();
+    if (start) prepareStage();
+    else { message('난이도를 선택하고 시작하세요. 벽돌을 끌어 알맞은 잎 사이에 놓으세요.'); get('difficulty').focus({preventScroll: true}); }
+  }
+  root.addEventListener('click', event => {
+    const button = event.target.closest('button');
+    if (!button || button.disabled) return;
+    if (['back', 'menu'].includes(button.dataset.hd)) returnToMenu();
+    else if (button.dataset.hd === 'start' && !dialog.open) reset(true);
+    else if (button.dataset.hd === 'continue' && dialog.open) {
+      const phase = state.phase;
+      dialog.close();
+      if (phase === 'transition') prepareStage();
+      else reset(true);
+    } else if (button.dataset.hd === 'choose' && dialog.open) reset(false);
+
+  });
+  get('difficulty').addEventListener('change', () => { if (state.phase === 'ready') reset(false); });
+  inventory.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); }, true);
+  inventory.addEventListener('dblclick', event => event.preventDefault());
+  inventory.addEventListener('dragstart', event => event.preventDefault());
+  inventory.addEventListener('mousedown', event => event.preventDefault());
+  function clearGap() {
+    root.querySelectorAll('.hd-neighbor').forEach(leaf => leaf.classList.remove('hd-neighbor'));
+    root.querySelectorAll('.hd-gap-active').forEach(gap => gap.classList.remove('hd-gap-active'));
+  }
+  function cancelDrag() {
+    if (!drag) return;
+    const previous = drag;
+    drag = null;
+    if (previous.scrollFrame !== undefined) cancelAnimationFrame(previous.scrollFrame);
+    previous.ghost?.remove();
+    clearGap();
+    if (previous.button.hasPointerCapture(previous.id)) previous.button.releasePointerCapture(previous.id);
+  }
+  function scrollDrag() {
+    if (!drag?.moved) return;
+    if (drag.clientY < 64) window.scrollBy(0, -12);
+    else if (drag.clientY > window.innerHeight - 64) window.scrollBy(0, 12);
+    const row = dropRow(drag.clientX, drag.clientY);
+    if (row) {
+      const rect = row.getBoundingClientRect();
+      if (drag.clientX < rect.left + 28) row.scrollLeft -= 8;
+      else if (drag.clientX > rect.right - 28) row.scrollLeft += 8;
+    }
+    highlightGap(drag.clientX, drag.clientY);
+    drag.scrollFrame = requestAnimationFrame(scrollDrag);
+  }
+  function dropRow(x, y) {
+    const row = document.elementFromPoint(x, y)?.closest('[data-drop-stem]');
+    return row && root.contains(row) ? row : null;
+  }
+  function chosenGap(x, y) {
+    const row = dropRow(x, y);
+    if (!row) return null;
+    const rect = row.getBoundingClientRect();
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return null;
+    const gaps = Array.from(row.querySelectorAll('[data-gap]'));
+    const center = node => { const box = node.getBoundingClientRect(); return box.left + box.width / 2; };
+    const gap = gaps.reduce((nearest, candidate) => Math.abs(center(candidate) - x) < Math.abs(center(nearest) - x) ? candidate : nearest);
+    return {row, gap, stem: Number(row.dataset.dropStem), index: Number(gap.dataset.gap)};
+  }
+  function highlightGap(x, y) {
+    clearGap();
+    const target = chosenGap(x, y);
+    if (!target) return;
+    target.gap.classList.add('hd-gap-active');
+    for (const index of [target.index - 1, target.index]) target.row.querySelector(`[data-index="${index}"]`)?.classList.add('hd-neighbor');
+  }
+  inventory.addEventListener('pointerdown', event => {
+    const button = event.target.closest('[data-cell]');
+    if (!button || button.disabled || event.button !== 0 || !event.isPrimary || drag || dialog.open || !visible()) return;
+    event.preventDefault();
+    drag = {id: event.pointerId, button, slot: Number(button.dataset.cell), x: event.clientX, y: event.clientY, moved: false, ghost: null};
+    button.setPointerCapture(event.pointerId);
+  });
+  inventory.addEventListener('pointermove', event => {
+    if (!drag || drag.id !== event.pointerId) return;
+    event.preventDefault();
+    if (!visible() || dialog.open || state.phase !== 'running') { cancelDrag(); return; }
+    drag.clientX = event.clientX;
+    drag.clientY = event.clientY;
+    if (!drag.moved && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) >= 10) {
+      drag.moved = true;
+      drag.ghost = document.createElement('span');
+      drag.ghost.className = 'hd-drag-ghost';
+      drag.ghost.setAttribute('aria-hidden', 'true');
+      drag.ghost.textContent = state.inventory[drag.slot];
+      root.append(drag.ghost);
+      drag.scrollFrame = requestAnimationFrame(scrollDrag);
+    }
+    if (!drag.moved) return;
+    drag.ghost.style.left = event.clientX + 'px';
+    drag.ghost.style.top = event.clientY + 'px';
+    highlightGap(event.clientX, event.clientY);
+  }, {passive: false});
+  inventory.addEventListener('pointerup', event => {
+    if (!drag || drag.id !== event.pointerId) return;
+    event.preventDefault();
+    const {slot, moved} = drag;
+    const target = chosenGap(event.clientX, event.clientY);
+    cancelDrag();
+    if (!moved) return;
+    if (target) insert(slot, target.stem, target.index);
+    else message('줄기와 잎 그림의 잎 사이에 놓아 주세요.');
+  });
+  inventory.addEventListener('pointercancel', event => {
+    if (drag?.id === event.pointerId) { cancelDrag(); message('드래그를 취소했어요. 다시 끌어 놓아 주세요.'); }
+  });
+  inventory.addEventListener('lostpointercapture', event => { if (drag?.id === event.pointerId) cancelDrag(); });
+
+  dialog.addEventListener('cancel', event => event.preventDefault());
+  dialog.addEventListener('keydown', event => {
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      const choices = [get('continue'), get('choose'), get('menu')].filter(button => !button.hidden);
+      const index = choices.indexOf(document.activeElement);
+      choices[(index + (event.shiftKey ? choices.length - 1 : 1)) % choices.length].focus();
+    }
+    if (event.key === ' ') {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!event.repeat && !spaceHeld) dialogSpaceArmed = true;
+      spaceHeld = true;
+    }
+    if (event.key === 'Enter' && event.repeat) event.preventDefault();
+  });
+  dialog.addEventListener('keyup', event => {
+    if (event.key !== ' ') return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (dialogSpaceArmed) {
+      dialogSpaceArmed = false;
+      if (event.target.matches('button')) event.target.click();
+    }
+  });
+  document.addEventListener('keyup', event => { if (event.key === ' ') spaceHeld = false; }, true);
+  window.addEventListener('blur', () => { spaceHeld = false; dialogSpaceArmed = false; cancelDrag(); });
+  document.addEventListener('visibilitychange', syncVisibility);
+  new MutationObserver(syncVisibility).observe(panel, {attributes: true, attributeFilter: ['hidden']});
+  new ResizeObserver(drawField).observe(arena);
+})();
+
+</script>
+<style>
+#probability-lab { --pl-accent:#5b5fc7; padding:20px 26px 30px; color:var(--ink); }
+#probability-lab * { box-sizing:border-box; }
+#probability-lab h2 { margin:16px 0 8px; font-size:24px; overflow-wrap:anywhere; }
+#probability-lab h3 { margin:0 0 12px; font-size:18px; }
+#probability-lab p { line-height:1.65; }
+#probability-lab .pl-note { color:var(--muted); font-size:14px; }
+#probability-lab .pl-layout { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:18px; margin-top:16px; }
+#probability-lab .pl-card { min-width:0; padding:18px; border:1.5px solid var(--rule); border-radius:16px; background:linear-gradient(145deg,#f5f5ff,#fff 65%); }
+#probability-lab button, #probability-lab select { min-height:44px; max-width:100%; padding:8px 12px; border:1.5px solid #b5b7dc; border-radius:10px; background:#fff; color:#34377e; font:inherit; }
+#probability-lab button { cursor:pointer; font-weight:700; }
+#probability-lab button:disabled { cursor:default; opacity:.5; }
+#probability-lab button[aria-pressed="true"], #probability-lab .pl-primary { background:var(--pl-accent); color:#fff; border-color:var(--pl-accent); }
+#probability-lab .pl-modes, #probability-lab .pl-actions { display:flex; flex-wrap:wrap; gap:8px; }
+#probability-lab .pl-modes button { flex:1; padding:8px 6px; font-size:15px; white-space:nowrap; }
+#probability-lab label { display:block; margin:14px 0 6px; font-weight:700; }
+#probability-lab select { width:100%; }
+#probability-lab .pl-stage { display:flex; position:relative; justify-content:center; align-items:center; min-height:220px; margin-top:12px; overflow:hidden; border-radius:12px; background:radial-gradient(ellipse,#e8e9ff,transparent 70%); }
+#probability-lab .pl-token { width:170px; height:170px; display:grid; place-items:center; transform-origin:center; }
+#probability-lab .pl-token svg { width:100%; height:100%; overflow:visible; }
+#probability-lab .pl-coin { display:grid; place-items:center; width:128px; height:128px; border:7px double #b47a22; border-radius:50%; background:linear-gradient(135deg,#fff2b4,#f4c457); color:#704a12; font-size:36px; font-weight:800; }
+#probability-lab .pl-pointer { position:absolute; top:14px; left:calc(50% - 10px); width:0; height:0; border-left:10px solid transparent; border-right:10px solid transparent; border-top:22px solid #34377e; z-index:1; }
+#probability-lab .pl-running[data-mode="die"] .pl-token { animation:pl-toss .28s ease-in-out infinite alternate; }
+#probability-lab .pl-running[data-mode="coin"] .pl-token { animation:pl-flip .2s linear infinite alternate; }
+#probability-lab .pl-result { text-align:center; min-height:48px; margin:0 0 12px; font-weight:800; color:#34377e; }
+#probability-lab .pl-summary { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }
+#probability-lab .pl-summary span { padding:8px 12px; background:#eeeefe; border-radius:9px; }
+#probability-lab .pl-chart { display:grid; gap:10px; margin:16px 0; }
+#probability-lab .pl-chart-row { display:grid; grid-template-columns:30px minmax(0,1fr) 58px; gap:8px; align-items:center; font-size:13px; }
+#probability-lab .pl-track { height:23px; position:relative; background:#edeef4; border-radius:4px; }
+#probability-lab .pl-bar { height:100%; background:#7377d7; border-radius:4px; }
+#probability-lab .pl-theory { position:absolute; top:-3px; bottom:-3px; width:3px; background:#c34c36; }
+#probability-lab table { width:100%; border-collapse:collapse; font-size:14px; text-align:center; }
+#probability-lab th, #probability-lab td { padding:7px 3px; border-bottom:1px solid var(--rule); }
+#probability-lab caption { text-align:left; font-weight:700; margin-bottom:8px; }
+#probability-lab .pl-comparison { margin-top:16px; padding:12px; border-left:4px solid var(--pl-accent); background:#f0f0ff; line-height:1.8; overflow-wrap:anywhere; }
+@keyframes pl-toss { from { transform:translateY(8px) rotate(-18deg); } to { transform:translateY(-16px) rotate(24deg); } }
+@keyframes pl-flip { from { transform:scaleX(1) translateY(0); } to { transform:scaleX(.08) translateY(-16px); } }
+@media(max-width:760px) { #probability-lab { padding:16px; } #probability-lab .pl-layout { grid-template-columns:minmax(0,1fr); } #probability-lab .pl-card { padding:12px; } #probability-lab h2 { font-size:21px; } }
+@media(prefers-reduced-motion:reduce) { #probability-lab .pl-token { animation:none !important; transition:none !important; } }
+
+    /* ===== 단원 차례(목차) — 2단원과 동일 형식 ===== */
+    .toc { position: sticky; top: 0; z-index: 30; display: flex; gap: 6px; overflow-x: auto; padding: 10px 26px; border-bottom: 1px solid var(--rule); background: #ffffffee; scrollbar-width: thin; }
+    .toc button { flex: none; padding: 5px 12px; border: 1.5px solid var(--rule); border-radius: 999px; background: #fff; color: var(--muted); font-size: 13.5px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+    .toc button[aria-current="true"] { border-color: var(--main); background: var(--main); color: #fff; }
+    .zone { scroll-margin-top: 64px; }
+    @media (max-width: 760px) { .toc { padding: 8px 12px; } }
+    @media print { .toc { display: none !important; } }
+
+  </style>
+<script>
+(() => {
+  const launcher = document.getElementById('probability-launch');
+  const panel = document.getElementById('game-panel');
+  const menuRoot = document.getElementById('game-root');
+  let activeRoot = null;
+  launcher.addEventListener('click', () => {
+    if (activeRoot) return;
+    const root = document.createElement('section');
+    activeRoot = root;
+    root.id = 'probability-lab';
+    root.setAttribute('aria-label', '주사위, 동전, 룰렛 확률 알아보기 게임');
+    root.innerHTML = `<button type="button" class="hub-back" data-pl="back">← 게임 목록으로</button>
+      <h2 tabindex="-1">주사위, 동전, 룰렛 확률 알아보기 게임</h2>
+      <p class="pl-note">먼저 결과를 예상하고 시행해 보세요. 이론은 기준, 상대도수는 실제 실험의 기록이에요.</p>
+      <div class="pl-modes" role="group" aria-label="실험 종류"><button type="button" data-mode="die" aria-pressed="true">🎲 주사위</button><button type="button" data-mode="coin" aria-pressed="false">🪙 동전</button><button type="button" data-mode="spinner" aria-pressed="false">🎯 룰렛</button></div>
+      <div class="pl-layout"><div class="pl-card">
+        <div data-pl="sections-wrap" hidden><label for="pl-sections">룰렛의 같은 크기 구역 수</label><select id="pl-sections" data-pl="sections">${Array.from({length:7}, (_,index) => `<option value="${index + 2}" ${index === 3 ? 'selected' : ''}>${index + 2}등분</option>`).join('')}</select></div>
+        <div class="pl-stage" data-mode="die"><div class="pl-pointer" hidden></div><div class="pl-token"></div></div>
+        <p class="pl-result" data-pl="result" role="status" aria-live="polite"></p>
+        <label for="pl-batch">한 번에 시행할 횟수</label><select id="pl-batch" data-pl="batch"><option value="1">1회 · 한 결과 관찰</option><option value="10">10회</option><option value="100">100회</option><option value="1000">1,000회</option></select>
+        <div class="pl-actions" style="margin-top:12px"><button type="button" class="pl-primary" data-pl="run">시행하기</button><button type="button" data-pl="auto" aria-pressed="false">자동 시행</button><button type="button" data-pl="stop" disabled>멈추기</button><button type="button" data-pl="reset">초기화</button></div>
+        <p class="pl-note">묶음 시행은 마지막 결과를 보여 줍니다. 멈추기·초기화·실험 변경·화면 이동 시 진행 중인 묶음은 기록하지 않습니다. 자동 시행은 선택한 횟수씩 반복합니다.</p>
+      </div><div class="pl-card">
+        <h3>실험 기록과 확률</h3><div class="pl-summary"><span>총 <strong data-pl="total">0</strong>회</span><span data-pl="common">최빈 결과: 아직 없음</span></div>
+        <p class="pl-note">보라 막대: 실험의 상대도수 · 붉은 선: 이론적 확률<br>막대 전체 길이 = 100% (모든 결과에 같은 눈금)</p>
+        <div class="pl-chart" role="img" aria-label="결과별 상대도수 막대와 이론적 확률 기준선"></div>
+        <table><caption>결과별 도수와 확률</caption><thead><tr><th scope="col">결과</th><th scope="col">도수</th><th scope="col">상대도수</th><th scope="col">이론</th></tr></thead><tbody></tbody></table>
+        <label for="pl-event">관찰할 사건 선택 · 학습용 확장</label><select id="pl-event" data-pl="event"></select><div class="pl-comparison" data-pl="comparison"></div>
+      </div></div><p class="pl-note" data-pl="lesson"></p>
+      <p class="pl-note">탐구: 10회와 1,000회의 분포를 비교해 보세요. 시행이 많아지면 상대도수가 이론적 확률에 가까워지는 경향이 있지만, 반드시 일치하거나 차이가 매번 줄어드는 것은 아닙니다. 이 실험은 공정한 도구를 컴퓨터의 의사난수로 모형화합니다.</p>`;
+    menuRoot.hidden = true;
+    panel.append(root);
+    const controller = new AbortController();
+    const on = (node, type, handler) => node.addEventListener(type, handler, {signal:controller.signal});
+    const get = name => root.querySelector(`[data-pl="${name}"]`);
+    const token = root.querySelector('.pl-token');
+    const stage = root.querySelector('.pl-stage');
+    const colors = ['#5b5fc7','#167f88','#c18415','#398151','#bd4562','#78603e','#2875ae','#c35a29'];
+    const pipSlots = [[4],[0,8],[0,4,8],[0,2,6,8],[0,2,4,6,8],[0,2,3,5,6,8]];
+    let mode = 'die';
+    let sections = 5;
+    let counts = [];
+    let total = 0;
+    let busy = false;
+    let automatic = false;
+    let timer = null;
+    let rotation = 0;
+    const labels = () => mode === 'die' ? ['1','2','3','4','5','6'] : mode === 'coin' ? ['앞','뒤'] : Array.from({length:sections}, (_,index) => String.fromCharCode(65 + index));
+    const percent = value => `${(value * 100).toFixed(2)}%`;
+    function draw(outcome = null) {
+      token.style.transition = 'none';
+      token.style.transform = '';
+      rotation = 0;
+      stage.dataset.mode = mode;
+      root.querySelector('.pl-pointer').hidden = mode !== 'spinner';
+      if (mode === 'die') {
+        token.innerHTML = `<svg viewBox="0 0 120 120" aria-label="${outcome === null ? '시행 전 주사위' : `주사위 ${outcome + 1}`}" role="img"><rect x="12" y="12" width="96" height="96" rx="20" fill="white" stroke="#5b5fc7" stroke-width="4"/>${outcome === null ? '<text x="60" y="76" text-anchor="middle" font-size="48" fill="#5b5fc7">?</text>' : pipSlots[outcome].map(slot => `<circle cx="${36 + (slot % 3) * 24}" cy="${36 + Math.floor(slot / 3) * 24}" r="8" fill="#34377e"/>`).join('')}</svg>`;
+      } else if (mode === 'coin') {
+        token.innerHTML = `<div class="pl-coin" role="img" aria-label="${outcome === null ? '시행 전 동전' : `동전 ${labels()[outcome]}`}" >${outcome === null ? '?' : labels()[outcome]}</div>`;
+      } else {
+        const point = angle => `${(100 + 86 * Math.cos(angle)).toFixed(6)},${(100 + 86 * Math.sin(angle)).toFixed(6)}`;
+        token.innerHTML = `<svg viewBox="0 0 200 200" role="img" aria-label="같은 크기 ${sections}구역 룰렛">${labels().map((label,index) => {
+          const start = -Math.PI / 2 + index * 2 * Math.PI / sections;
+          const end = start + 2 * Math.PI / sections;
+          const middle = (start + end) / 2;
+          return `<path data-sector="${index}" data-angle="${360 / sections}" d="M100,100 L${point(start)} A86,86 0 0 1 ${point(end)} Z" fill="${colors[index]}" stroke="white" stroke-width="2"/><text x="${100 + 58 * Math.cos(middle)}" y="${106 + 58 * Math.sin(middle)}" text-anchor="middle" fill="white" font-size="20" font-weight="700">${label}</text>`;
+        }).join('')}<circle cx="100" cy="100" r="8" fill="white"/></svg>`;
+        if (outcome !== null) {
+          rotation = 360 - (outcome + .5) * 360 / sections;
+          token.style.transform = `rotate(${rotation}deg)`;
+        }
+      }
+      token.dataset.outcome = outcome === null ? '' : String(outcome);
+    }
+    function compare() {
+      const outcomes = labels();
+      const selection = get('event').value;
+      const indices = selection === 'even' ? [1,3,5] : selection === 'high' ? [3,4,5] : [Number(selection)];
+      const hits = indices.reduce((sum,index) => sum + counts[index], 0);
+      get('comparison').textContent = `이론적 확률 = 사건에 해당하는 결과 수 / 가능한 모든 결과 수 = ${indices.length}/${outcomes.length} = ${percent(indices.length / outcomes.length)}. 실험의 상대도수 = ${total ? `${hits}/${total} = ${percent(hits / total)}` : '아직 자료 없음 (0회 시행)'}.`;
+    }
+    function render() {
+      const outcomes = labels();
+      get('total').textContent = total.toLocaleString('ko-KR');
+      const maximum = Math.max(...counts);
+      get('common').textContent = total ? `최빈 결과: ${outcomes.filter((label,index) => counts[index] === maximum).join(', ')} (${maximum}회)` : '최빈 결과: 아직 없음';
+      root.querySelector('.pl-chart').innerHTML = outcomes.map((label,index) => `<div class="pl-chart-row"><span>${label}</span><div class="pl-track"><div class="pl-bar" style="width:${total ? counts[index] / total * 100 : 0}%"></div><span class="pl-theory" style="left:${100 / outcomes.length}%"></span></div><span>${total ? percent(counts[index] / total) : '자료 없음'}</span></div>`).join('');
+      root.querySelector('tbody').innerHTML = outcomes.map((label,index) => `<tr data-count="${counts[index]}"><th scope="row">${label}</th><td>${counts[index]}</td><td>${total ? percent(counts[index] / total) : '—'}</td><td>1/${outcomes.length}<br>${percent(1 / outcomes.length)}</td></tr>`).join('');
+      compare();
+    }
+    function controls() {
+      get('run').disabled = busy || automatic;
+      get('batch').disabled = busy || automatic;
+      get('stop').disabled = !busy && !automatic;
+      get('auto').textContent = automatic ? '자동 시행 멈춤' : '자동 시행';
+      get('auto').setAttribute('aria-pressed', String(automatic));
+    }
+    function stop(announce = true) {
+      clearTimeout(timer);
+      timer = null;
+      const interrupted = busy;
+      automatic = false;
+      busy = false;
+      stage.classList.remove('pl-running');
+      if (interrupted) draw();
+      controls();
+      if (announce) get('result').textContent = interrupted ? '멈췄어요. 진행 중이던 묶음은 기록하지 않았습니다.' : '멈췄어요. 기록은 유지합니다.';
+    }
+    function reset() {
+      stop(false);
+      counts = Array(labels().length).fill(0);
+      total = 0;
+      get('event').innerHTML = labels().map((label,index) => `<option value="${index}">${label}${mode === 'die' ? '이 나옴' : '가 나옴'}</option>`).join('') + (mode === 'die' ? '<option value="even">짝수가 나옴 (2, 4, 6)</option><option value="high">4 이상이 나옴 (4, 5, 6)</option>' : '');
+      get('sections-wrap').hidden = mode !== 'spinner';
+      root.querySelectorAll('[data-mode]').forEach(button => { if (button.tagName === 'BUTTON') button.setAttribute('aria-pressed', String(button.dataset.mode === mode)); });
+      get('lesson').textContent = mode === 'die' ? '공정한 주사위: 1~6은 각각 1/6. 예측해 보세요. 6회 던지면 모든 눈이 꼭 한 번씩 나올까요?' : mode === 'coin' ? '공정한 동전: 앞과 뒤는 각각 1/2. 앞면을 골라 실험하고 50%와 비교해 보세요.' : `공정한 룰렛: ${sections}개 구역의 중심각은 각각 360°/${sections}, 확률은 1/${sections}. 구역 수를 바꾸면 기록은 초기화됩니다.`;
+      get('result').textContent = '아직 시행 전 · 시행하기를 눌러 주세요.';
+      draw();
+      render();
+    }
+    function run() {
+      if (busy || panel.hidden || document.hidden || !root.isConnected) return;
+      const amount = Number(get('batch').value);
+      if (total > Number.MAX_SAFE_INTEGER - amount) { stop(); get('result').textContent = '기록 한도에 도달했습니다. 초기화해 주세요.'; return; }
+      const pending = Array(counts.length).fill(0);
+      let outcome = 0;
+      for (let trial = 0; trial < amount; trial++) {
+        outcome = Math.floor(Math.random() * pending.length);
+        pending[outcome]++;
+      }
+      busy = true;
+      controls();
+      stage.classList.add('pl-running');
+      get('result').textContent = `${amount.toLocaleString('ko-KR')}회 시행 중…`;
+      const duration = amount === 1 ? 650 : 280;
+      if (mode === 'spinner') {
+        const target = 360 - (outcome + .5) * 360 / sections;
+        rotation += 720 + ((target - rotation % 360 + 360) % 360);
+        token.getBoundingClientRect();
+        token.style.transition = `transform ${duration}ms cubic-bezier(.15,.65,.2,1)`;
+        token.style.transform = `rotate(${rotation}deg)`;
+      }
+      timer = setTimeout(() => {
+        timer = null;
+        counts = counts.map((count,index) => count + pending[index]);
+        total += amount;
+        busy = false;
+        stage.classList.remove('pl-running');
+        draw(outcome);
+        render();
+        get('result').textContent = `${amount}회 완료 · ${amount > 1 ? '마지막 ' : ''}결과: ${labels()[outcome]}`;
+        controls();
+        if (automatic) timer = setTimeout(run, 120);
+      }, duration);
+    }
+    on(get('run'), 'click', run);
+    on(get('auto'), 'click', () => {
+      if (automatic) { stop(); return; }
+      stop(false);
+      automatic = true;
+      controls();
+      run();
+    });
+    on(get('stop'), 'click', () => stop());
+    on(get('reset'), 'click', reset);
+    on(get('event'), 'change', compare);
+    on(get('sections'), 'change', () => { sections = Number(get('sections').value); reset(); });
+    root.querySelectorAll('button[data-mode]').forEach(button => on(button, 'click', () => { mode = button.dataset.mode; reset(); }));
+    const suspend = () => { if (panel.hidden || document.hidden) stop(); };
+    on(document, 'visibilitychange', suspend);
+    const observer = new MutationObserver(suspend);
+    observer.observe(panel, {attributes:true, attributeFilter:['hidden']});
+    on(get('back'), 'click', () => {
+      stop(false);
+      observer.disconnect();
+      controller.abort();
+      root.remove();
+      activeRoot = null;
+      menuRoot.hidden = false;
+      launcher.focus({preventScroll:true});
+    });
+    reset();
+    root.querySelector('h2').focus({preventScroll:true});
+  });
+})();
+</script>
+
+<script>
+/* ---------- 단원 차례(목차): 정리·퀴즈 탭 맨 위, 누르면 그 구역으로 ---------- */
+(function () {
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const tocs = [[$('#study-toc'), () => $('#study-content')], [$('#quiz-toc'), () => $('#quiz-body')]].filter(([nav]) => nav);
+  const zones = $$('#study-content .zone[data-sec]');
+  if (!tocs.length || !zones.length) return;
+  tocs.forEach(([nav, root]) => {
+    nav.innerHTML = zones.map((z) => `<button type="button" data-sec="${z.dataset.sec}">${z.dataset.toc}</button>`).join('');
+    nav.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-sec]');
+      const host = root();
+      const z = b && host && host.querySelector(`.zone[data-sec="${b.dataset.sec}"]`);
+      if (z) z.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      tocs.forEach(([nav, root]) => {
+        if (nav.closest('[hidden]')) return;
+        const host = root();
+        if (!host) return;
+        const list = $$('.zone[data-sec]', host);
+        let cur = list[0];
+        list.forEach((z) => { if (z.getBoundingClientRect().top < 120) cur = z; });
+        $$('button', nav).forEach((b) => {
+          const on = cur && b.dataset.sec === cur.dataset.sec;
+          if (on && b.getAttribute('aria-current') !== 'true') nav.scrollTo({ left: b.offsetLeft - nav.clientWidth / 2 + b.offsetWidth / 2, behavior: 'smooth' });
+          b.setAttribute('aria-current', String(!!on));
+        });
+      });
+    });
+  }, { passive: true });
+})();
+
+</script>
+</body>
+</html>

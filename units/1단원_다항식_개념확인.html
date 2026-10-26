@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>다항식</title>
+  <style>
+    /* ===== 토큰 ===== */
+    :root {
+      /* ★ 단원 테마 색: 이 값 하나만 바꾸면 배너·탭·태그·상자·버튼·그래프 선이 모두 따라 바뀐다.
+         (배너의 흰 글자가 잘 보이도록 충분히 진한 색으로. 주황·빨강·파랑 계열은 강조색과 겹치므로 피하기) */
+      --main: #2f9a52;
+      /* 아래는 --main에서 자동으로 만들어지는 색 (직접 고치지 않음) */
+      --main-d: color-mix(in srgb, var(--main) 72%, #000);      /* 진한 테마색: 대단원 띠, 강조 글자 */
+      --mint: color-mix(in srgb, var(--main) 12%, #fff);        /* 아주 연한 배경 */
+      --mint-2: color-mix(in srgb, var(--main) 30%, #fff);      /* 태그 배경 */
+      --tint: color-mix(in srgb, var(--main) 5%, #fff);         /* 공식 상자 배경 */
+      --tint-2: color-mix(in srgb, var(--main) 3%, #fff);       /* 탐색기 배경 */
+      --bg: color-mix(in srgb, var(--main) 6%, #f6f6f6);        /* 페이지 바깥 배경 */
+      --rule: color-mix(in srgb, var(--main) 7%, #e5e5e5);      /* 구분선 */
+      --grid: color-mix(in srgb, var(--main) 6%, #eeeeee);      /* 모눈·진행 막대 바탕 */
+      --tag-ink: color-mix(in srgb, var(--main) 22%, #1a1f1e);  /* 태그 글자 */
+      --shadow: color-mix(in srgb, var(--main-d) 8%, transparent);
+      --shadow-2: color-mix(in srgb, var(--main-d) 20%, transparent);
+      --ink: #22302e; --muted: #5d6b69; --paper: #ffffff;
+      --coral: #f2624f; --blue: #2b72d6; --violet: #7656c9; --gold: #e9a417; --hl: #fff1b0;
+      --ok: #1f6fd1; --bad: #e04545;
+      --sans: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      --serif: "Cambria", "Times New Roman", "Batang", serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.6; }
+    i { font-family: var(--serif); font-style: italic; }
+    sup { font-size: .68em; line-height: 0; }
+    math { font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", math, serif; font-size: 1.12em; }
+    button { font-family: var(--sans); }
+
+    /* ===== 레이아웃 ===== */
+    .page { width: min(1180px, calc(100% - 28px)); margin: 24px auto 40px; overflow: hidden; border: 2px solid var(--main); border-radius: 20px; background: var(--paper); box-shadow: 0 10px 30px var(--shadow); }
+    .banner { padding: 12px 16px 10px; background: var(--main); color: #fff; text-align: center; font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.3; }
+    .banner small { display: block; font-size: 13px; font-weight: 600; opacity: .85; letter-spacing: 0; }
+    .tabs { display: flex; gap: 6px; padding: 14px 24px 0; border-bottom: 2px solid var(--main); background: color-mix(in srgb, var(--main) 4%, #fff); }
+    .tab { margin-bottom: -2px; padding: 9px 26px; border: 1.5px solid var(--rule); border-bottom: 2px solid transparent; border-radius: 12px 12px 0 0; background: color-mix(in srgb, var(--main) 4%, #f5f5f5); color: var(--muted); font-size: 16px; font-weight: 700; cursor: pointer; }
+    .tab[aria-selected="true"] { border-color: var(--main); border-bottom-color: var(--paper); background: var(--paper); color: var(--ink); }
+    .tab:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid #ffc9a8; outline-offset: 2px; }
+
+    .zone { display: flex; align-items: center; gap: 12px; padding: 22px 26px 2px; }
+    .zone b { padding: 4px 20px; border-radius: 999px; background: var(--main-d); color: #fff; font-size: 17px; }
+    .zone::after { content: ""; flex: 1; height: 2px; background: var(--mint-2); }
+    .sec { padding: 18px 26px; border-bottom: 1px solid var(--rule); }
+    .cols-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .cols-2 > .col { min-width: 0; padding: 0 22px; }
+    .cols-2 > .col:first-child { padding-left: 0; border-right: 2px dashed var(--rule); }
+    .cols-2 > .col:last-child { padding-right: 0; }
+
+    /* ===== 개념 구성 요소 ===== */
+    .head { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 18px; }
+    .no { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--coral); color: #fff; font-size: 14px; font-weight: 800; flex: none; }
+    .tag { display: inline-block; padding: 2px 15px 3px; border-radius: 999px; background: var(--mint-2); color: var(--tag-ink); font-size: 15.5px; font-weight: 800; line-height: 1.5; white-space: nowrap; }
+    .tag.tag-coral { background: #ffd9d2; color: #6d2219; }
+    .term { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; align-items: baseline; margin: 10px 0; }
+    .term p { margin: 0; font-size: 15px; }
+    .body { margin: 6px 0; font-size: 15px; }
+    .sub { margin: -4px 0 10px 14px; font-size: 14.5px; color: #33413f; }
+    .em { color: var(--blue); font-weight: 700; }
+    .key { color: var(--coral); font-weight: 800; }
+    .blue { color: var(--blue); }
+    .m { font-family: var(--serif); font-size: 1.06em; white-space: nowrap; }
+    .big { font-size: 1.25em; }
+    .fr { display: inline-flex; flex-direction: column; margin: 0 2px; font-size: .86em; line-height: 1.12; text-align: center; vertical-align: middle; }
+    .fr > span:first-child { padding: 0 3px; border-bottom: 1px solid currentColor; }
+    .box { margin: 12px 0; padding: 10px 14px; border: 1.5px dashed var(--main); border-radius: 12px; background: var(--tint); text-align: center; font-size: 15px; line-height: 1.9; }
+    .formula { margin: 4px 0; font-size: 17px; }
+    .small { font-size: 14px; }
+    .tip { margin: 10px 0; padding: 7px 12px; border-left: 4px solid var(--gold); border-radius: 0 8px 8px 0; background: #fff8e3; font-size: 14.5px; }
+    .mini-title { margin: 6px 0 6px; color: var(--main-d); font-size: 14.5px; font-weight: 800; }
+
+    .table-scroll { overflow-x: auto; }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
+    .mini-table th, .mini-table td { padding: 5px 6px; border: 1px solid var(--rule); }
+    .mini-table th { background: var(--mint); font-weight: 700; }
+    .mini-table .t { color: var(--blue); font-weight: 700; }
+    .mini-table .f { color: #9aa5a3; }
+
+    .steps { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: center; margin: 8px 0 4px 6px; }
+    .steps .eqn { font-size: 17px; }
+    .steps .note { padding-left: 10px; border-left: 2px solid var(--coral); color: var(--coral); font-size: 13px; line-height: 1.35; }
+    .steps .note:empty { border-left: 0; }
+    .hl { padding: 0 3px; border-radius: 5px; background: #ffe0da; color: #b4321f; }
+
+    .flow { display: grid; gap: 2px; justify-items: start; margin: 10px auto 0; padding: 12px 16px; width: fit-content; max-width: 100%; border-radius: 12px; background: #fbf7ee; font-size: 14px; }
+    .flow-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .flow-box { padding: 2px 12px; border: 1.5px solid var(--ink); border-radius: 8px; background: #fff; font-size: 16px; }
+    .flow-tag { color: var(--coral); font-weight: 700; }
+    .flow-arrow { margin-left: 26px; color: var(--muted); }
+
+    .ex-list { display: grid; gap: 8px; margin-top: 8px; }
+    .ex { padding: 8px 12px; border-radius: 10px; background: #f7f9f9; font-size: 15px; line-height: 1.9; }
+    .pill { display: inline-block; margin-left: 4px; padding: 0 10px; border-radius: 999px; background: var(--mint-2); font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+    .pill.coral { background: #ffd9d2; }
+
+    .cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .card { min-width: 0; padding: 12px 14px; border: 1.5px solid var(--rule); border-radius: 14px; background: #fff; }
+    .card h4 { margin: 0 0 8px; color: var(--coral); font-size: 16px; }
+    .lines { display: grid; gap: 2px; font-family: var(--serif); font-size: 16.5px; }
+    .lines .why { font-family: var(--sans); color: var(--muted); font-size: 12.5px; }
+    .card .box { margin: 6px 0 10px; }
+
+    .fig { position: relative; max-width: 380px; margin: 8px auto 0; }
+    .fig.small { max-width: 300px; }
+    .fig svg, .mini svg { display: block; width: 100%; height: auto; }
+    .svg-wrap { position: relative; }
+    .fig figcaption { margin-top: 4px; color: var(--muted); font-size: 13px; text-align: center; }
+    .minis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .mini { margin: 0; min-width: 0; text-align: center; }
+    .mini svg, .mini .svg-wrap { max-width: 190px; margin: 2px auto 0; }
+    .mini .svg-wrap svg { margin: 0; }
+    .mini .slot { min-width: 42px; height: 24px; padding: 0 5px; font-size: 12px; }
+    .mini figcaption { font-size: 13.5px; line-height: 1.45; }
+    .badge { display: inline-block; padding: 0 10px; border-radius: 999px; font-family: var(--serif); font-style: italic; font-size: 14px; }
+    .badge.pos { background: #ffe0da; color: #b4321f; }
+    .badge.neg { background: #dce8fb; color: #1d55a6; }
+
+    .qcards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .qcard { min-width: 0; padding: 14px 16px; border: 1.5px solid var(--rule); border-radius: 16px; background: #fff; }
+    .qtitle { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 4px; color: var(--coral); font-size: 16.5px; }
+    .plist { margin: 6px 0; padding: 0; list-style: none; font-size: 14.5px; }
+    .plist li { margin: 3px 0; padding-left: 1.9em; text-indent: -1.9em; }
+
+    /* SVG */
+    /* 글자 기본값은 상속으로만 준다 (요소의 fill·font-size 속성이 우선하도록) */
+    svg { font-family: var(--sans); font-size: 12px; }
+    svg .ax-o { font-family: var(--serif); font-size: 13px; }
+    svg .it { font-family: var(--serif); font-style: italic; font-size: 14px; }
+    svg .grid line { stroke: var(--grid); stroke-width: 1; }
+    svg .axes line { stroke: #3b4644; stroke-width: 1.2; }
+    svg .axes polygon { fill: #3b4644; }
+    svg .tick { font-family: var(--serif); font-size: 10.5px; fill: #6f7c7a; }
+    svg .ax-label { font-family: var(--serif); font-style: italic; font-size: 15px; }
+    svg .plab { font-size: 13px; font-weight: 700; paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+    svg .halo { paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+
+    /* ===== 탐색기 ===== */
+    .explorer { background: var(--tint-2); }
+    .explorer-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .explorer-head .tag { background: var(--main); color: #fff; }
+    .explorer-head p { margin: 0; color: var(--muted); font-size: 14px; }
+    .explorer-body { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+    .explorer-body svg { display: block; width: 100%; max-width: 440px; height: auto; margin: 0 auto; border: 1.5px solid var(--rule); border-radius: 14px; background: #fff; }
+    .slider { display: grid; grid-template-columns: 34px minmax(0, 1fr) 56px; gap: 10px; align-items: center; margin: 6px 0; font-size: 18px; }
+    .slider input { width: 100%; accent-color: var(--main); }
+    .slider output { font-family: var(--serif); text-align: center; font-weight: 700; }
+    .slider-hint { margin: -4px 0 6px 44px; color: var(--muted); font-size: 12.5px; }
+    .readout { margin-top: 12px; padding: 14px 16px; border-radius: 14px; background: #fff; border: 1.5px solid var(--mint-2); }
+    .eq-big { font-size: 24px; color: var(--main-d); }
+    .eq-sub { color: var(--muted); font-size: 16px; }
+    .facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; margin: 10px 0 6px; font-size: 15px; }
+    .facts dt { color: var(--muted); font-weight: 700; }
+    .facts dd { margin: 0; font-family: var(--serif); }
+    .move { margin: 6px 0 0; font-size: 14.5px; }
+    .warn { color: var(--bad); font-weight: 700; }
+
+    /* ===== 퀴즈 ===== */
+    .quiz-guide { margin: 0; padding: 14px 26px; background: #fff8e3; font-size: 14.5px; border-bottom: 1px solid var(--rule); }
+    /* 숨긴 정답과 빈칸 버튼을 같은 칸에 겹쳐 둔다 → 칸 크기만큼 자리를 차지해 옆 글자를 가리지 않음 */
+    .cloze { display: inline-grid; margin: 1px 3px; vertical-align: baseline; }
+    .cloze > .ans-src, .cloze > .blank { grid-area: 1 / 1; }
+    .ans-src { visibility: hidden; padding: 2px 10px; }
+    #quiz-body .qhide, #quiz-body .ans-hidden { visibility: hidden; }
+    .blank { display: inline-flex; align-items: center; justify-content: center; min-width: 2.8em; width: 100%; height: 100%; padding: 2px 8px; border: 1.8px solid var(--ink); border-radius: 8px; background: #fff; color: var(--ink); font: inherit; font-weight: 700; white-space: nowrap; cursor: pointer; line-height: 1.2; }
+    .blank:hover { background: #fffbea; }
+    .blank.ok, .slot.ok { border-color: var(--ok); border-style: solid; color: var(--ok); background: #eef5ff; }
+    .blank.bad, .slot.bad { border-color: var(--bad); border-style: solid; color: var(--bad); background: #fff0f0; }
+    .place-group { margin-top: 8px; }
+    .slot { position: absolute; z-index: 2; transform: translate(-50%, -50%); min-width: 62px; height: 28px; padding: 0 8px; border: 1.8px dashed var(--coral); border-radius: 8px; background: #fff; color: var(--coral); font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .slot.filled { border-style: solid; border-color: var(--ink); color: var(--ink); }
+    .slot.drop-hover { background: #ffeee8; transform: translate(-50%, -50%) scale(1.08); }
+    .bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; padding: 10px; border: 1.5px dashed var(--mint-2); border-radius: 12px; }
+    .bank-hint { width: 100%; margin: 0; color: var(--muted); font-size: 12.5px; text-align: center; }
+    .chip { padding: 5px 14px; border: 1.8px solid var(--main); border-radius: 999px; background: #fff; color: var(--ink); font-size: 14px; font-weight: 700; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+    .chip.selected { background: var(--main); color: #fff; }
+    .ghost { position: fixed; z-index: 70; pointer-events: none; transform: translate(-50%, -50%) rotate(-3deg); box-shadow: 0 8px 20px #0003; }
+    .quiz-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; padding: 26px 20px 32px; }
+    .quiz-summary { width: 100%; margin: 0; min-height: 1.5em; color: var(--muted); font-size: 15px; text-align: center; }
+    .btn { padding: 10px 24px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 3px 4px 0 var(--ink); }
+    .btn:active { transform: translate(2px, 2px); box-shadow: 1px 2px 0 var(--ink); }
+    .btn.primary { border-color: var(--main-d); background: var(--main); color: #fff; box-shadow: 3px 4px 0 var(--main-d); }
+    .btn:disabled { opacity: .45; cursor: default; }
+
+    .modal { position: fixed; z-index: 50; inset: 0; display: grid; place-items: center; padding: 20px; background: #161c1b99; }
+    .dialog { width: min(720px, 100%); max-height: calc(100vh - 40px); overflow: auto; padding: 26px; border: 2px solid var(--main); border-radius: 18px; background: #fffefb; box-shadow: 0 18px 50px #0004; }
+    .dialog h2 { margin: 0 0 16px; font-size: 20px; }
+    .ctx-view { padding: 18px 18px; border-radius: 12px; background: var(--mint); font-size: 19px; line-height: 2; }
+    .ctx-view .term p, .ctx-view .body, .ctx-view .sub, .ctx-view .box { font-size: inherit; }
+    .ctx-view .box { margin: 0; background: #fff; }
+    .ctx-view .formula { font-size: 21px; }
+    .ctx-view .mini-blank { display: inline-block; min-width: 2.6em; padding: 0 8px; border: 1.5px solid #9aa7a5; border-radius: 7px; background: #fff; color: #8a9593; text-align: center; line-height: 1.5; }
+    .ctx-view .mini-blank.active { border: 2.2px solid var(--coral); color: var(--ink); }
+    .ctx-input { width: 8em; padding: 2px 8px; border: 2.2px solid var(--coral); border-radius: 8px; background: #fff; color: var(--ink); font: 700 19px var(--sans); text-align: center; }
+    .choices { display: grid; gap: 10px; margin-top: 16px; }
+    .choice { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 14px; border: 1.5px solid var(--rule); border-radius: 12px; background: #fff; color: var(--ink); font-size: 18px; text-align: left; cursor: pointer; }
+    .choice[aria-checked="true"] { border-color: var(--main); background: var(--mint); }
+    .choice .num { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border: 1.8px solid var(--ink); border-radius: 50%; font-size: 14px; font-weight: 800; }
+    .choice .opt { font-family: var(--sans); }
+    .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .actions button { padding: 9px 20px; border: 1.5px solid #333; border-radius: 10px; background: #fff; color: #333; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .actions .confirm { border-color: var(--main-d); background: var(--main); color: #fff; }
+
+    #quiz-panel { padding-bottom: 40px; }
+    .mid-check { position: fixed; z-index: 40; right: 20px; bottom: 20px; width: 210px; padding: 12px 14px; border: 2px solid var(--main); border-radius: 16px; background: #fffffff2; box-shadow: 0 10px 28px var(--shadow-2); }
+    .mid-progress { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .mid-progress b { color: var(--main-d); }
+    .mid-bar { height: 6px; margin-top: 5px; overflow: hidden; border-radius: 99px; background: var(--grid); }
+    .mid-bar span { display: block; width: 0; height: 100%; background: var(--main); transition: width .3s; }
+    .mid-result { margin: 8px 0 0; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
+    .mid-result.good { color: var(--ok); }
+    .mid-result.warn { color: var(--bad); }
+    .mid-result.info { color: var(--muted); }
+    .mid-btn { width: 100%; margin-top: 9px; padding: 9px 0; border: 0; border-radius: 12px; background: var(--coral); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 0 #a8331f; }
+    .mid-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #a8331f; }
+    .toast { position: fixed; z-index: 80; left: 50%; top: 16%; padding: 18px 34px; border: 2px solid var(--ok); border-radius: 16px; background: #f4f9ff; color: var(--ok); font-size: 25px; font-weight: 800; box-shadow: 0 12px 35px #1f6fd140; opacity: 0; pointer-events: none; transform: translate(-50%, 0); }
+    .toast.show { animation: toast 2.6s ease forwards; }
+    @keyframes toast { 0% { opacity: 0; transform: translate(-50%, -8px) scale(.94); } 14%, 75% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -10px); } }
+
+    /* ===== 게임 ===== */
+    .game { padding: 20px 26px 30px; }
+    .game-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    .game-title { margin: 0; font-size: 24px; }
+    .g-stats { display: flex; flex-wrap: wrap; gap: 6px; }
+    .g-stats span { padding: 3px 12px; border-radius: 999px; background: var(--mint); font-size: 14px; font-weight: 700; }
+    .g-stats #g-score { background: #ffe9b8; }
+    .game-guide { margin: 8px 0 0; color: var(--muted); font-size: 14.5px; }
+    .g-dots { display: flex; gap: 6px; margin-top: 10px; }
+    .g-dot { width: 14px; height: 14px; border-radius: 50%; background: color-mix(in srgb, var(--main) 7%, #e8e8e8); }
+    .g-dot.cur { box-shadow: 0 0 0 2.5px var(--main); background: #fff; }
+    .g-dot.hit { background: var(--main); }
+    .g-dot.miss { background: var(--coral); }
+    .game-body { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; margin-top: 14px; align-items: start; }
+    .game-board svg { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto; border: 1.5px solid var(--rule); border-radius: 14px; background: #fff; }
+    .legend { display: flex; justify-content: center; gap: 18px; margin-top: 6px; color: var(--muted); font-size: 13px; }
+    .legend span::before { content: ""; display: inline-block; width: 26px; height: 0; margin-right: 6px; vertical-align: middle; }
+    .legend .lg-target::before { border-top: 4px dashed var(--coral); }
+    .legend .lg-player::before { border-top: 3px solid var(--main); }
+    .g-eq-card { padding: 12px 16px; border-radius: 14px; background: var(--mint); }
+    .g-eq-card small { display: block; color: var(--muted); font-size: 13px; }
+    .g-eq-card .g-form { color: var(--muted); font-size: 14px; }
+    #g-eq { font-size: 26px; color: var(--main-d); }
+    .g-ctrl { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding: 8px 12px; border: 1.5px solid var(--rule); border-radius: 14px; }
+    .g-ctrl-label b { font-size: 22px; }
+    .g-ctrl-label small { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.3; }
+    .stepper { display: flex; align-items: center; gap: 8px; flex: none; }
+    .stepper button { width: 46px; height: 46px; border: 2px solid var(--main); border-radius: 12px; background: #fff; color: var(--main-d); font-size: 26px; font-weight: 800; line-height: 1; cursor: pointer; touch-action: manipulation; }
+    .stepper button:active { background: var(--mint); }
+    .stepper button:disabled { opacity: .35; cursor: default; }
+    .stepper output { min-width: 58px; font-family: var(--serif); font-size: 22px; font-weight: 700; text-align: center; }
+    .g-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .g-actions .btn { flex: 1; }
+    .btn.fire { border-color: #a8331f; background: var(--coral); color: #fff; box-shadow: 3px 4px 0 #a8331f; font-size: 18px; }
+    .g-feedback { min-height: 70px; margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: #f6f8f8; font-size: 15px; }
+    .g-feedback ul { margin: 6px 0 0; padding-left: 20px; }
+    .g-feedback.hit { background: color-mix(in srgb, var(--main) 9%, #fff); color: var(--main-d); }
+    .g-feedback.miss { background: #fff2ef; }
+    .g-feedback.reveal { background: #fff8e3; }
+    #g-next { width: 100%; margin-top: 12px; }
+    .g-end { display: grid; place-items: center; padding: 30px 10px; }
+    .g-end-card { width: min(560px, 100%); padding: 28px; border: 2px solid var(--main); border-radius: 20px; text-align: center; }
+    .stars { color: var(--gold); font-size: 44px; letter-spacing: 6px; }
+    .g-end-card h3 { margin: 4px 0; font-size: 24px; }
+    .g-end-card ol { margin: 16px 0 20px; padding: 0; list-style: none; text-align: left; font-size: 15px; }
+    .g-end-card li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 4px; border-bottom: 1px dashed var(--rule); }
+
+    /* ===== 반응형 / 인쇄 ===== */
+    @media (max-width: 900px) {
+      .cards3 { grid-template-columns: 1fr; }
+      .qcards { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .page { width: 100%; margin: 0; border-width: 0; border-radius: 0; }
+      .banner { font-size: 24px; }
+      .tabs { padding: 10px 12px 0; }
+      .tab { flex: 1; padding: 8px 6px; }
+      .zone { padding: 18px 16px 2px; }
+      .sec, .game { padding: 16px; }
+      .quiz-guide { padding: 12px 16px; }
+      .cols-2, .explorer-body, .game-body { display: block; }
+      .cols-2 > .col, .cols-2 > .col:first-child, .cols-2 > .col:last-child { padding: 0; border-right: 0; }
+      .cols-2 > .col:first-child { padding-bottom: 14px; margin-bottom: 14px; border-bottom: 2px dashed var(--rule); }
+      .explorer-body > * + *, .game-body > * + * { margin-top: 16px; }
+      .term { grid-template-columns: 1fr; }
+      .term .tag { justify-self: start; }
+      .dialog { padding: 18px; }
+      .ctx-view { font-size: 17px; }
+      #quiz-panel { padding-bottom: 150px; }
+      .mid-check { right: 10px; bottom: 10px; width: 168px; padding: 9px 11px; }
+      .mid-btn { font-size: 15px; padding: 8px 0; }
+    }
+    @media print {
+      body { background: #fff; }
+      .page { width: 100%; margin: 0; border-width: 1px; box-shadow: none; }
+      .tabs, #quiz-panel, #game-panel, .explorer { display: none !important; }
+      #study-panel { display: block !important; }
+      .sec, .qcard, .card { break-inside: avoid; }
+    }
+  
+    /* ===== 단원 차례(목차) — 2단원과 동일 형식 ===== */
+    .toc { position: sticky; top: 0; z-index: 30; display: flex; gap: 6px; overflow-x: auto; padding: 10px 26px; border-bottom: 1px solid var(--rule); background: #ffffffee; scrollbar-width: thin; }
+    .toc button { flex: none; padding: 5px 12px; border: 1.5px solid var(--rule); border-radius: 999px; background: #fff; color: var(--muted); font-size: 13.5px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+    .toc button[aria-current="true"] { border-color: var(--main); background: var(--main); color: #fff; }
+    .zone { scroll-margin-top: 64px; }
+    @media (max-width: 760px) { .toc { padding: 8px 12px; } }
+    @media print { .toc { display: none !important; } }
+
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="banner">다항식<small>징검다리 1단원 개념 확인</small></header>
+  <nav class="tabs" role="tablist" aria-label="활동 선택">
+    <button class="tab" type="button" role="tab" id="tab-study" aria-selected="true" aria-controls="study-panel">정리</button>
+    <button class="tab" type="button" role="tab" id="tab-quiz" aria-selected="false" aria-controls="quiz-panel">퀴즈</button>
+    <button class="tab" type="button" role="tab" id="tab-game" aria-selected="false" aria-controls="game-panel">게임</button>
+  </nav>
+
+  <!-- ================= 정리 ================= -->
+  <section class="tab-panel" id="study-panel" role="tabpanel" aria-labelledby="tab-study">
+    <nav class="toc" id="study-toc" aria-label="단원 차례"></nav>
+    <div id="study-content">
+
+      <div class="zone" data-sec="u1-1" data-toc="Ⅰ 문자와 일차식"><b>Ⅰ. 문자의 사용과 일차식</b></div>
+      <section class="sec cols-2">
+        <div class="col">
+          <h3 class="head"><span class="no">1</span>문자의 사용</h3>
+          <div class="term ctx"><span class="tag">곱셈 기호의 생략</span><p>수와 문자, 문자와 문자의 곱에서는 <b class="em" data-q="mulomit">곱셈 기호 ×를 생략</b>한다.</p></div>
+          <div class="box ctx">수와 문자의 곱은 <span data-q="numberfirst">수를 문자 앞에</span> 쓴다. <span class="m">5 × <i>a</i> = <b class="blue" data-q="fivea">5<i>a</i></b></span></div>
+          <div class="term ctx"><span class="tag">1과 −1</span><p>문자에 곱한 1은 생략하고, −1을 곱하면 <span class="m" data-q="minusone">−<i>a</i></span>로 쓴다.</p></div>
+          <p class="body ctx">문자끼리의 곱은 보통 <span data-q="alphabet">알파벳 순서</span>대로 쓰고, 같은 문자의 곱은 <span data-q="samepower">거듭제곱</span>으로 나타낸다.</p>
+          <div class="box ctx"><span class="m"><i>b</i> × <i>a</i> = <b class="blue" data-q="ab"><i>ab</i></b>, &nbsp;<i>a</i> × <i>a</i> = <b class="blue" data-q="asq"><i>a</i><sup>2</sup></b></span></div>
+        </div>
+        <div class="col">
+          <h3 class="head"><span class="no">2</span>나눗셈 기호의 생략</h3>
+          <div class="term ctx"><span class="tag">분수로 표현</span><p>나눗셈 기호 ÷를 생략하고 <span data-q="fractionword">분수의 꼴</span>로 나타낸다.</p></div>
+          <div class="box ctx"><span class="m"><i>a</i> ÷ <i>b</i> = <span data-q="adivb"><math><mfrac><mi>a</mi><mi>b</mi></mfrac></math></span></span> <span class="small">(단, <span class="m" data-q="bnonzero"><i>b</i> ≠ 0</span>)</span></div>
+          <p class="tip">곱하거나 나누는 대상이 식 전체라면 괄호와 분수선을 분명히 표시한다.</p>
+        </div>
+      </section>
+      <section class="sec cols-2">
+        <div class="col">
+          <h3 class="head"><span class="no">3</span>식의 값</h3>
+          <div class="term ctx"><span class="tag"><span data-q="subname">대입</span></span><p>문자를 사용한 식에서 문자를 어떤 수나 식으로 바꾸어 넣는 것</p></div>
+          <div class="term ctx"><span class="tag"><span data-q="valuename">식의 값</span></span><p>대입하여 계산한 결과</p></div>
+          <div class="steps ctx"><div class="eqn m">3<i>a</i> − 5<i>b</i> &nbsp; (<i>a</i> = 3, <i>b</i> = −2)</div><div class="note">수를 대입</div><div class="eqn m">3 × 3 − 5 × (−2)</div><div class="note">음수는 괄호 사용</div><div class="eqn m" data-q="subresult">19</div><div class="note">식의 값</div></div>
+        </div>
+        <div class="col">
+          <h3 class="head"><span class="no">4</span>항과 다항식</h3>
+          <div class="term ctx"><span class="tag"><span data-q="term">항</span></span><p>수 또는 문자의 곱으로 이루어진 것</p></div>
+          <div class="term ctx"><span class="tag"><span data-q="constant">상수항</span></span><p>수만으로 이루어진 항</p></div>
+          <div class="term ctx"><span class="tag"><span data-q="coefficient">계수</span></span><p>항에서 문자에 곱해진 수</p></div>
+          <div class="term ctx"><span class="tag"><span data-q="polynomial">다항식</span></span><p>한 개 또는 두 개 이상의 항의 합으로 이루어진 식</p></div>
+          <div class="term ctx"><span class="tag"><span data-q="monomial">단항식</span></span><p>항이 한 개뿐인 다항식</p></div>
+          <div class="box ctx"><span class="m">2<i>x</i> + 5</span>의 항은 <span data-q="terms2">2<i>x</i>와 5</span>, 상수항은 <span data-q="const5">5</span>, <i>x</i>의 계수는 <span data-q="coef2">2</span>이다.</div>
+        </div>
+      </section>
+      <section class="sec cols-2">
+        <div class="col">
+          <h3 class="head"><span class="no">5</span>차수와 일차식</h3>
+          <div class="term ctx"><span class="tag"><span data-q="degree">차수</span></span><p>어떤 항에서 곱한 문자의 개수</p></div>
+          <div class="term ctx"><span class="tag"><span data-q="polydegree">다항식의 차수</span></span><p>다항식에서 차수가 <span data-q="highest">가장 큰 항의 차수</span></p></div>
+          <div class="term ctx"><span class="tag"><span data-q="linear">일차식</span></span><p>차수가 <span data-q="degreeone">1</span>인 다항식</p></div>
+          <div class="box ctx"><span class="m">2<i>x</i> + 5</span>는 <span data-q="linearcheck">일차식</span>이고, <span class="m">3<i>x</i><sup>2</sup></span>의 차수는 <span data-q="squaredegree">2</span>이다.</div>
+        </div>
+        <div class="col">
+          <h3 class="head"><span class="no">6</span>일차식과 수의 곱셈·나눗셈</h3>
+          <p class="body ctx">곱셈은 <span data-q="distribute">분배법칙</span>으로 각 항에 수를 곱한다.</p>
+          <div class="steps ctx"><div class="eqn m">2(3<i>x</i> − 2)</div><div class="note">각 항에 2를 곱함</div><div class="eqn m">2 × 3<i>x</i> − 2 × 2</div><div class="note">분배법칙</div><div class="eqn m" data-q="linearproduct">6<i>x</i> − 4</div><div class="note">계산 결과</div></div>
+          <p class="body ctx">수로 나눌 때는 그 수의 <span data-q="reciprocal">역수</span>를 곱한다.</p>
+          <div class="box ctx"><span class="m">(3<i>x</i> − 6) ÷ 3 = <span data-q="lineardiv"><i>x</i> − 2</span></span></div>
+        </div>
+      </section>
+      <section class="sec cols-2">
+        <div class="col">
+          <h3 class="head"><span class="no">7</span>동류항과 덧셈·뺄셈</h3>
+          <div class="term ctx"><span class="tag"><span data-q="liketerm">동류항</span></span><p>문자가 같고 <span data-q="samedegree">차수도 같은</span> 항</p></div>
+          <p class="body ctx">동류항끼리 모아 <span data-q="addcoef">계수끼리 계산</span>한다.</p>
+          <div class="box ctx"><span class="m">2<i>x</i> + 3<i>x</i> = <b class="blue" data-q="fivex">5<i>x</i></b></span></div>
+          <p class="body ctx">괄호 앞에 −가 있으면 빼는 식의 <span data-q="allsigns">각 항의 부호를 바꾸어</span> 더한다.</p>
+          <div class="steps ctx"><div class="eqn m">(2<i>x</i> + 1) − (3<i>x</i> − 5)</div><div class="note">괄호 풀기</div><div class="eqn m">2<i>x</i> + 1 − 3<i>x</i> + 5</div><div class="note">두 항의 부호 변경</div><div class="eqn m" data-q="subtractresult">−<i>x</i> + 6</div><div class="note">동류항 계산</div></div>
+        </div>
+        <div class="col">
+          <h3 class="head"><span class="no">8</span>같은 문자의 묶음</h3>
+          <figure class="fig"><div class="svg-wrap"><svg viewBox="0 0 360 100" role="img" aria-label="x 두 개와 x 세 개를 모아 x 다섯 개로 만드는 그림"><rect x="8" y="14" width="43" height="42" rx="7" fill="var(--mint-2)"/><rect x="58" y="14" width="43" height="42" rx="7" fill="var(--mint-2)"/><text x="29" y="42" text-anchor="middle" font-family="Cambria, Times New Roman, serif" font-size="16"><tspan font-style="italic">x</tspan></text><text x="79" y="42" text-anchor="middle" font-family="Cambria, Times New Roman, serif" font-size="16"><tspan font-style="italic">x</tspan></text><text x="119" y="42" font-family="Cambria, Times New Roman, serif" font-size="16">+</text><rect x="145" y="14" width="43" height="42" rx="7" fill="var(--mint-2)"/><rect x="195" y="14" width="43" height="42" rx="7" fill="var(--mint-2)"/><rect x="245" y="14" width="43" height="42" rx="7" fill="var(--mint-2)"/><text x="166" y="42" text-anchor="middle" font-family="Cambria, Times New Roman, serif" font-size="16"><tspan font-style="italic">x</tspan></text><text x="216" y="42" text-anchor="middle" font-family="Cambria, Times New Roman, serif" font-size="16"><tspan font-style="italic">x</tspan></text><text x="266" y="42" text-anchor="middle" font-family="Cambria, Times New Roman, serif" font-size="16"><tspan font-style="italic">x</tspan></text><text x="18" y="87" font-family="Cambria, Times New Roman, serif" font-size="16">2<tspan font-style="italic">x</tspan> + 3<tspan font-style="italic">x</tspan> = 5<tspan font-style="italic">x</tspan></text></svg></div><figcaption>같은 문자를 나타내는 타일의 개수를 합한다.</figcaption></figure>
+        </div>
+      </section>
+      <section class="sec explorer" aria-label="동류항 계산 탐색기"><div class="explorer-head"><span class="tag">직접 움직여 보기 ①</span><p><i>m</i>, <i>n</i>을 바꾸며 같은 문자 항의 계수를 합해 보세요.</p></div><div class="explorer-body"><div class="explorer-controls"><div class="slider"><i>m</i><input id="like-m" type="range" min="-5" max="5" value="2"><output id="like-m-out">2</output></div><div class="slider"><i>n</i><input id="like-n" type="range" min="-5" max="5" value="3"><output id="like-n-out">3</output></div><div class="box m" id="like-eq"></div><p class="body" id="like-note"></p></div><div class="explorer-chart"><svg id="like-svg" viewBox="0 0 360 180" role="img" aria-label="부호가 붙은 x 타일"></svg></div></div></section>
+
+      <div class="zone" data-sec="u1-2" data-toc="Ⅱ 식의 계산"><b>Ⅱ. 식의 계산</b></div>
+      <section class="sec"><h3 class="head"><span class="no">9</span>지수법칙</h3><p class="body"><i>m</i>, <i>n</i>은 자연수이다. 나눗셈에서는 밑이 0이 아니어야 한다.</p><div class="qcards">
+        <div class="qcard"><h4 class="qtitle">밑이 같은 거듭제곱의 곱</h4><div class="box ctx"><span class="m"><i>a</i><sup><i>m</i></sup> × <i>a</i><sup><i>n</i></sup> = <span data-q="powadd"><i>a</i><sup><i>m</i>+<i>n</i></sup></span></span></div><p class="body">지수를 더한다.</p></div>
+        <div class="qcard"><h4 class="qtitle">거듭제곱의 거듭제곱</h4><div class="box ctx"><span class="m">(<i>a</i><sup><i>m</i></sup>)<sup><i>n</i></sup> = <span data-q="powmul"><i>a</i><sup><i>mn</i></sup></span></span></div><p class="body">지수를 곱한다.</p></div>
+        <div class="qcard"><h4 class="qtitle">밑이 같은 거듭제곱의 나눗셈</h4><div class="box ctx"><span class="m"><i>a</i><sup><i>m</i></sup> ÷ <i>a</i><sup><i>n</i></sup> = <span data-q="powdiv">지수의 크기에 따라 계산</span></span></div><p class="body">밑이 0이 아니어야 한다.</p></div>
+        <div class="qcard"><h4 class="qtitle">곱과 몫의 거듭제곱</h4><div class="box ctx"><span class="m">(<i>ab</i>)<sup><i>m</i></sup> = <span data-q="powprod"><i>a</i><sup><i>m</i></sup><i>b</i><sup><i>m</i></sup></span></span></div><div class="box ctx"><span class="m"><math><msup><mrow><mo>(</mo><mfrac><mi>b</mi><mi>a</mi></mfrac><mo>)</mo></mrow><mi>m</mi></msup></math> = <span data-q="powquot"><math><mfrac><msup><mi>b</mi><mi>m</mi></msup><msup><mi>a</mi><mi>m</mi></msup></mfrac></math></span></span></div></div>
+      </div><div class="cards3"><div class="card"><h4>나눗셈: m &gt; n</h4><div class="box ctx"><span class="m"><i>a</i><sup><i>m</i></sup> ÷ <i>a</i><sup><i>n</i></sup> = <span data-q="powgreater"><i>a</i><sup><i>m</i>−<i>n</i></sup></span></span></div></div><div class="card"><h4>나눗셈: m = n</h4><div class="box ctx"><span class="m"><i>a</i><sup><i>m</i></sup> ÷ <i>a</i><sup><i>n</i></sup> = <span data-q="powequal">1</span></span></div></div><div class="card"><h4>나눗셈: m &lt; n</h4><div class="box ctx"><span class="m"><i>a</i><sup><i>m</i></sup> ÷ <i>a</i><sup><i>n</i></sup> = <span data-q="powless"><math><mfrac><mn>1</mn><msup><mi>a</mi><mrow><mi>n</mi><mo>−</mo><mi>m</mi></mrow></msup></mfrac></math></span></span></div></div></div></section>
+      <section class="sec cols-2"><div class="col"><h3 class="head"><span class="no">10</span>단항식의 곱셈</h3><p class="body ctx">계수는 <span data-q="coefmultiply">계수끼리</span>, 문자는 <span data-q="lettermultiply">문자끼리</span> 곱한다.</p><div class="steps ctx"><div class="eqn m">3<i>a</i> × 2<i>b</i></div><div class="note">교환·결합법칙</div><div class="eqn m">(3 × 2)(<i>a</i> × <i>b</i>)</div><div class="note">계수와 문자 분리</div><div class="eqn m" data-q="monoprod">6<i>ab</i></div><div class="note">계산 결과</div></div></div><div class="col"><h3 class="head"><span class="no">11</span>단항식의 나눗셈</h3><p class="body ctx"><span data-q="fractionmethod">분수 꼴</span>로 바꾸거나 <span data-q="inversemethod">역수를 곱하는 방법</span>으로 계산한다.</p><div class="box ctx"><span class="m">15<i>a</i><sup>2</sup><i>b</i> ÷ 3<i>a</i> = <span data-q="monodiv">5<i>ab</i></span></span></div><p class="body">계수끼리 나누고, 같은 문자의 지수를 계산한다.</p></div></section>
+      <section class="sec cols-2"><div class="col"><h3 class="head"><span class="no">12</span>다항식의 덧셈·뺄셈</h3><p class="body ctx">괄호를 풀고 <span data-q="polycollect">동류항끼리 모아</span> 간단히 한다.</p><p class="body ctx">뺄셈에서는 빼는 식의 <span data-q="polysigns">각 항의 부호를 바꾸어</span> 더한다.</p><div class="box ctx"><span class="m">(2<i>a</i> + 3<i>b</i>) + (4<i>a</i> − <i>b</i>) = <span data-q="polyadd">6<i>a</i> + 2<i>b</i></span></span></div></div><div class="col"><h3 class="head"><span class="no">13</span>이차식</h3><div class="term ctx"><span class="tag"><span data-q="quadratic">이차식</span></span><p>다항식의 항 중에서 가장 큰 차수가 <span data-q="degree2">2</span>인 다항식</p></div><p class="body">덧셈·뺄셈은 일차식과 같은 방법으로 계산한다.</p></div></section>
+      <section class="sec cols-2"><div class="col"><h3 class="head"><span class="no">14</span>(단항식)×(다항식)</h3><p class="body ctx"><span data-q="distributive2">분배법칙</span>을 이용해 다항식의 각 항에 곱한다.</p><div class="steps ctx"><div class="eqn m">2<i>a</i>(3<i>a</i> + 4<i>b</i>)</div><div class="note">각 항에 2a를 곱함</div><div class="eqn m">2<i>a</i> × 3<i>a</i> + 2<i>a</i> × 4<i>b</i></div><div class="note">전개</div><div class="eqn m" data-q="expandmono">6<i>a</i><sup>2</sup> + 8<i>ab</i></div><div class="note">결과</div></div><div class="term ctx"><span class="tag"><span data-q="expansion">전개</span></span><p>곱을 분배법칙으로 하나의 다항식으로 나타내는 것</p></div></div><div class="col"><h3 class="head"><span class="no">15</span>(다항식)÷(단항식)</h3><p class="body ctx">다항식의 <span data-q="divideeach">각 항을 단항식으로 나누거나</span> 나눗셈을 곱셈으로 고친다.</p><div class="box ctx"><span class="m">(6<i>x</i><sup>2</sup> + 9<i>x</i>) ÷ 3<i>x</i> = <span data-q="polydiv">2<i>x</i> + 3</span></span></div></div></section>
+
+      <section class="sec"><figure class="fig"><div class="svg-wrap"><svg viewBox="0 0 360 110" role="img" aria-label="한 항을 다항식의 두 항에 각각 곱하는 분배법칙"><text x="18" y="28" font-family="Cambria, Times New Roman, serif" font-size="16">2<tspan font-style="italic">a</tspan>(3<tspan font-style="italic">a</tspan>+4<tspan font-style="italic">b</tspan>)</text><path d="M72 34 L65 72 M83 34 L230 72" fill="none" stroke="var(--main)" stroke-width="2"/><text x="18" y="96" font-family="Cambria, Times New Roman, serif" font-size="16">2<tspan font-style="italic">a</tspan>×3<tspan font-style="italic">a</tspan></text><text x="196" y="96" font-family="Cambria, Times New Roman, serif" font-size="16">2<tspan font-style="italic">a</tspan>×4<tspan font-style="italic">b</tspan></text></svg></div><figcaption>괄호 밖의 항을 괄호 안의 각 항에 곱한다.</figcaption></figure></section>
+      <div class="zone" data-sec="u1-3" data-toc="Ⅲ 곱셈과 인수분해"><b>Ⅲ. 다항식의 곱셈과 인수분해</b></div>
+      <section class="sec"><h3 class="head"><span class="no">16</span>다항식의 곱셈</h3><p class="body ctx">다항식의 각 항을 상대 다항식의 <span data-q="everyterm">각 항에 곱한 뒤</span> 동류항끼리 모은다.</p><div class="box ctx"><span class="m">(<i>a</i> + <i>b</i>)(<i>c</i> + <i>d</i>) = <span data-q="fourprod"><i>ac</i> + <i>ad</i> + <i>bc</i> + <i>bd</i></span></span></div><figure class="fig"><div class="svg-wrap"><svg viewBox="0 0 360 90" role="img" aria-label="네 항을 각각 곱하는 전개 도식"><text x="14" y="32" font-family="Cambria, Times New Roman, serif" font-size="16">(<tspan font-style="italic">a</tspan>+<tspan font-style="italic">b</tspan>)(<tspan font-style="italic">c</tspan>+<tspan font-style="italic">d</tspan>)</text><path d="M80 40 L34 67 M95 40 L107 67 M115 40 L190 67 M130 40 L275 67" fill="none" stroke="var(--main)" stroke-width="2"/><text x="12" y="83" font-family="Cambria, Times New Roman, serif" font-size="16"><tspan font-style="italic">ac</tspan></text><text x="91" y="83" font-family="Cambria, Times New Roman, serif" font-size="16"><tspan font-style="italic">ad</tspan></text><text x="175" y="83" font-family="Cambria, Times New Roman, serif" font-size="16"><tspan font-style="italic">bc</tspan></text><text x="260" y="83" font-family="Cambria, Times New Roman, serif" font-size="16"><tspan font-style="italic">bd</tspan></text></svg></div></figure></section>
+      <section class="sec"><h3 class="head"><span class="no">17</span>곱셈공식</h3><div class="qcards">
+        <div class="qcard"><h4 class="qtitle ctx">① 합의 제곱</h4><div class="box ctx"><span class="m">(<i>a</i> + <i>b</i>)<sup>2</sup> = <span data-q="formula1"><i>a</i><sup>2</sup> + 2<i>ab</i> + <i>b</i><sup>2</sup></span></span></div></div>
+        <div class="qcard"><h4 class="qtitle ctx">② 차의 제곱</h4><div class="box ctx"><span class="m">(<i>a</i> − <i>b</i>)<sup>2</sup> = <span data-q="formula2"><i>a</i><sup>2</sup> − 2<i>ab</i> + <i>b</i><sup>2</sup></span></span></div></div>
+        <div class="qcard"><h4 class="qtitle ctx">③ 합과 차의 곱</h4><div class="box ctx"><span class="m">(<i>a</i> + <i>b</i>)(<i>a</i> − <i>b</i>) = <span data-q="formula3"><i>a</i><sup>2</sup> − <i>b</i><sup>2</sup></span></span></div></div>
+        <div class="qcard"><h4 class="qtitle ctx">④ 최고차항이 x²</h4><div class="box ctx"><span class="m">(<i>x</i> + <i>a</i>)(<i>x</i> + <i>b</i>) = <span data-q="formula4"><i>x</i><sup>2</sup> + (<i>a</i>+<i>b</i>)<i>x</i> + <i>ab</i></span></span></div></div>
+        <div class="qcard"><h4 class="qtitle ctx">⑤ 계수가 있는 일차식의 곱</h4><div class="box ctx"><span class="m">(<i>ax</i>+<i>b</i>)(<i>cx</i>+<i>d</i>) = <span data-q="formula5"><i>acx</i><sup>2</sup> + (<i>ad</i>+<i>bc</i>)<i>x</i> + <i>bd</i></span></span></div></div>
+      </div></section>
+      <section class="sec cols-2"><div class="col"><h3 class="head"><span class="no">18</span>인수분해</h3><div class="term ctx"><span class="tag"><span data-q="factor">인수</span></span><p>다항식을 곱으로 나타낼 때 각 식</p></div><div class="term ctx"><span class="tag"><span data-q="factorization">인수분해</span></span><p>한 다항식을 두 개 이상의 다항식의 곱으로 나타내는 것</p></div><div class="box ctx"><span class="m"><i>x</i><sup>2</sup> + 3<i>x</i> + 2 <span data-q="reversearrow">⇄</span> (<i>x</i> + 1)(<i>x</i> + 2)</span></div></div><div class="col"><h3 class="head"><span class="no">19</span>공통인수</h3><p class="body ctx">각 항에 공통인 인수가 있으면 <span data-q="factorout">분배법칙을 거꾸로 이용</span>해 묶는다.</p><div class="box ctx"><span class="m"><i>ma</i> + <i>mb</i> = <span data-q="commonfactor"><i>m</i>(<i>a</i> + <i>b</i>)</span></span></div></div></section>
+      <section class="sec"><figure class="fig"><div class="svg-wrap"><svg viewBox="0 0 360 90" role="img" aria-label="공통인수 m을 묶는 과정"><text x="16" y="37" font-family="Cambria, Times New Roman, serif" font-size="16"><tspan font-style="italic">ma</tspan> + <tspan font-style="italic">mb</tspan></text><path d="M108 34 L190 34" fill="none" stroke="var(--main)" stroke-width="2"/><text x="207" y="37" font-family="Cambria, Times New Roman, serif" font-size="16"><tspan font-style="italic">m</tspan>(<tspan font-style="italic">a</tspan>+<tspan font-style="italic">b</tspan>)</text><text x="110" y="70">공통인수 m을 묶기</text></svg></div><figcaption>전개와 반대 방향으로 공통인수를 묶는다.</figcaption></figure></section>
+      <section class="sec"><h3 class="head"><span class="no">20</span>인수분해 공식</h3><div class="qcards">
+        <div class="qcard"><h4 class="qtitle">① 완전제곱식</h4><div class="box ctx"><span class="m"><i>a</i><sup>2</sup> + 2<i>ab</i> + <i>b</i><sup>2</sup> = <span data-q="inverse1">(<i>a</i> + <i>b</i>)<sup>2</sup></span></span></div></div>
+        <div class="qcard"><h4 class="qtitle">② 완전제곱식</h4><div class="box ctx"><span class="m"><i>a</i><sup>2</sup> − 2<i>ab</i> + <i>b</i><sup>2</sup> = <span data-q="inverse2">(<i>a</i> − <i>b</i>)<sup>2</sup></span></span></div></div>
+        <div class="qcard"><h4 class="qtitle">③ 제곱의 차</h4><div class="box ctx"><span class="m"><i>a</i><sup>2</sup> − <i>b</i><sup>2</sup> = <span data-q="inverse3">(<i>a</i> + <i>b</i>)(<i>a</i> − <i>b</i>)</span></span></div></div>
+        <div class="qcard"><h4 class="qtitle">④ 합과 곱을 찾기</h4><div class="box ctx"><span class="m"><i>x</i><sup>2</sup> + (<i>a</i>+<i>b</i>)<i>x</i> + <i>ab</i> = <span data-q="inverse4">(<i>x</i> + <i>a</i>)(<i>x</i> + <i>b</i>)</span></span></div></div>
+        <div class="qcard"><h4 class="qtitle">⑤ 계수가 있는 경우</h4><div class="box ctx"><span class="m"><i>acx</i><sup>2</sup> + (<i>ad</i>+<i>bc</i>)<i>x</i> + <i>bd</i> = <span data-q="inverse5">(<i>ax</i>+<i>b</i>)(<i>cx</i>+<i>d</i>)</span></span></div></div>
+      </div><p class="body ctx"><span class="tag"><span data-q="perfectsquare">완전제곱식</span></span>은 다항식의 제곱으로 이루어진 식 또는 그 식에 수를 곱한 식이다.</p></section>
+      <section class="sec explorer" aria-label="전개와 인수분해 탐색기"><div class="explorer-head"><span class="tag">직접 움직여 보기 ②</span><p><i>a</i>, <i>b</i>를 바꾸며 곱의 전개와 인수분해를 함께 관찰하세요.</p></div><div class="explorer-body"><div class="explorer-controls"><div class="slider"><i>a</i><input id="factor-a" type="range" min="-4" max="4" value="2"><output id="factor-a-out">2</output></div><div class="slider"><i>b</i><input id="factor-b" type="range" min="-4" max="4" value="3"><output id="factor-b-out">3</output></div><div class="box m" id="factor-eq"></div><p class="body" id="factor-note"></p></div><div class="explorer-chart"><svg id="factor-svg" viewBox="0 0 340 220" role="img" aria-label="전개의 네 항을 보여 주는 부호 있는 대수 타일"></svg></div></div></section>
+    </div>
+  </section>
+
+  <!-- ================= 퀴즈 ================= -->
+  <section class="tab-panel" id="quiz-panel" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+    <p class="quiz-guide">💡 <b>?</b> 빈칸을 눌러 답을 넣으세요. 그림의 빈 이름표는 아래 이름표를 <b>끌어다 놓거나</b>, <b>눌러서 고른 뒤 자리를 누르면</b> 됩니다. 다 채웠으면 맨 아래 <b>[정답 확인]</b>!</p>
+    <nav class="toc" id="quiz-toc" aria-label="단원 차례"></nav>
+    <div id="quiz-body"></div>
+    <div class="quiz-bar">
+      <button id="quiz-check" class="btn primary" type="button">정답 확인</button>
+      <button id="quiz-reset" class="btn" type="button">다시 풀기</button>
+      <p id="quiz-summary" class="quiz-summary" aria-live="polite"></p>
+    </div>
+    <!-- 화면을 따라다니는 중간 점검 (퀴즈 탭에서만 보임) -->
+    <aside class="mid-check" aria-label="중간 점검">
+      <div class="mid-progress"><span>채운 빈칸</span><b><span id="mid-filled">0</span> / <span id="mid-total">0</span></b></div>
+      <div class="mid-bar" aria-hidden="true"><span id="mid-bar-fill"></span></div>
+      <p class="mid-result" id="mid-result" aria-live="polite" hidden></p>
+      <button id="mid-check" class="mid-btn" type="button">✔ 중간 점검</button>
+    </aside>
+  </section>
+
+  <!-- ================= 게임 ================= -->
+  <section class="tab-panel" id="game-panel" role="tabpanel" aria-labelledby="tab-game" hidden>
+    <div class="game">
+      <div class="game-top"><h2 class="game-title">🎯 다항식 변환 챌린지</h2><div class="g-stats"><span id="g-stage"></span><span id="g-round"></span><span id="g-score"></span></div></div>
+      <p class="game-guide">± 버튼으로 답을 조절하고 <b>[확인!]</b>을 누르세요. 한 번에 맞히면 3점입니다.</p>
+      <div class="g-dots" id="g-dots" aria-hidden="true"></div>
+      <div id="g-play" class="game-body">
+        <div class="game-board"><svg id="g-svg" viewBox="0 0 500 260" role="img" aria-label="목표 식과 변환 방향"></svg><div class="legend"><span class="lg-target">주어진 식</span><span class="lg-player">내가 만든 식</span></div></div>
+        <div><div class="g-eq-card"><small>내가 만든 식</small><div id="g-eq" class="m"></div><div class="g-form" id="g-form"></div></div><div id="g-controls"></div><div class="g-actions"><button id="g-fire" class="btn fire" type="button">확인!</button><button id="g-giveup" class="btn" type="button">정답 보기</button></div><div id="g-feedback" class="g-feedback" aria-live="polite"></div><button id="g-next" class="btn primary" type="button" hidden>다음 문제 →</button></div>
+      </div>
+      <div id="g-end" class="g-end" hidden><div class="g-end-card"><div class="stars" id="g-stars"></div><h3>도전 완료!</h3><p id="g-total"></p><ol id="g-list"></ol><button id="g-restart" class="btn primary" type="button">다시 하기</button></div></div>
+    </div>
+  </section>
+</main>
+
+<!-- 모달: 글자 입력 -->
+<div class="modal" id="text-modal" role="dialog" aria-modal="true" aria-labelledby="text-modal-title" hidden>
+  <div class="dialog">
+    <h2 id="text-modal-title">빈칸에 알맞은 말을 써 넣으세요.</h2>
+    <div class="ctx-view" id="text-ctx"></div>
+    <div class="actions"><button type="button" data-close>취소</button><button type="button" class="confirm" id="text-confirm">확인</button></div>
+  </div>
+</div>
+<!-- 모달: 고르기 -->
+<div class="modal" id="choice-modal" role="dialog" aria-modal="true" aria-labelledby="choice-modal-title" hidden>
+  <div class="dialog">
+    <h2 id="choice-modal-title">빈칸에 알맞은 것을 고르세요.</h2>
+    <div class="ctx-view" id="choice-ctx"></div>
+    <div class="choices" id="choice-list" role="radiogroup" aria-label="보기"></div>
+    <div class="actions"><button type="button" data-close>취소</button><button type="button" class="confirm" id="choice-confirm">확인</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite">참 잘했어요! 🎉</div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+function shuffle(list) { const a=[...list]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const QUIZ = [{"id": "mulomit", "type": "choice", "options": ["곱셈 기호 ×를 생략", "나눗셈 기호 ÷를 생략", "곱셈 기호 ×를 반드시 표시"], "answer": 0}, {"id": "numberfirst", "type": "choice", "options": ["수를 문자 앞에", "문자를 수 앞에", "수를 문자 뒤에"], "answer": 0}, {"id": "fivea", "type": "choice", "options": ["5<i>a</i>", "<i>a</i>5", "5+<i>a</i>", "<i>a</i><sup>5</sup>"], "answer": 0}, {"id": "minusone", "type": "choice", "options": ["−<i>a</i>", "<i>a</i>−1", "1−<i>a</i>", "−1<i>a</i>"], "answer": 0}, {"id": "alphabet", "type": "text", "answers": ["알파벳 순서"]}, {"id": "samepower", "type": "text", "answers": ["거듭제곱"]}, {"id": "ab", "type": "choice", "options": ["<i>ab</i>", "<i>ba</i><sup>2</sup>", "<i>a</i>+<i>b</i>", "<i>a</i><sup>2</sup><i>b</i>"], "answer": 0}, {"id": "asq", "type": "choice", "options": ["<i>a</i><sup>2</sup>", "2<i>a</i>", "<i>a</i>+<i>a</i><sup>2</sup>", "<i>a</i><sup>3</sup>"], "answer": 0}, {"id": "fractionword", "type": "text", "answers": ["분수의 꼴"]}, {"id": "adivb", "type": "choice", "options": ["<math><mfrac><mi>a</mi><mi>b</mi></mfrac></math>", "<math><mfrac><mi>b</mi><mi>a</mi></mfrac></math>", "<i>a</i>−<i>b</i>", "<i>ab</i>"], "answer": 0}, {"id": "bnonzero", "type": "choice", "options": ["<i>b</i> ≠ 0", "<i>b</i>=0", "<i>a</i>≠0", "<i>b</i>>0"], "answer": 0}, {"id": "subname", "type": "text", "answers": ["대입"]}, {"id": "valuename", "type": "text", "answers": ["식의 값"]}, {"id": "subresult", "type": "choice", "options": ["19", "−1", "−19", "1"], "answer": 0}, {"id": "term", "type": "text", "answers": ["항"]}, {"id": "constant", "type": "text", "answers": ["상수항"]}, {"id": "coefficient", "type": "text", "answers": ["계수"]}, {"id": "polynomial", "type": "text", "answers": ["다항식"]}, {"id": "monomial", "type": "text", "answers": ["단항식"]}, {"id": "terms2", "type": "choice", "options": ["2<i>x</i>와 5", "2와 <i>x</i>와 5", "2<i>x</i>와 −5", "<i>x</i>와 5"], "answer": 0}, {"id": "const5", "type": "choice", "options": ["5", "2", "2<i>x</i>", "<i>x</i>"], "answer": 0}, {"id": "coef2", "type": "choice", "options": ["2", "5", "7", "<i>x</i>"], "answer": 0}, {"id": "degree", "type": "text", "answers": ["차수"]}, {"id": "polydegree", "type": "text", "answers": ["다항식의 차수"]}, {"id": "highest", "type": "choice", "options": ["가장 큰 항의 차수", "가장 작은 항의 차수", "모든 항의 차수의 합", "항의 개수"], "answer": 0}, {"id": "linear", "type": "text", "answers": ["일차식"]}, {"id": "degreeone", "type": "choice", "options": ["1", "0", "2", "3"], "answer": 0}, {"id": "linearcheck", "type": "choice", "options": ["일차식", "이차식", "상수항", "단항식"], "answer": 0}, {"id": "squaredegree", "type": "choice", "options": ["2", "1", "3", "0"], "answer": 0}, {"id": "distribute", "type": "text", "answers": ["분배법칙"]}, {"id": "linearproduct", "type": "choice", "options": ["6<i>x</i> − 4", "6<i>x</i>−2", "6<i>x</i>+4", "3<i>x</i>−4"], "answer": 0}, {"id": "reciprocal", "type": "text", "answers": ["역수"]}, {"id": "lineardiv", "type": "choice", "options": ["<i>x</i> − 2", "<i>x</i>−6", "3<i>x</i>−2", "<i>x</i>+2"], "answer": 0}, {"id": "liketerm", "type": "text", "answers": ["동류항"]}, {"id": "samedegree", "type": "choice", "options": ["차수도 같은", "계수도 같은", "부호도 같은", "항의 개수도 같은"], "answer": 0}, {"id": "addcoef", "type": "choice", "options": ["계수끼리 계산", "지수끼리 계산", "문자끼리 지움", "계수와 지수를 더함"], "answer": 0}, {"id": "fivex", "type": "choice", "options": ["5<i>x</i>", "6<i>x</i>", "5<i>x</i><sup>2</sup>", "<i>x</i><sup>5</sup>"], "answer": 0}, {"id": "allsigns", "type": "choice", "options": ["각 항의 부호를 바꾸어", "첫 항의 부호만 바꾸어", "상수항만 빼고", "부호를 그대로 두고"], "answer": 0}, {"id": "subtractresult", "type": "choice", "options": ["−<i>x</i> + 6", "−<i>x</i>−4", "5<i>x</i>−4", "−<i>x</i>−6"], "answer": 0}, {"id": "powadd", "type": "choice", "options": ["<i>a</i><sup><i>m</i>+<i>n</i></sup>", "<i>a</i><sup><i>mn</i></sup>", "<i>a</i><sup><i>m</i>−<i>n</i></sup>", "<i>a</i><sup><i>m</i>+<i>n</i>+1</sup>"], "answer": 0}, {"id": "powmul", "type": "choice", "options": ["<i>a</i><sup><i>mn</i></sup>", "<i>a</i><sup><i>m</i>+<i>n</i></sup>", "<i>a</i><sup><i>m</i>−<i>n</i></sup>", "<i>a</i><sup><i>mn</i>+1</sup>"], "answer": 0}, {"id": "powdiv", "type": "choice", "options": ["지수의 크기에 따라 계산", "지수를 곱하여 계산", "항상 1로 계산", "밑을 빼서 계산"], "answer": 0}, {"id": "powprod", "type": "choice", "options": ["<i>a</i><sup><i>m</i></sup><i>b</i><sup><i>m</i></sup>", "<i>a</i><sup><i>m</i></sup><i>b</i>", "<i>ab</i><sup><i>m</i></sup>", "<i>a</i><sup>2<i>m</i></sup><i>b</i><sup><i>m</i></sup>"], "answer": 0}, {"id": "powquot", "type": "choice", "options": ["<math><mfrac><msup><mi>b</mi><mi>m</mi></msup><msup><mi>a</mi><mi>m</mi></msup></mfrac></math>", "<math><mfrac><msup><mi>b</mi><mi>m</mi></msup><mi>a</mi></mfrac></math>", "<math><mfrac><mi>b</mi><msup><mi>a</mi><mi>m</mi></msup></mfrac></math>", "<math><mfrac><msup><mi>a</mi><mi>m</mi></msup><msup><mi>b</mi><mi>m</mi></msup></mfrac></math>"], "answer": 0}, {"id": "powgreater", "type": "choice", "options": ["<i>a</i><sup><i>m</i>−<i>n</i></sup>", "<i>a</i><sup><i>m</i>+<i>n</i></sup>", "<i>a</i><sup><i>mn</i></sup>", "<i>a</i><sup><i>n</i>−<i>m</i></sup>"], "answer": 0}, {"id": "powequal", "type": "choice", "options": ["1", "0", "<i>a</i>", "<i>a</i><sup>2<i>m</i></sup>"], "answer": 0}, {"id": "powless", "type": "choice", "options": ["<math><mfrac><mn>1</mn><msup><mi>a</mi><mrow><mi>n</mi><mo>−</mo><mi>m</mi></mrow></msup></mfrac></math>", "<i>a</i><sup><i>m</i>−<i>n</i></sup>", "<math><mfrac><mn>1</mn><msup><mi>a</mi><mrow><mi>m</mi><mo>+</mo><mi>n</mi></mrow></msup></mfrac></math>", "<i>a</i><sup><i>n</i>−<i>m</i></sup>"], "answer": 0}, {"id": "coefmultiply", "type": "text", "answers": ["계수끼리"]}, {"id": "lettermultiply", "type": "text", "answers": ["문자끼리"]}, {"id": "monoprod", "type": "choice", "options": ["6<i>ab</i>", "5<i>ab</i>", "6<i>a</i>+<i>b</i>", "6<i>a</i><sup>2</sup><i>b</i>"], "answer": 0}, {"id": "fractionmethod", "type": "text", "answers": ["분수 꼴"]}, {"id": "inversemethod", "type": "text", "answers": ["역수를 곱하는 방법"]}, {"id": "monodiv", "type": "choice", "options": ["5<i>ab</i>", "5<i>a</i><sup>2</sup><i>b</i>", "12<i>ab</i>", "5<i>b</i>"], "answer": 0}, {"id": "polycollect", "type": "choice", "options": ["동류항끼리 모아", "계수끼리만 모아", "차수가 다른 항끼리 모아", "모든 항을 곱해"], "answer": 0}, {"id": "polysigns", "type": "choice", "options": ["각 항의 부호를 바꾸어", "첫 항의 부호만 바꾸어", "마지막 항만 바꾸어", "부호를 그대로 두고"], "answer": 0}, {"id": "polyadd", "type": "choice", "options": ["6<i>a</i> + 2<i>b</i>", "6<i>a</i>+4<i>b</i>", "6<i>a</i>−2<i>b</i>", "8<i>ab</i>+2<i>b</i>"], "answer": 0}, {"id": "quadratic", "type": "text", "answers": ["이차식"]}, {"id": "degree2", "type": "choice", "options": ["2", "1", "3", "항의 개수"], "answer": 0}, {"id": "distributive2", "type": "text", "answers": ["분배법칙"]}, {"id": "expandmono", "type": "choice", "options": ["6<i>a</i><sup>2</sup> + 8<i>ab</i>", "6<i>a</i><sup>2</sup>+4<i>ab</i>", "5<i>a</i><sup>2</sup>+8<i>ab</i>", "6<i>a</i>+8<i>b</i>"], "answer": 0}, {"id": "expansion", "type": "text", "answers": ["전개"]}, {"id": "divideeach", "type": "choice", "options": ["각 항을 단항식으로 나누거나", "첫 항만 단항식으로 나누거나", "항을 서로 나누거나", "모든 항을 곱하거나"], "answer": 0}, {"id": "polydiv", "type": "choice", "options": ["2<i>x</i> + 3", "2<i>x</i>+9", "2<i>x</i>+3<i>x</i>", "6<i>x</i>+3"], "answer": 0}, {"id": "everyterm", "type": "choice", "options": ["각 항에 곱한 뒤", "첫 항에만 곱한 뒤", "계수끼리만 곱한 뒤", "같은 위치의 항끼리 곱한 뒤"], "answer": 0}, {"id": "fourprod", "type": "choice", "options": ["<i>ac</i> + <i>ad</i> + <i>bc</i> + <i>bd</i>", "<i>ac</i>+<i>bd</i>", "<i>ab</i>+<i>cd</i>", "<i>ac</i>+<i>ad</i>+<i>bd</i>"], "answer": 0}, {"id": "formula1", "type": "choice", "options": ["<i>a</i><sup>2</sup> + 2<i>ab</i> + <i>b</i><sup>2</sup>", "<i>a</i><sup>2</sup>+<i>b</i><sup>2</sup>", "<i>a</i><sup>2</sup>+<i>ab</i>+<i>b</i><sup>2</sup>", "<i>a</i><sup>2</sup>−2<i>ab</i>+<i>b</i><sup>2</sup>"], "answer": 0}, {"id": "formula2", "type": "choice", "options": ["<i>a</i><sup>2</sup> − 2<i>ab</i> + <i>b</i><sup>2</sup>", "<i>a</i><sup>2</sup>−<i>b</i><sup>2</sup>", "<i>a</i><sup>2</sup>+2<i>ab</i>+<i>b</i><sup>2</sup>", "<i>a</i><sup>2</sup>−<i>ab</i>+<i>b</i><sup>2</sup>"], "answer": 0}, {"id": "formula3", "type": "choice", "options": ["<i>a</i><sup>2</sup> − <i>b</i><sup>2</sup>", "<i>a</i><sup>2</sup>+<i>b</i><sup>2</sup>", "<i>a</i><sup>2</sup>−2<i>ab</i>+<i>b</i><sup>2</sup>", "<i>a</i><sup>2</sup>+2<i>ab</i>+<i>b</i><sup>2</sup>"], "answer": 0}, {"id": "formula4", "type": "choice", "options": ["<i>x</i><sup>2</sup> + (<i>a</i>+<i>b</i>)<i>x</i> + <i>ab</i>", "<i>x</i><sup>2</sup>+<i>abx</i>+(<i>a</i>+<i>b</i>)", "<i>x</i><sup>2</sup>+(<i>a</i>+<i>b</i>)<i>x</i>+(<i>a</i>+<i>b</i>)", "<i>x</i><sup>2</sup>+(<i>a</i>−<i>b</i>)<i>x</i>+<i>ab</i>"], "answer": 0}, {"id": "formula5", "type": "choice", "options": ["<i>acx</i><sup>2</sup> + (<i>ad</i>+<i>bc</i>)<i>x</i> + <i>bd</i>", "<i>acx</i><sup>2</sup>+(<i>ab</i>+<i>cd</i>)<i>x</i>+<i>bd</i>", "<i>acx</i><sup>2</sup>+(<i>ad</i>+<i>bc</i>)<i>x</i>+<i>bc</i>", "<i>acx</i><sup>2</sup>+(<i>ad</i>−<i>bc</i>)<i>x</i>+<i>bd</i>"], "answer": 0}, {"id": "factor", "type": "text", "answers": ["인수"]}, {"id": "factorization", "type": "text", "answers": ["인수분해"]}, {"id": "reversearrow", "type": "choice", "options": ["⇄", "→만 가능", "←만 가능", "곱셈만 가능"], "answer": 0}, {"id": "factorout", "type": "choice", "options": ["분배법칙을 거꾸로 이용", "지수법칙을 거꾸로 이용", "모든 항을 더해서", "계수만 묶어서"], "answer": 0}, {"id": "commonfactor", "type": "choice", "options": ["<i>m</i>(<i>a</i> + <i>b</i>)", "<i>m</i>(<i>a</i>−<i>b</i>)", "<i>m</i>+<i>a</i>+<i>b</i>", "<i>mab</i>"], "answer": 0}, {"id": "inverse1", "type": "choice", "options": ["(<i>a</i> + <i>b</i>)<sup>2</sup>", "(<i>a</i>+<i>b</i>)(<i>a</i>−<i>b</i>)", "(<i>a</i>−<i>b</i>)<sup>2</sup>", "<i>a</i>+<i>b</i><sup>2</sup>"], "answer": 0}, {"id": "inverse2", "type": "choice", "options": ["(<i>a</i> − <i>b</i>)<sup>2</sup>", "(<i>a</i>+<i>b</i>)<sup>2</sup>", "(<i>a</i>+<i>b</i>)(<i>a</i>−<i>b</i>)", "<i>a</i>−<i>b</i><sup>2</sup>"], "answer": 0}, {"id": "inverse3", "type": "choice", "options": ["(<i>a</i> + <i>b</i>)(<i>a</i> − <i>b</i>)", "(<i>a</i>+<i>b</i>)<sup>2</sup>", "(<i>a</i>−<i>b</i>)<sup>2</sup>", "<i>a</i>(<i>a</i>−<i>b</i>)"], "answer": 0}, {"id": "inverse4", "type": "choice", "options": ["(<i>x</i> + <i>a</i>)(<i>x</i> + <i>b</i>)", "(<i>x</i>+<i>a</i>)(<i>x</i>−<i>b</i>)", "(<i>x</i>+<i>ab</i>)(<i>x</i>+<i>a</i>+<i>b</i>)", "(<i>x</i>+<i>a</i>+<i>b</i>)<sup>2</sup>"], "answer": 0}, {"id": "inverse5", "type": "choice", "options": ["(<i>ax</i>+<i>b</i>)(<i>cx</i>+<i>d</i>)", "(<i>ax</i>+<i>b</i>)(<i>cx</i>−<i>d</i>)", "(<i>ax</i>+<i>d</i>)(<i>cx</i>+<i>b</i>)", "(<i>acx</i>+<i>b</i>)(<i>x</i>+<i>d</i>)"], "answer": 0}, {"id": "perfectsquare", "type": "text", "answers": ["완전제곱식"]}];
+const QUIZ_BY_ID = Object.fromEntries(QUIZ.map(item => [item.id,item]));
+const minus = '−';
+function signed(n) { return n < 0 ? `− ${Math.abs(n)}` : `+ ${n}`; }
+function xTerm(n) { if(n===0)return '0'; if(n===1)return '<i>x</i>'; if(n===-1)return '−<i>x</i>'; return `${n<0?'−':''}${Math.abs(n)}<i>x</i>`; }
+function plusX(n) { if(n===0)return ''; return n<0 ? ` − ${Math.abs(n)}<i>x</i>` : ` + ${n}<i>x</i>`; }
+function plusN(n) { return n===0 ? '' : n<0 ? ` − ${Math.abs(n)}` : ` + ${n}`; }
+function factor(n) { return `(<i>x</i>${plusN(n)})`; }
+function quad(s,p) { return `<i>x</i><sup>2</sup>${plusX(s)}${plusN(p)}`; }
+function escapeSvg(s) { return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function svgText(x,y,t,size=18,fill='var(--ink)') { return `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}" text-anchor="middle">${escapeSvg(t)}</text>`; }
+function svgMath(x,y,markup,size=18,fill='var(--ink)') { return `<text x="${x}" y="${y}" font-family="Cambria, Times New Roman, serif" font-size="${size}" fill="${fill}" text-anchor="middle">${markup}</text>`; }
+function svgVar(name) { return `<tspan font-style="italic">${name}</tspan>`; }
+function svgXTerm(n) { if(n===0)return '0'; return `${n<0?'−':''}${Math.abs(n)===1?'':Math.abs(n)}${svgVar('x')}`; }
+function initExplorers() {
+  const lm=$('#like-m'), ln=$('#like-n'), la=$('#factor-a'), lb=$('#factor-b');
+  function drawLike() {
+    const m=+lm.value,n=+ln.value,sum=m+n;
+    $('#like-m-out').textContent=m; $('#like-n-out').textContent=n;
+    $('#like-eq').innerHTML=`${xTerm(m)} ${n<0?'−':'+'} ${xTerm(Math.abs(n))} = ${xTerm(sum)}`.replace(' + 0 =',' =');
+    $('#like-note').textContent=`계수 ${m}와 ${n}을 더하면 ${sum}입니다. 음수 타일은 양수 타일과 한 쌍씩 없어집니다.`;
+    const tile=(v,y,name)=>{ let out=svgMath(25,y+20,svgVar(name),15); for(let i=0;i<Math.abs(v);i++){let x=48+i*52;out+=`<rect x="${x}" y="${y}" width="45" height="38" rx="6" fill="${v<0?'var(--coral)':'var(--mint-2)'}"/>${svgMath(x+22,y+25,`${v<0?'−':''}${svgVar('x')}`,17)}`;} return out;};
+    $('#like-svg').innerHTML=tile(m,20,'m')+tile(n,78,'n')+svgMath(180,161,`결과: ${svgXTerm(sum)}`,20,'var(--main-d)');
+  }
+  function drawFactor() {
+    const a=+la.value,b=+lb.value,s=a+b,p=a*b;
+    $('#factor-a-out').textContent=a; $('#factor-b-out').textContent=b;
+    $('#factor-eq').innerHTML=`${factor(a)}${factor(b)} ⇄ ${quad(s,p)}`;
+    $('#factor-note').textContent=`가운데 계수는 ${a} + (${b}) = ${s}, 상수항은 ${a} × (${b}) = ${p}입니다.`;
+    const parts=[
+      [`${svgVar('x')}<tspan baseline-shift="super" font-size="13">2</tspan>`,1],
+      [svgXTerm(a),a],[svgXTerm(b),b],[String(p).replace('-', '−'),p]
+    ];
+    const identity=`${svgVar('x')}<tspan baseline-shift="super" font-size="11">2</tspan>${s===0?'':`${s<0?' − ':' + '}${svgXTerm(Math.abs(s))}`}${p===0?'':`${p<0?' − ':' + '}${Math.abs(p)}`}`;
+    $('#factor-svg').innerHTML=parts.map(([label,v],i)=>{const x=12+(i%2)*160,y=12+Math.floor(i/2)*94;return `<rect x="${x}" y="${y}" width="150" height="82" rx="9" fill="${v<0?'var(--coral)':'var(--mint-2)'}"/>${svgMath(x+75,y+49,label,21)}`;}).join('')+svgMath(170,212,identity,17);
+  }
+  [lm,ln].forEach(el=>el.addEventListener('input',drawLike));
+  [la,lb].forEach(el=>el.addEventListener('input',drawFactor));
+  drawLike();drawFactor();
+}
+  /* ---------- 퀴즈 ---------- */
+  const quizBody = $('#quiz-body');
+  const checkBtn = $('#quiz-check');
+  const summary = $('#quiz-summary');
+
+  function makePlace(root, item) {
+    const fig = root.querySelector(`[data-place-fig="${item.id}"]`);
+    if (!fig) { console.warn('퀴즈 그림을 찾을 수 없음:', item.id); return; }
+    const group = document.createElement('div');
+    group.className = 'place-group';
+    fig.replaceWith(group);
+    group.append(fig);
+    // 한 묶음에 그림이 여러 개일 수 있다 (예: 기울기 a>0, a<0). 이름표 은행은 하나로 합친다.
+    const labels = [];
+    $$('.svg-wrap', fig).forEach((wrap) => {
+      const svg = wrap.querySelector('svg');
+      const [, , W, H] = svg.getAttribute('viewBox').split(' ').map(Number);
+      $$('[data-place]', svg).forEach((t) => {
+        labels.push(t);
+        t.classList.add('ans-hidden');
+        const slot = document.createElement('button');
+        slot.type = 'button';
+        slot.className = 'slot';
+        slot.dataset.answer = t.dataset.place;
+        slot.dataset.value = '';
+        slot.textContent = '?';
+        slot.setAttribute('aria-label', '이름표를 놓을 자리');
+        slot.style.left = `${(+t.getAttribute('x') / W) * 100}%`;
+        slot.style.top = `${(+t.getAttribute('y') / H) * 100}%`;
+        wrap.append(slot);
+      });
+    });
+    const bank = document.createElement('div');
+    bank.className = 'bank';
+    shuffle([...labels.map((t) => t.dataset.place), ...(item.extra || [])]).forEach((value) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip';
+      chip.dataset.value = value;
+      chip.textContent = value;
+      bank.append(chip);
+    });
+    const hint = document.createElement('p');
+    hint.className = 'bank-hint';
+    hint.textContent = `이름표를 끌어다 놓거나, 눌러서 고른 뒤 자리를 누르세요.${item.extra ? ' (필요 없는 이름표도 있어요)' : ''}`;
+    bank.append(hint);
+    group.append(bank);
+  }
+
+  function buildQuiz() {
+    const clone = $('#study-content').cloneNode(true);
+    clone.removeAttribute('id');
+    $$('.explorer', clone).forEach((el) => el.remove());
+    $$('[id]', clone).forEach((el) => el.removeAttribute('id'));
+    QUIZ.forEach((item) => {
+      if (item.type === 'place') { makePlace(clone, item); return; }
+      const src = clone.querySelector(`[data-q="${item.id}"]`);
+      if (!src) { console.warn('퀴즈 빈칸을 찾을 수 없음:', item.id); return; }
+      const cloze = document.createElement('span');
+      cloze.className = 'cloze';
+      src.replaceWith(cloze);
+      src.classList.add('ans-src');
+      src.setAttribute('aria-hidden', 'true');
+      cloze.append(src);
+      const blank = document.createElement('button');
+      blank.type = 'button';
+      blank.className = 'blank';
+      blank.dataset.qid = item.id;
+      blank.textContent = '?';
+      blank.setAttribute('aria-label', '빈칸 (눌러서 답하기)');
+      cloze.append(blank);
+      if (item.type === 'choice') item.order = shuffle(item.options.map((_, i) => i));
+    });
+    quizBody.replaceChildren(clone);
+    selectedChip = null;
+    resetCheckState();
+  }
+
+  function resetCheckState() {
+    checkBtn.textContent = '정답 확인';
+    summary.textContent = '';
+    $('#mid-result').hidden = true;
+    updateProgress();
+  }
+  // 채운 빈칸 수 (중간 점검 패널의 진행 막대)
+  function updateProgress() {
+    const blanks = $$('.blank, .slot', quizBody);
+    const filled = blanks.filter((el) => el.dataset.value || el.dataset.pick !== undefined).length;
+    $('#mid-filled').textContent = filled;
+    $('#mid-total').textContent = blanks.length;
+    $('#mid-bar-fill').style.width = `${blanks.length ? (filled / blanks.length) * 100 : 0}%`;
+  }
+  function clearMark(el) {
+    el.classList.remove('ok', 'bad');
+    resetCheckState();
+  }
+
+  // 모달에 보여 줄 문장: 현재 빈칸은 입력칸으로, 나머지 빈칸은 작은 칸으로 바꾼다
+  function contextView(blank, activeNode) {
+    const ctx = blank.closest('.ctx');
+    const copy = ctx.cloneNode(true);
+    const originals = $$('.cloze', ctx);
+    $$('.cloze', copy).forEach((cloze, i) => {
+      if (originals[i].contains(blank)) { cloze.replaceWith(activeNode); return; }
+      const other = cloze.querySelector('.blank');
+      const span = document.createElement('span');
+      span.className = 'mini-blank';
+      span.innerHTML = other.innerHTML;
+      cloze.replaceWith(span);
+    });
+    return copy;
+  }
+
+  const textModal = $('#text-modal'), choiceModal = $('#choice-modal');
+  let activeBlank = null, pickedIndex = null;
+
+  function openModal(modal) { modal.hidden = false; }
+  function closeModals() {
+    textModal.hidden = true;
+    choiceModal.hidden = true;
+    if (activeBlank) activeBlank.focus();
+    activeBlank = null;
+  }
+
+  function openTextBlank(blank) {
+    const input = document.createElement('input');
+    input.className = 'ctx-input';
+    input.id = 'text-input';
+    input.autocomplete = 'off';
+    input.setAttribute('aria-label', '답 입력');
+    input.value = blank.dataset.value || '';
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); confirmText(); } });
+    $('#text-ctx').replaceChildren(contextView(blank, input));
+    openModal(textModal);
+    input.focus();
+    input.select();
+  }
+  function confirmText() {
+    const value = $('#text-input').value.trim();
+    if (value) { activeBlank.dataset.value = value; activeBlank.textContent = value; }
+    else { delete activeBlank.dataset.value; activeBlank.textContent = '?'; }
+    clearMark(activeBlank);
+    closeModals();
+  }
+
+  function openChoiceBlank(blank, item) {
+    pickedIndex = blank.dataset.pick !== undefined ? +blank.dataset.pick : null;
+    const preview = document.createElement('span');
+    preview.className = 'mini-blank active';
+    preview.id = 'choice-preview';
+    preview.innerHTML = pickedIndex === null ? '?' : item.options[pickedIndex];
+    $('#choice-ctx').replaceChildren(contextView(blank, preview));
+    const list = $('#choice-list');
+    list.replaceChildren();
+    item.order.forEach((orig, n) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'choice';
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', String(orig === pickedIndex));
+      btn.dataset.index = orig;
+      btn.innerHTML = `<span class="num">${n + 1}</span><span class="opt">${item.options[orig]}</span>`;
+      btn.addEventListener('click', () => {
+        pickedIndex = orig;
+        $$('.choice', list).forEach((b) => b.setAttribute('aria-checked', String(b === btn)));
+        $('#choice-preview').innerHTML = item.options[orig];
+      });
+      list.append(btn);
+    });
+    openModal(choiceModal);
+    (list.querySelector('[aria-checked="true"]') || list.firstElementChild).focus();
+  }
+  function confirmChoice() {
+    const item = QUIZ_BY_ID[activeBlank.dataset.qid];
+    if (pickedIndex !== null) {
+      activeBlank.dataset.pick = pickedIndex;
+      activeBlank.innerHTML = item.options[pickedIndex];
+      clearMark(activeBlank);
+    }
+    closeModals();
+  }
+
+  $('#text-confirm').addEventListener('click', confirmText);
+  $('#choice-confirm').addEventListener('click', confirmChoice);
+  $$('[data-close]').forEach((btn) => btn.addEventListener('click', closeModals));
+  [textModal, choiceModal].forEach((modal) => modal.addEventListener('click', (e) => { if (e.target === modal) closeModals(); }));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && (!textModal.hidden || !choiceModal.hidden)) closeModals();
+  });
+
+  /* 이름표 놓기 (마우스 드래그 + 터치 드래그 + 눌러서 놓기) */
+  let selectedChip = null, drag = null, suppressClick = false;
+  const groupOf = (el) => el.closest('.place-group');
+  function selectChip(chip) {
+    if (selectedChip) selectedChip.classList.remove('selected');
+    selectedChip = chip && chip !== selectedChip ? chip : null;
+    if (selectedChip) selectedChip.classList.add('selected');
+  }
+  // 같은 글자의 이름표가 여러 장일 수 있으므로(증가 ×3) 숨겨진 것을 먼저 돌려준다
+  function chipFor(group, value) {
+    const chips = $$('.chip', group).filter((c) => c.dataset.value === value);
+    return chips.find((c) => c.hidden) || chips[0];
+  }
+  function unplace(slot) {
+    const chip = chipFor(groupOf(slot), slot.dataset.value);
+    if (chip) chip.hidden = false;
+    slot.dataset.value = '';
+    slot.textContent = '?';
+    slot.classList.remove('filled');
+    clearMark(slot);
+  }
+  function place(chip, slot) {
+    if (slot.dataset.value) unplace(slot);
+    slot.dataset.value = chip.dataset.value;
+    slot.textContent = chip.dataset.value;
+    slot.classList.add('filled');
+    chip.hidden = true;
+    selectChip(null);
+    clearMark(slot);
+  }
+
+  quizBody.addEventListener('click', (e) => {
+    const blank = e.target.closest('.blank');
+    if (blank) {
+      const item = QUIZ_BY_ID[blank.dataset.qid];
+      activeBlank = blank;
+      if (item.type === 'text') openTextBlank(blank);
+      else openChoiceBlank(blank, item);
+      return;
+    }
+    const chip = e.target.closest('.chip');
+    if (chip) {
+      if (suppressClick) return;
+      selectChip(chip);
+      return;
+    }
+    const slot = e.target.closest('.slot');
+    if (slot) {
+      if (selectedChip && groupOf(selectedChip) === groupOf(slot)) place(selectedChip, slot);
+      else if (slot.dataset.value) unplace(slot);
+    }
+  });
+
+  quizBody.addEventListener('pointerdown', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip || e.button > 0) return;
+    drag = { chip, x0: e.clientX, y0: e.clientY, ghost: null, over: null };
+    chip.setPointerCapture(e.pointerId);
+  });
+  quizBody.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    if (!drag.ghost) {
+      if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 6) return;
+      drag.ghost = drag.chip.cloneNode(true);
+      drag.ghost.classList.add('ghost', 'selected');
+      document.body.append(drag.ghost);
+    }
+    drag.ghost.style.left = `${e.clientX}px`;
+    drag.ghost.style.top = `${e.clientY}px`;
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    const slot = target && target.closest('.slot');
+    const over = slot && groupOf(slot) === groupOf(drag.chip) ? slot : null;
+    if (over !== drag.over) {
+      if (drag.over) drag.over.classList.remove('drop-hover');
+      if (over) over.classList.add('drop-hover');
+      drag.over = over;
+    }
+  });
+  function endDrag(e, cancelled) {
+    if (!drag) return;
+    const { chip, ghost, over } = drag;
+    drag = null;
+    if (!ghost) return;
+    ghost.remove();
+    if (over) over.classList.remove('drop-hover');
+    if (!cancelled && over) place(chip, over);
+    suppressClick = true;
+    setTimeout(() => { suppressClick = false; }, 0);
+  }
+  quizBody.addEventListener('pointerup', (e) => endDrag(e, false));
+  quizBody.addEventListener('pointercancel', (e) => endDrag(e, true));
+
+  const norm = (s) => s.replace(/\s+/g, '').replace(/（/g, '(').replace(/）/g, ')').replace(/[−–]/g, '-').replace(/＝/g, '=').toLowerCase();
+  // 채운 칸만 채점해서 색을 칠하고, 개수를 돌려준다 (빈 칸은 표시하지 않음)
+  function grade() {
+    let total = 0, correct = 0, empty = 0;
+    const mark = (el, ok) => { el.classList.toggle('ok', ok); el.classList.toggle('bad', !ok); if (ok) correct++; };
+    $$('.blank', quizBody).forEach((blank) => {
+      total++;
+      const item = QUIZ_BY_ID[blank.dataset.qid];
+      const filled = item.type === 'text' ? !!blank.dataset.value : blank.dataset.pick !== undefined;
+      if (!filled) { empty++; blank.classList.remove('ok', 'bad'); return; }
+      mark(blank, item.type === 'text'
+        ? item.answers.some((ans) => norm(ans) === norm(blank.dataset.value))
+        : +blank.dataset.pick === item.answer);
+    });
+    $$('.slot', quizBody).forEach((slot) => {
+      total++;
+      if (!slot.dataset.value) { empty++; slot.classList.remove('ok', 'bad'); return; }
+      mark(slot, slot.dataset.value === slot.dataset.answer);
+    });
+    return { total, correct, empty, filled: total - empty };
+  }
+  function celebrate() {
+    checkBtn.textContent = '참 잘했어요!';
+    const toast = $('#toast');
+    toast.classList.remove('show');
+    void toast.offsetWidth;
+    toast.classList.add('show');
+  }
+  checkBtn.addEventListener('click', () => {
+    const { total, correct, empty } = grade();
+    summary.textContent = `${total}개 중 ${correct}개 정답${empty ? ` · 아직 빈칸 ${empty}개` : ''}`;
+    if (correct === total) celebrate();
+  });
+  $('#mid-check').addEventListener('click', () => {
+    const { total, correct, filled } = grade();
+    const result = $('#mid-result');
+    const wrong = filled - correct;
+    if (filled === 0) {
+      result.className = 'mid-result info';
+      result.textContent = '아직 채운 빈칸이 없어요.';
+    } else if (wrong === 0) {
+      result.className = 'mid-result good';
+      result.textContent = correct === total ? '모두 정답! 🎉' : `채운 ${filled}개 모두 정답! 👍`;
+      if (correct === total) celebrate();
+    } else {
+      result.className = 'mid-result warn';
+      result.textContent = `채운 ${filled}개 중 ${correct}개 정답. 빨간 칸 ${wrong}개를 다시 봐요!`;
+    }
+    result.hidden = false;
+  });
+  $('#toast').addEventListener('animationend', (e) => e.currentTarget.classList.remove('show'));
+  $('#quiz-reset').addEventListener('click', () => {
+    buildQuiz();
+    $('#quiz-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+/* ---------- 게임: 다항식 변환 챌린지 ---------- */
+function initGame() {
+  const rounds = [
+    {stage:0,kind:'product',m:3,n:5,target:8},
+    {stage:0,kind:'power',m:3,n:2,target:6},
+    {stage:0,kind:'quotient',m:8,n:3,target:5},
+    {stage:1,kind:'expand',a:2,b:3,target:{s:5,p:6}},
+    {stage:1,kind:'expand',a:-1,b:3,target:{s:2,p:-3}},
+    {stage:1,kind:'expand',a:-2,b:-3,target:{s:-5,p:6}},
+    {stage:2,kind:'factor',s:5,p:6,target:{a:2,b:3}},
+    {stage:2,kind:'factor',s:2,p:-3,target:{a:-1,b:3}},
+    {stage:2,kind:'factor',s:-5,p:6,target:{a:-2,b:-3}},
+  ];
+  const labels=['1단계 · 지수법칙','2단계 · 전개','3단계 · 인수분해'];
+  const controls=$('#g-controls'), fb=$('#g-feedback');
+  let idx=0,score=0,tries=0,done=false,results=[],player={};
+  const superNum=n=>String(n).replace(/[0-9]/g,c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[Number(c)]);
+  function promptOf(r) {
+    if(r.kind==='product')return `x${superNum(r.m)} × x${superNum(r.n)}`;
+    if(r.kind==='power')return `(x${superNum(r.m)})${superNum(r.n)}`;
+    if(r.kind==='quotient')return `x${superNum(r.m)} ÷ x${superNum(r.n)}`;
+    if(r.kind==='expand')return `(x${r.a<0?' − '+Math.abs(r.a):' + '+r.a})(x${r.b<0?' − '+Math.abs(r.b):' + '+r.b})`;
+    return `x²${r.s<0?' − '+Math.abs(r.s)+'x':' + '+r.s+'x'}${r.p<0?' − '+Math.abs(r.p):' + '+r.p}`;
+  }
+  function answerOf(r) {
+    if(r.stage===0)return `x<sup>${r.target}</sup>`;
+    if(r.stage===1)return quad(r.target.s,r.target.p);
+    return factor(r.target.a)+factor(r.target.b);
+  }
+  function playerOf(r) {
+    if(r.stage===0)return `<i>x</i><sup>${player.e}</sup>`;
+    if(r.stage===1)return quad(player.s,player.p);
+    return factor(player.a)+factor(player.b);
+  }
+  function specs(r) {
+    if(r.stage===0)return [{key:'e',label:'결과 지수',lo:0,hi:12}];
+    if(r.stage===1)return [{key:'s',label:'x의 계수',lo:-8,hi:8},{key:'p',label:'상수항',lo:-8,hi:8}];
+    return [{key:'a',label:'첫 인수의 수',lo:-4,hi:4},{key:'b',label:'둘째 인수의 수',lo:-4,hi:4}];
+  }
+  function correct(r) {
+    if(r.stage===0)return player.e===r.target;
+    if(r.stage===1)return player.s===r.target.s&&player.p===r.target.p;
+    return player.a+player.b===r.s&&player.a*player.b===r.p;
+  }
+  function hint(r) {
+    if(r.kind==='product')return '밑이 같으면 지수를 더합니다.';
+    if(r.kind==='power')return '거듭제곱을 다시 거듭제곱할 때는 지수를 곱합니다.';
+    if(r.kind==='quotient')return '밑이 같으면 지수를 뺍니다.';
+    if(r.stage===1) {
+      if(player.s===r.target.s)return 'x의 계수는 맞아요. 두 수의 곱을 다시 확인해 보세요.';
+      if(player.p===r.target.p)return '상수항은 맞아요. 두 수의 합을 다시 확인해 보세요.';
+      return 'x의 계수는 두 수의 합, 상수항은 두 수의 곱입니다.';
+    }
+    if(player.a+player.b===r.s)return '합은 맞지만 곱을 다시 확인해 보세요.';
+    if(player.a*player.b===r.p)return '곱은 맞지만 합을 다시 확인해 보세요.';
+    return '두 수의 합과 곱을 각각 확인해 보세요.';
+  }
+  function hud() {
+    const r=rounds[Math.min(idx,rounds.length-1)];
+    $('#g-stage').textContent=labels[r.stage];
+    $('#g-round').textContent=`${Math.min(idx+1,rounds.length)} / ${rounds.length}`;
+    $('#g-score').textContent=`점수 ${score}`;
+    $('#g-dots').innerHTML=rounds.map((_,i)=>`<span class="g-dot ${results[i]?(results[i].ok?'hit':'miss'):(i===idx?'cur':'')}"></span>`).join('');
+  }
+  function drawBoard(r) {
+    const svg=$('#g-svg'), prompt=promptOf(r);
+    svg.setAttribute('aria-label',`주어진 식 ${prompt}`);
+    svg.innerHTML=`<rect x="18" y="18" width="464" height="88" rx="16" fill="var(--mint)"/>${svgText(250,52,'주어진 식',17,'var(--muted)')}${svgText(250,86,prompt,25,'var(--ink)')}${svgText(250,149,r.stage===2?'인수분해 ↓':'변환 ↓',22,'var(--coral)')}<rect x="18" y="172" width="464" height="70" rx="16" fill="var(--tint)"/>${svgText(250,215,r.stage===0?'결과 지수 맞히기':r.stage===1?'합과 곱으로 전개하기':'두 인수의 수 찾기',20,'var(--main-d)')}`;
+  }
+  function refresh() {
+    const r=rounds[idx];
+    for(const spec of specs(r)) {
+      controls.querySelector(`[data-out="${spec.key}"]`).textContent=player[spec.key];
+      controls.querySelector(`[data-key="${spec.key}"][data-step="-1"]`).disabled=done||player[spec.key]===spec.lo;
+      controls.querySelector(`[data-key="${spec.key}"][data-step="1"]`).disabled=done||player[spec.key]===spec.hi;
+    }
+    $('#g-eq').innerHTML=playerOf(r);
+  }
+  function load() {
+    const r=rounds[idx]; tries=0;done=false;
+    player=r.stage===0?{e:0}:r.stage===1?{s:0,p:0}:{a:0,b:0};
+    controls.innerHTML=specs(r).map(spec=>`<div class="g-ctrl"><div class="g-ctrl-label"><b class="m">${spec.key}</b><small>${spec.label}</small></div><div class="stepper"><button type="button" data-key="${spec.key}" data-step="-1" aria-label="${spec.label} 줄이기">−</button><output data-out="${spec.key}"></output><button type="button" data-key="${spec.key}" data-step="1" aria-label="${spec.label} 늘리기">+</button></div></div>`).join('');
+    $('#g-form').textContent=r.stage===0?'결과의 지수를 맞히세요.':r.stage===1?'x²의 계수는 1입니다.':'두 수의 순서는 바뀌어도 됩니다.';
+    fb.className='g-feedback';fb.textContent='주어진 식을 보고 답을 조절하세요.';
+    $('#g-fire').disabled=false;$('#g-giveup').disabled=false;$('#g-next').hidden=true;
+    drawBoard(r);hud();refresh();
+  }
+  function finish(ok,pts) {
+    results[idx]={ok,pts,tries};done=true;
+    $('#g-fire').disabled=true;$('#g-giveup').disabled=true;
+    $('#g-next').hidden=false;$('#g-next').textContent=idx===rounds.length-1?'결과 보기 →':'다음 문제 →';
+    hud();refresh();
+  }
+  $('#g-fire').addEventListener('click',()=>{
+    if(done)return;
+    const r=rounds[idx];tries++;
+    if(correct(r)) {
+      const pts=tries===1?3:tries===2?2:1;score+=pts;
+      fb.className='g-feedback hit';fb.innerHTML=`<b>정답!</b> ${tries}번 만에 맞혔어요. +${pts}점<br><span class="m">${answerOf(r)}</span>`;
+      finish(true,pts);
+    } else {
+      fb.className='g-feedback miss';fb.innerHTML=`<b>${tries}번째 시도</b> · ${hint(r)}`;
+    }
+  });
+  $('#g-giveup').addEventListener('click',()=>{
+    if(done)return;
+    const r=rounds[idx];player={...r.target};
+    fb.className='g-feedback reveal';fb.innerHTML=`정답: <span class="m">${answerOf(r)}</span>`;
+    finish(false,0);
+  });
+  $('#g-next').addEventListener('click',()=>{
+    if(idx<rounds.length-1){idx++;load();return;}
+    $('#g-play').hidden=true;$('#g-end').hidden=false;
+    const max=rounds.length*3,stars=score>=max*.85?3:score>=max*.55?2:1;
+    $('#g-stars').textContent='★'.repeat(stars)+'☆'.repeat(3-stars);
+    $('#g-total').innerHTML=`총점 <b>${score}</b> / ${max}점`;
+    $('#g-list').innerHTML=rounds.map((r,i)=>`<li><span>${i+1}. ${promptOf(r)}</span><span>${results[i].ok?`${results[i].tries}번 만에 정답 +${results[i].pts}`:'정답 확인'}</span></li>`).join('');
+    idx=rounds.length;hud();
+  });
+  controls.addEventListener('click',e=>{
+    const btn=e.target.closest('button[data-key]');if(!btn||done)return;
+    const spec=specs(rounds[idx]).find(s=>s.key===btn.dataset.key);
+    player[spec.key]=Math.max(spec.lo,Math.min(spec.hi,player[spec.key]+Number(btn.dataset.step)));
+    refresh();
+  });
+  $('#g-restart').addEventListener('click',()=>{
+    idx=0;score=0;results=[];$('#g-play').hidden=false;$('#g-end').hidden=true;load();
+  });
+  load();
+}
+  /* ---------- 탭 ---------- */
+  function initTabs() {
+    $$('.tab').forEach((tab) => tab.addEventListener('click', () => {
+      $$('.tab').forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+      $$('.tab-panel').forEach((panel) => { panel.hidden = panel.id !== tab.getAttribute('aria-controls'); });
+    }));
+  }
+
+initExplorers();
+buildQuiz();
+initGame();
+initTabs();
+})();
+</script>
+
+<script>
+/* ---------- 단원 차례(목차): 정리·퀴즈 탭 맨 위, 누르면 그 구역으로 ---------- */
+(function () {
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const tocs = [[$('#study-toc'), () => $('#study-content')], [$('#quiz-toc'), () => $('#quiz-body')]].filter(([nav]) => nav);
+  const zones = $$('#study-content .zone[data-sec]');
+  if (!tocs.length || !zones.length) return;
+  tocs.forEach(([nav, root]) => {
+    nav.innerHTML = zones.map((z) => `<button type="button" data-sec="${z.dataset.sec}">${z.dataset.toc}</button>`).join('');
+    nav.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-sec]');
+      const host = root();
+      const z = b && host && host.querySelector(`.zone[data-sec="${b.dataset.sec}"]`);
+      if (z) z.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      tocs.forEach(([nav, root]) => {
+        if (nav.closest('[hidden]')) return;
+        const host = root();
+        if (!host) return;
+        const list = $$('.zone[data-sec]', host);
+        let cur = list[0];
+        list.forEach((z) => { if (z.getBoundingClientRect().top < 120) cur = z; });
+        $$('button', nav).forEach((b) => {
+          const on = cur && b.dataset.sec === cur.dataset.sec;
+          if (on && b.getAttribute('aria-current') !== 'true') nav.scrollTo({ left: b.offsetLeft - nav.clientWidth / 2 + b.offsetWidth / 2, behavior: 'smooth' });
+          b.setAttribute('aria-current', String(!!on));
+        });
+      });
+    });
+  }, { passive: true });
+})();
+
+</script>
+</body>
+</html>

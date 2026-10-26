@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>징검다리 개념 확인</title>
+  <meta name="description" content="고등학교 1학년 수학 단원마다, 그 단원을 이해하는 데 필요한 중학교 개념을 정리 · 퀴즈 · 게임으로 확인합니다.">
+  <meta property="og:title" content="징검다리 개념 확인">
+  <meta property="og:description" content="고등학교 1학년 수학으로 건너가는 중학교 개념 — 정리 · 퀴즈 · 게임">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='19' width='9' height='7' rx='3.5' fill='%232f9a52'/%3E%3Crect x='11.5' y='13' width='9' height='7' rx='3.5' fill='%2312998c'/%3E%3Crect x='22' y='7' width='9' height='7' rx='3.5' fill='%235b5fc7'/%3E%3C/svg%3E">
+  <!--
+    징검다리 표지(단원 고르기)와 단원 보기 틀.
+    이 파일은 템플릿이다. 직접 열지 말고 build.mjs가 아래 두 표시 자리에 단원 정보와 단원 원본을 채워 dist/에 만든다.
+    디자인은 단원 파일과 같은 토큰을 쓴다 (--main 하나에서 나머지 색이 계산됨).
+  -->
+  <style>
+    /* ===== 토큰 (단원 파일과 같음) ===== */
+    :root {
+      /* 표지 테마 색: 단원 색이 돋보이도록 무채색에 가까운 진한 색 */
+      --main: #3d4c5a;
+      --ink: #22302e; --muted: #5d6b69; --paper: #ffffff;
+      --coral: #f2624f; --gold: #e9a417;
+      --sans: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    }
+    /* --main에서 자동으로 만들어지는 색. 단원 카드·단원 막대는 자기 --main으로 다시 계산한다 */
+    :root, .ucard, .bar {
+      --main-d: color-mix(in srgb, var(--main) 72%, #000);
+      --mint: color-mix(in srgb, var(--main) 12%, #fff);
+      --mint-2: color-mix(in srgb, var(--main) 30%, #fff);
+      --bg: color-mix(in srgb, var(--main) 6%, #f6f6f6);
+      --rule: color-mix(in srgb, var(--main) 7%, #e5e5e5);
+      --tag-ink: color-mix(in srgb, var(--main) 22%, #1a1f1e);
+      --shadow: color-mix(in srgb, var(--main-d) 8%, transparent);
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.6; }
+    button { font-family: var(--sans); }
+    html.viewing, html.viewing body { overflow: hidden; }
+
+    /* ===== 표지 ===== */
+    .page { width: min(1180px, calc(100% - 28px)); margin: 24px auto 40px; overflow: hidden; border: 2px solid var(--main); border-radius: 20px; background: var(--paper); box-shadow: 0 10px 30px var(--shadow); }
+    .banner { padding: 12px 16px 12px; background: var(--main); color: #fff; text-align: center; font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.3; }
+    .banner small { display: block; font-size: 13px; font-weight: 600; opacity: .85; letter-spacing: 0; }
+    .stones { display: flex; justify-content: center; gap: 7px; margin-top: 9px; }
+    .stones span { width: 30px; height: 9px; border-radius: 999px; background: var(--c); }
+    .stones span:nth-child(even) { transform: translateY(3px); }
+    .sec { padding: 18px 26px 24px; }
+    .head { margin: 0; font-size: 24px; }
+    .guide { margin: 8px 0 0; color: var(--muted); font-size: 14.5px; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 16px; }
+    .ucard { position: relative; display: flex; flex-direction: column; gap: 7px; min-width: 0; padding: 18px; border: 1.5px solid var(--rule); border-radius: 18px; background: #fff; color: inherit; text-decoration: none; transition: border-color .12s, transform .12s; }
+    .ucard:hover { border-color: var(--main); transform: translateY(-2px); }
+    .ucard:focus-visible, .bar a:focus-visible, .bar button:focus-visible { outline: 3px solid #ffc9a8; outline-offset: 2px; }
+    .ucard .num { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--main); color: #fff; font-size: 20px; font-weight: 800; }
+    .ucard .unit { margin: 2px 0 0; color: var(--main-d); font-size: 13px; font-weight: 800; }
+    .ucard h3 { margin: -6px 0 0; font-size: 19px; }
+    .ucard p { flex: 1; margin: 0; color: var(--muted); font-size: 14px; }
+    .ucard .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .ucard .chips span { padding: 1px 9px; border-radius: 999px; background: var(--mint); color: var(--tag-ink); font-size: 12px; font-weight: 700; }
+    .ucard .chips .count { background: #fff8e3; color: #7a5a12; }
+    .ucard .recent { color: #a8740a; font-size: 13.5px; font-weight: 800; }
+    .ucard .btn { margin-top: 4px; text-align: center; }
+    .btn { display: inline-block; padding: 10px 24px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 3px 4px 0 var(--ink); }
+    .btn.primary { border-color: var(--main-d); background: var(--main); color: #fff; box-shadow: 3px 4px 0 var(--main-d); }
+    .ucard:active .btn { transform: translate(2px, 2px); box-shadow: 1px 2px 0 var(--main-d); }
+    .foot { margin: 22px 0 0; padding-top: 12px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 13px; }
+    .foot b { color: var(--ink); }
+    .offline { display: inline-block; margin-top: 8px; padding: 5px 14px; border: 1.5px solid var(--rule); border-radius: 999px; background: #fff; color: var(--muted); font-size: 13.5px; font-weight: 800; text-decoration: none; }
+    .offline:hover { border-color: var(--main); color: var(--ink); }
+
+    /* ===== 단원 보기 ===== */
+    #viewer { position: fixed; z-index: 10; inset: 0; display: flex; flex-direction: column; background: var(--paper); }
+    .bar { flex: none; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 12px; border-bottom: 2px solid var(--main); background: color-mix(in srgb, var(--main) 4%, #fff); }
+    .back { flex: none; padding: 6px 14px; border: 1.5px solid var(--rule); border-radius: 999px; background: #fff; color: var(--muted); font-size: 14px; font-weight: 800; cursor: pointer; }
+    .back:hover { border-color: var(--main); color: var(--ink); }
+    .vlabel { min-width: 0; overflow: hidden; color: var(--main-d); font-size: 16px; font-weight: 800; white-space: nowrap; text-overflow: ellipsis; }
+    .jump { display: flex; gap: 5px; margin-left: auto; }
+    .jump a { display: grid; place-items: center; width: 30px; height: 30px; border: 1.5px solid var(--c); border-radius: 50%; background: #fff; color: var(--c); font-size: 14px; font-weight: 800; text-decoration: none; }
+    .jump a:hover { background: color-mix(in srgb, var(--c) 12%, #fff); }
+    .jump a[aria-current="page"] { background: var(--c); color: #fff; }
+    #host { position: relative; flex: 1 1 auto; min-height: 0; }
+    #host iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--paper); }
+    #busy { position: absolute; z-index: 1; inset: 0; display: grid; place-items: center; background: var(--paper); color: var(--muted); font-size: 15px; font-weight: 700; }
+
+    @media (max-width: 760px) {
+      .page { width: 100%; margin: 0; border-width: 0; border-radius: 0; }
+      .banner { font-size: 24px; }
+      .sec { padding: 16px; }
+      .cards { grid-template-columns: 1fr; }
+      .bar { gap: 8px; padding: 6px 8px; }
+      .back { padding: 5px 11px; font-size: 13.5px; }
+      .vlabel { font-size: 14.5px; }
+      .jump { gap: 3px; }
+      .jump a { width: 27px; height: 27px; font-size: 13px; }
+    }
+    @media (max-width: 480px) {
+      .vlabel .vname { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<main class="page" id="cover">
+  <header class="banner">징검다리 개념 확인<small>고등학교 1학년 수학으로 건너가는 중학교 개념</small><div class="stones" id="stones" aria-hidden="true"></div></header>
+  <section class="sec">
+    <h2 class="head">📚 단원 고르기</h2>
+    <p class="guide">고등학교 수학 단원마다, 그 단원을 이해하는 데 필요한 중학교 개념을 모았어요. 단원마다 <b>정리 · 퀴즈 · 게임</b>이 있어요.</p>
+    <div class="cards" id="cards"></div>
+    <p class="foot">단원 화면 맨 위의 <b>← 단원 고르기</b>를 누르면 이 화면으로 돌아와요. 풀던 내용은 다른 단원에 다녀와도 그대로 남아 있어요.<span id="built"></span><br>
+      <a class="offline" id="offline" download="징검다리_통합_개념확인.html" hidden>⬇ 인터넷 없이 쓰는 한 파일판 내려받기</a></p>
+  </section>
+</main>
+
+<section id="viewer" hidden>
+  <div class="bar" id="bar">
+    <button type="button" class="back" id="back">← 단원 고르기</button>
+    <span class="vlabel" id="vlabel"></span>
+    <nav class="jump" id="jump" aria-label="다른 단원으로"></nav>
+  </div>
+  <div id="host"><div id="busy" hidden>단원을 불러오는 중…</div></div>
+</section>
+
+<script id="unit-data" type="application/json">__UNITS__</script>
+<!--__SOURCES__-->
+<script>
+/* ---------- 표지 · 단원 보기 ---------- */
+(function () {
+  const $ = (sel) => document.querySelector(sel);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const DATA = JSON.parse($('#unit-data').textContent);
+  const UNITS = DATA.units;
+  const byNo = Object.fromEntries(UNITS.map((u) => [String(u.no), u]));
+  const LAST_KEY = 'jg-last-unit';
+  const frames = {};
+  const cover = $('#cover'), viewer = $('#viewer'), host = $('#host'), busy = $('#busy');
+
+  const getLast = () => { try { return localStorage.getItem(LAST_KEY); } catch (e) { return null; } };
+  const setLast = (no) => { try { localStorage.setItem(LAST_KEY, no); } catch (e) {} };
+
+  // 표지 카드: 단원 파일에서 뽑은 정보(build.mjs)로 만든다
+  UNITS.forEach((u) => {
+    const a = el('a', 'ucard');
+    a.href = '#u' + u.no;
+    a.dataset.no = u.no;
+    a.style.setProperty('--main', u.color);
+    a.append(el('span', 'num', u.no), el('span', 'unit', '고등 수학 ' + u.no + '단원'), el('h3', '', u.name), el('p', '', u.sub));
+    const chips = el('div', 'chips');
+    u.sections.forEach((s) => chips.append(el('span', '', s)));
+    if (u.blanks) chips.append(el('span', 'count', '빈칸 ' + u.blanks + '개'));
+    a.append(chips, el('span', 'recent', '★ 최근에 공부한 단원'), el('span', 'btn primary', '공부 시작'));
+    $('#cards').append(a);
+
+    const dot = el('a', '', u.no);
+    dot.href = '#u' + u.no;
+    dot.title = u.no + '단원 ' + u.name;
+    dot.style.setProperty('--c', u.color);
+    $('#jump').append(dot);
+
+    const stone = el('span');
+    stone.style.setProperty('--c', u.color);
+    $('#stones').append(stone);
+  });
+  if (DATA.built) $('#built').textContent = ' (' + DATA.built + ' 기준)';
+  // 웹판에만: 한 파일판 내려받기 (한 파일판 자신에는 없음)
+  if (DATA.offline) { $('#offline').href = DATA.offline; $('#offline').hidden = false; }
+
+  function markRecent() {
+    const last = getLast();
+    document.querySelectorAll('.ucard').forEach((c) => { c.querySelector('.recent').hidden = c.dataset.no !== last; });
+  }
+
+  function load(u) {
+    const ifr = el('iframe');
+    ifr.title = u.no + '단원 ' + u.name;
+    busy.hidden = false;
+    ifr.addEventListener('load', () => { busy.hidden = true; }, { once: true });
+    host.append(ifr);
+    // 한 파일판: 단원 원본이 이 문서 안에 들어 있다. 웹판: units/ 폴더의 파일을 연다.
+    const src = document.querySelector('script[data-unit="' + u.no + '"]');
+    if (src) ifr.srcdoc = JSON.parse(src.textContent);
+    else ifr.src = u.src;
+    return ifr;
+  }
+
+  function show(u) {
+    const no = String(u.no);
+    document.documentElement.classList.add('viewing');
+    cover.inert = true;
+    viewer.hidden = false;
+    $('#bar').style.setProperty('--main', u.color);
+    $('#vlabel').innerHTML = '';
+    $('#vlabel').append(no + '단원', el('span', 'vname', ' · ' + u.name));
+    document.querySelectorAll('#jump a').forEach((a) => {
+      if (a.textContent === no) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    document.title = no + '단원 ' + u.name + ' · 징검다리 개념 확인';
+    // 단원을 오가도 풀던 내용이 남도록 한 번 연 단원은 숨겨 두기만 한다
+    Object.keys(frames).forEach((k) => { frames[k].hidden = k !== no; });
+    if (frames[no]) busy.hidden = true;
+    else frames[no] = load(u);
+    setLast(no);
+  }
+
+  function showCover() {
+    viewer.hidden = true;
+    cover.inert = false;
+    document.documentElement.classList.remove('viewing');
+    document.title = '징검다리 개념 확인';
+    markRecent();
+  }
+
+  function route() {
+    const m = /^#u(\d+)$/.exec(location.hash);
+    if (m && byNo[m[1]]) show(byNo[m[1]]); else showCover();
+  }
+
+  function goCover() {
+    history.pushState(null, '', location.pathname + location.search);
+    route();
+  }
+
+  $('#back').addEventListener('click', goCover);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !viewer.hidden) goCover(); });
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+</body>
+</html>

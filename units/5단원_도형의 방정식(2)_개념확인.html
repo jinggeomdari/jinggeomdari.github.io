@@ -1,0 +1,1669 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>도형의 방정식</title>
+  <style>
+    /* ===== 토큰 ===== */
+    :root {
+      --main: #b4478f;
+      --main-d: color-mix(in srgb, var(--main) 72%, #000);
+      --mint: color-mix(in srgb, var(--main) 12%, #fff);
+      --mint-2: color-mix(in srgb, var(--main) 30%, #fff);
+      --tint: color-mix(in srgb, var(--main) 5%, #fff);
+      --tint-2: color-mix(in srgb, var(--main) 3%, #fff);
+      --bg: color-mix(in srgb, var(--main) 6%, #f6f6f6);
+      --rule: color-mix(in srgb, var(--main) 7%, #e5e5e5);
+      --grid: color-mix(in srgb, var(--main) 6%, #eeeeee);
+      --tag-ink: color-mix(in srgb, var(--main) 22%, #1a1f1e);
+      --shadow: color-mix(in srgb, var(--main-d) 8%, transparent);
+      --shadow-2: color-mix(in srgb, var(--main-d) 20%, transparent);
+      --ink: #22302e; --muted: #5d6b69; --paper: #ffffff;
+      --coral: #f2624f; --blue: #2b72d6; --violet: #7656c9; --gold: #e9a417; --hl: #fff1b0;
+      --ok: #1f6fd1; --bad: #e04545;
+      --sans: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      --serif: "Cambria", "Times New Roman", "Batang", serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.6; }
+    i { font-family: var(--serif); font-style: normal; }
+    sup { font-size: .68em; line-height: 0; }
+    math { font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", math, serif; font-size: 1.15em; }
+    button { font-family: var(--sans); }
+    svg text { font-family: "Times New Roman", Cambria, serif; font-style: normal; font-weight: bold; }
+
+    /* ===== 레이아웃 ===== */
+    .page { width: min(1200px, calc(100% - 28px)); margin: 24px auto 40px; overflow: hidden; border: 2px solid var(--main); border-radius: 20px; background: var(--paper); box-shadow: 0 10px 30px var(--shadow); }
+    .banner { padding: 14px 16px 12px; background: var(--main); color: #fff; text-align: center; font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.3; }
+    .banner small { display: block; font-size: 13.5px; font-weight: 600; opacity: .88; letter-spacing: 0; }
+    .tabs { display: flex; gap: 6px; padding: 14px 24px 0; border-bottom: 2px solid var(--main); background: color-mix(in srgb, var(--main) 4%, #fff); }
+    .tab { margin-bottom: -2px; padding: 9px 26px; border: 1.5px solid var(--rule); border-bottom: 2px solid transparent; border-radius: 12px 12px 0 0; background: color-mix(in srgb, var(--main) 4%, #f5f5f5); color: var(--muted); font-size: 16px; font-weight: 700; cursor: pointer; }
+    .tab[aria-selected="true"] { border-color: var(--main); border-bottom-color: var(--paper); background: var(--paper); color: var(--ink); }
+    .tab:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid #ffc9a8; outline-offset: 2px; }
+
+    .zone { display: flex; align-items: center; gap: 12px; padding: 24px 26px 4px; }
+    .zone b { padding: 5px 22px; border-radius: 999px; background: var(--main-d); color: #fff; font-size: 17.5px; letter-spacing: .02em; }
+    .zone::after { content: ""; flex: 1; height: 2px; background: var(--mint-2); }
+    .sec { padding: 22px 26px; border-bottom: 1px solid var(--rule); }
+    
+    /* 개념 그리드: 2단 (개념 1 | 개념 2) */
+    .cols-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
+    .cols-2 > .col { min-width: 0; display: flex; flex-direction: column; justify-content: space-between; }
+    .cols-2 > .col:first-child { border-right: 2px dashed var(--rule); padding-right: 24px; }
+    .cols-2 > .col:last-child { padding-left: 4px; }
+
+    /* ===== 개념 구성 요소 ===== */
+    .head { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font-size: 17.5px; font-weight: 700; }
+    .no { display: inline-grid; place-items: center; width: 25px; height: 25px; border-radius: 50%; background: var(--coral); color: #fff; font-size: 13.5px; font-weight: 800; flex: none; }
+    .body { margin: 7px 0; font-size: 15px; }
+    .em { color: var(--blue); font-weight: 700; }
+    .key { color: var(--coral); font-weight: 800; }
+    .m { font-family: var(--serif); font-style: normal; font-weight: 700; font-size: 1.08em; white-space: nowrap; }
+    .box { margin: 10px 0; padding: 8px 12px; border: 1.5px dashed var(--main); border-radius: 12px; background: var(--tint); text-align: center; font-size: 15.5px; line-height: 1.8; }
+    .ol-line { text-decoration: overline; }
+
+    /* 도형 피규어 */
+    .fig-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 14px; }
+    .fig-svg { display: block; width: 100%; max-width: 180px; height: auto; }
+
+    /* ===== 가로 전체 폭 탐색기(직접 움직여 보기) 공통 스타일 ===== */
+    .explorer { border-radius: 18px; padding: 20px 24px; background: var(--tint-2); border-bottom: 2px solid var(--rule); }
+    .explorer-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .explorer-head .tag { display: inline-block; padding: 4px 16px; border-radius: 999px; background: var(--main); color: #fff; font-size: 14px; font-weight: 800; }
+    .explorer-head p { margin: 0; color: var(--muted); font-size: 14px; font-weight: 600; }
+    
+    /* 가로형 탐색기 2단: 좌(도형 캔버스) + 우(슬라이더 & 결과창) */
+    .explorer-grid { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 28px; align-items: center; }
+    .explorer-vis { display: flex; justify-content: center; align-items: center; }
+    .explorer-vis svg { display: block; width: 100%; max-width: 270px; height: auto; border: 1.5px solid var(--rule); border-radius: 14px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .explorer-ctrl { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+    
+    .slider { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; align-items: center; margin: 7px 0; font-size: 14.5px; }
+    .slider span { font-weight: 700; color: var(--ink); }
+    .slider input { width: 100%; accent-color: var(--main); cursor: pointer; }
+    .readout { margin-top: 12px; padding: 12px 16px; border-radius: 13px; background: #fff; border: 1.5px solid var(--mint-2); font-size: 14.5px; line-height: 1.7; }
+    .readout b { color: var(--main-d); }
+
+    /* ===== 퀴즈 ===== */
+    .quiz-guide { margin: 0; padding: 14px 26px; background: #fff8e3; font-size: 14.5px; border-bottom: 1px solid var(--rule); }
+    .cloze { display: inline-grid; margin: 1px 3px; vertical-align: baseline; }
+    .cloze > .ans-src, .cloze > .blank { grid-area: 1 / 1; }
+    .ans-src { visibility: hidden; padding: 2px 8px; }
+    .blank { display: inline-flex; align-items: center; justify-content: center; min-width: 2.8em; height: 100%; padding: 2px 8px; border: 1.8px solid var(--ink); border-radius: 8px; background: #fff; color: var(--ink); font: inherit; font-weight: 700; white-space: nowrap; cursor: pointer; line-height: 1.2; }
+    .blank:hover { background: #fffbea; border-color: var(--main); }
+    .blank.ok { border-color: var(--ok); color: var(--ok); background: #eef5ff; }
+    .blank.bad { border-color: var(--bad); color: var(--bad); background: #fff0f0; }
+
+    .quiz-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; padding: 24px 20px 30px; }
+    .quiz-summary { width: 100%; margin: 0; min-height: 1.5em; color: var(--muted); font-size: 15px; text-align: center; }
+    .btn { padding: 9px 22px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); font-size: 15.5px; font-weight: 800; cursor: pointer; box-shadow: 3px 4px 0 var(--ink); }
+    .btn:active { transform: translate(2px, 2px); box-shadow: 1px 2px 0 var(--ink); }
+    .btn.primary { border-color: var(--main-d); background: var(--main); color: #fff; box-shadow: 3px 4px 0 var(--main-d); }
+
+    .mid-check { position: fixed; z-index: 40; right: 20px; bottom: 20px; width: 210px; padding: 12px 14px; border: 2px solid var(--main); border-radius: 16px; background: #fffffff2; box-shadow: 0 10px 28px var(--shadow-2); }
+    .mid-progress { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .mid-progress b { color: var(--main-d); }
+    .mid-bar { height: 6px; margin-top: 5px; overflow: hidden; border-radius: 99px; background: var(--grid); }
+    .mid-bar span { block: block; width: 0; height: 100%; background: var(--main); transition: width .3s; }
+    .mid-result { margin: 8px 0 0; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
+    .mid-result.good { color: var(--ok); }
+    .mid-result.warn { color: var(--bad); }
+    .mid-btn { width: 100%; margin-top: 9px; padding: 9px 0; border: 0; border-radius: 12px; background: var(--coral); color: #fff; font-size: 15.5px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 0 #a8331f; }
+
+    /* 모달 */
+    .modal { position: fixed; z-index: 50; inset: 0; display: grid; place-items: center; padding: 20px; background: #161c1b99; }
+    .dialog { width: min(650px, 100%); max-height: calc(100vh - 40px); overflow: auto; padding: 26px; border: 2px solid var(--main); border-radius: 18px; background: #fffefb; box-shadow: 0 18px 50px #0004; }
+    .dialog h2 { margin: 0 0 16px; font-size: 19px; }
+    .ctx-view { padding: 16px; border-radius: 12px; background: var(--mint); font-size: 18px; line-height: 1.9; }
+    .ctx-input { width: 9em; padding: 4px 8px; border: 2.2px solid var(--coral); border-radius: 8px; background: #fff; font: 700 18px var(--sans); text-align: center; }
+    .choices { display: grid; gap: 8px; margin-top: 14px; }
+    .choice { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 14px; border: 1.5px solid var(--rule); border-radius: 12px; background: #fff; font-size: 16.5px; cursor: pointer; }
+    .choice[aria-checked="true"] { border-color: var(--main); background: var(--mint); font-weight: 700; }
+    .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+    .actions button { padding: 8px 18px; border: 1.5px solid #333; border-radius: 10px; background: #fff; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .actions .confirm { border-color: var(--main-d); background: var(--main); color: #fff; }
+
+    .toast { position: fixed; z-index: 80; left: 50%; top: 16%; padding: 16px 32px; border: 2px solid var(--ok); border-radius: 16px; background: #f4f9ff; color: var(--ok); font-size: 24px; font-weight: 800; box-shadow: 0 12px 35px #1f6fd140; opacity: 0; pointer-events: none; transform: translate(-50%, 0); }
+    .toast.show { animation: toast 2.6s ease forwards; }
+    @keyframes toast { 0% { opacity: 0; transform: translate(-50%, -8px) scale(.94); } 14%, 75% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -10px); } }
+
+    /* ===== 게임 ===== */
+    .game { padding: 20px 26px 30px; }
+    .game-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    .game-title { margin: 0; font-size: 23px; }
+    .hub-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-top: 16px; }
+    .hub-card { display: flex; flex-direction: column; gap: 8px; padding: 18px; border: 1.5px solid var(--rule); border-radius: 18px; background: #fff; }
+    .hub-card .icon { font-size: 32px; }
+    .hub-card h3 { margin: 0; font-size: 18.5px; }
+    .hub-card p { flex: 1; margin: 0; color: var(--muted); font-size: 13.5px; }
+    .teambar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; margin-top: 12px; }
+    .team { display: flex; align-items: center; justify-content: space-between; padding: 7px 16px; border: 2px solid var(--rule); border-radius: 14px; background: #fff; }
+    .team.active { border-color: var(--main); background: var(--mint); }
+    .team[data-team="1"].active { border-color: var(--coral); background: #fff2ef; }
+    .g-end-card { width: min(520px, 100%); margin: 20px auto; padding: 26px; border: 2px solid var(--main); border-radius: 20px; text-align: center; }
+
+    @media (max-width: 820px) {
+      .page { width: 100%; margin: 0; border: 0; border-radius: 0; }
+      .cols-2, .explorer-grid { display: block; }
+      .cols-2 > .col:first-child { border-right: 0; border-bottom: 2px dashed var(--rule); padding-bottom: 18px; margin-bottom: 18px; }
+      .explorer-vis { margin-bottom: 16px; }
+      .mid-check { right: 10px; bottom: 10px; width: 165px; }
+    }
+  
+    /* ===== 단원 차례(목차) — 2단원과 동일 형식 ===== */
+    .toc { position: sticky; top: 0; z-index: 30; display: flex; gap: 6px; overflow-x: auto; padding: 10px 26px; border-bottom: 1px solid var(--rule); background: #ffffffee; scrollbar-width: thin; }
+    .toc button { flex: none; padding: 5px 12px; border: 1.5px solid var(--rule); border-radius: 999px; background: #fff; color: var(--muted); font-size: 13.5px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+    .toc button[aria-current="true"] { border-color: var(--main); background: var(--main); color: #fff; }
+    .zone { scroll-margin-top: 64px; }
+    @media (max-width: 760px) { .toc { padding: 8px 12px; } }
+    @media print { .toc { display: none !important; } }
+
+  </style>
+</head>
+<body>
+
+<main class="page">
+  <header class="banner">도형의 방정식<small>징검다리 6단원 개념 확인</small></header>
+  <nav class="tabs" role="tablist" aria-label="활동 선택">
+    <button class="tab" type="button" role="tab" id="tab-study" aria-selected="true" aria-controls="study-panel">정리</button>
+    <button class="tab" type="button" role="tab" id="tab-quiz" aria-selected="false" aria-controls="quiz-panel">퀴즈</button>
+    <button class="tab" type="button" role="tab" id="tab-game" aria-selected="false" aria-controls="game-panel">게임</button>
+  </nav>
+
+  <!-- ================= 정리 탭 ================= -->
+  <section class="tab-panel" id="study-panel" role="tabpanel" aria-labelledby="tab-study">
+    <nav class="toc" id="study-toc" aria-label="단원 차례"></nav>
+    <div id="study-content">
+
+      <!-- ================= Ⅰ. 원과 직선 ================= -->
+      <div class="zone" data-sec="u5-1" data-toc="Ⅰ 원과 직선"><b>Ⅰ. 원과 직선</b></div>
+
+      <!-- [개념 배치 행 1] 개념 1 | 개념 2 -->
+      <section class="sec cols-2">
+        <div class="col">
+          <div>
+            <h3 class="head"><span class="no">1</span>원의 중심과 현의 수직이등분선 사이에서의 관계</h3>
+            <p class="body ctx">① 원의 중심에서 현에 내린 수선은 그 현을 <b class="key" data-q="bisect_chord">이등분</b>한다.</p>
+            <p class="body ctx">② 현의 수직이등분선은 그 원의 <b class="key" data-q="circle_center">중심</b>을 지난다.</p>
+          </div>
+          <div class="fig-wrap">
+            <!-- [그림 1] 현의 수직이등분선 -->
+            <svg class="fig-svg" viewBox="0 0 160 160" aria-label="원의 중심과 현의 수직이등분선">
+              <circle cx="80" cy="75" r="55" fill="none" stroke="#555555" stroke-width="2"/>
+              <line x1="80" y1="10" x2="80" y2="145" stroke="#222222" stroke-width="1.8"/>
+              <line x1="37.6" y1="110" x2="122.4" y2="110" stroke="#d946ef" stroke-width="2.6" stroke-linecap="round"/>
+              <polyline points="80,100 90,100 90,110" fill="none" stroke="#333333" stroke-width="1.4"/>
+              <line x1="57" y1="105" x2="57" y2="115" stroke="#444444" stroke-width="1.6"/>
+              <line x1="60" y1="105" x2="60" y2="115" stroke="#444444" stroke-width="1.6"/>
+              <line x1="100" y1="105" x2="100" y2="115" stroke="#444444" stroke-width="1.6"/>
+              <line x1="103" y1="105" x2="103" y2="115" stroke="#444444" stroke-width="1.6"/>
+              <circle cx="80" cy="75" r="3.2" fill="#222222"/>
+              <text x="73" y="80" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="end">O</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="col">
+          <div>
+            <h3 class="head"><span class="no">2</span>원의 중심으로부터 같은 거리에 있는 두 현의 길이 관계</h3>
+            <p class="body ctx">① 한 원에서 중심으로부터 같은 거리에 있는 <b class="key" data-q="two_chords">두 현</b>의 길이는 같다.</p>
+            <p class="body ctx">② 한 원에서 길이가 같은 두 현은 <b class="key" data-q="dist_center">원의 중심</b>으로부터 같은 거리에 있다.</p>
+          </div>
+          <div class="fig-wrap">
+            <!-- [그림 2] 같은 거리의 두 현 -->
+            <svg class="fig-svg" viewBox="0 0 160 160" aria-label="중심으로부터 같은 거리에 있는 두 현">
+              <circle cx="80" cy="80" r="56" fill="none" stroke="#555555" stroke-width="2"/>
+              <line x1="80" y1="80" x2="101.3" y2="65.1" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round"/>
+              <line x1="80" y1="80" x2="65.1" y2="101.3" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round"/>
+              <line x1="72.9" y1="24.5" x2="129.8" y2="105.7" stroke="#d946ef" stroke-width="2.6" stroke-linecap="round"/>
+              <line x1="24.5" y1="72.9" x2="105.7" y2="129.8" stroke="#d946ef" stroke-width="2.6" stroke-linecap="round"/>
+              <line x1="87.6" y1="70.4" x2="91.6" y2="76.2" stroke="#222222" stroke-width="1.4"/>
+              <line x1="89.7" y1="68.9" x2="93.7" y2="74.7" stroke="#222222" stroke-width="1.4"/>
+              <line x1="70.4" y1="87.6" x2="76.2" y2="91.6" stroke="#222222" stroke-width="1.4"/>
+              <line x1="68.9" y1="89.7" x2="74.7" y2="93.7" stroke="#222222" stroke-width="1.4"/>
+              <polyline points="95.6,69.1 99.6,74.8 105.3,70.8" fill="none" stroke="#333333" stroke-width="1.3"/>
+              <polyline points="69.1,95.6 74.8,99.6 70.8,105.3" fill="none" stroke="#333333" stroke-width="1.3"/>
+              <line x1="84.2" y1="46.8" x2="89.9" y2="42.8" stroke="#333333" stroke-width="1.6"/>
+              <line x1="112.7" y1="87.4" x2="118.4" y2="83.4" stroke="#333333" stroke-width="1.6"/>
+              <line x1="46.8" y1="84.2" x2="42.8" y2="89.9" stroke="#333333" stroke-width="1.6"/>
+              <line x1="87.4" y1="112.7" x2="83.4" y2="118.4" stroke="#333333" stroke-width="1.6"/>
+              <circle cx="80" cy="80" r="3.2" fill="#222222"/>
+              <text x="74" y="81" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="end">O</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- [개념 배치 행 2] 개념 3 | 개념 4 -->
+      <section class="sec cols-2">
+        <div class="col">
+          <div>
+            <h3 class="head"><span class="no">3</span>원과 접선 및 접점</h3>
+            <p class="body ctx">① <b class="key" data-q="tangent_line">원의 접선</b>은 그 접점을 지나는 반지름과 서로 수직이다.</p>
+          </div>
+          <div class="fig-wrap">
+            <!-- [그림 3] 원과 접선 -->
+            <svg class="fig-svg" viewBox="0 0 180 155" aria-label="원의 접선과 접점">
+              <rect width="180" height="155" fill="#ffffff"/>
+              <circle cx="85" cy="56" r="42" fill="none" stroke="#555555" stroke-width="2"/>
+              <line x1="12" y1="98" x2="168" y2="98" stroke="#222222" stroke-width="2" stroke-linecap="round"/>
+              <line x1="85" y1="56" x2="85" y2="98" stroke="#222222" stroke-width="1.8"/>
+              <polyline points="85,89 94,89 94,98" fill="none" stroke="#333333" stroke-width="1.4"/>
+              <circle cx="85" cy="56" r="3.2" fill="#222222"/>
+              <text x="85" y="47" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">O</text>
+              <circle cx="85" cy="98" r="3.2" fill="#222222"/>
+              <g>
+                <path d="M 66,107 L 81,107 L 85,101 L 89,107 L 104,107 Q 108,107 108,111 L 108,127 Q 108,131 104,131 L 66,131 Q 62,131 62,127 L 62,111 Q 62,107 66,107 Z" fill="#ffffff" stroke="#64748b" stroke-width="1.3"/>
+                <text x="85" y="123.5" font-family="'Malgun Gothic', '맑은 고딕', sans-serif" font-size="11.5" font-weight="bold" fill="#1e293b" text-anchor="middle">접점</text>
+              </g>
+              <g>
+                <path d="M 124,64 L 162,64 Q 166,64 166,68 L 166,84 Q 166,88 162,88 L 147,88 L 143,94 L 139,88 L 124,88 Q 120,88 120,84 L 120,68 Q 120,64 124,64 Z" fill="#ffffff" stroke="#64748b" stroke-width="1.3"/>
+                <text x="143" y="80.5" font-family="'Malgun Gothic', '맑은 고딕', sans-serif" font-size="11.5" font-weight="bold" fill="#1e293b" text-anchor="middle">접선</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="col">
+          <div>
+            <h3 class="head"><span class="no">4</span>원과 접선의 길이 사이의 관계</h3>
+            <p class="body ctx">② 원 밖의 한 점에서 그은 <b class="key" data-q="two_tangents">두 접선</b>의 길이는 서로 같다.</p>
+            <div class="box ctx">
+              <span class="m"><span class="ol-line">PA</span> = <span class="ol-line">PB</span></span>
+            </div>
+          </div>
+          <div class="fig-wrap">
+            <!-- [그림 4] 접선의 길이 -->
+            <svg class="fig-svg" viewBox="0 0 180 150" aria-label="원 밖의 한 점에서 그은 두 접선의 길이">
+              <rect width="180" height="150" fill="#ffffff"/>
+              <circle cx="120" cy="75" r="44" fill="none" stroke="#555555" stroke-width="2"/>
+              <line x1="24" y1="75" x2="99.8" y2="35.9" stroke="#333333" stroke-width="2" stroke-linecap="round"/>
+              <line x1="24" y1="75" x2="99.8" y2="114.1" stroke="#333333" stroke-width="2" stroke-linecap="round"/>
+              <line x1="58.9" y1="53.1" x2="62.1" y2="59.3" stroke="#333333" stroke-width="1.6"/>
+              <line x1="61.7" y1="51.6" x2="64.9" y2="57.8" stroke="#333333" stroke-width="1.6"/>
+              <line x1="62.1" y1="90.7" x2="58.9" y2="96.9" stroke="#333333" stroke-width="1.6"/>
+              <line x1="64.9" y1="92.2" x2="61.7" y2="98.4" stroke="#333333" stroke-width="1.6"/>
+              <circle cx="120" cy="75" r="3" fill="#222222"/>
+              <text x="132" y="80" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222">O</text>
+              <text x="15" y="80" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="end">P</text>
+              <text x="100" y="24" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">A</text>
+              <text x="100" y="134" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">B</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- [활동 배치 행 1] 직접 움직여 보기 ① -->
+      <section class="sec explorer" id="explorer-1-1">
+        <div class="explorer-head">
+          <span class="tag">직접 움직여 보기 ①</span>
+          <p>현의 길이와 위치(회전)에 따른 수직이등분선의 성질 관찰</p>
+        </div>
+        <div class="explorer-grid">
+          <div class="explorer-vis">
+            <svg id="act1-svg" viewBox="0 0 240 210" role="img" aria-label="현의 수직이등분선 탐색 그래프"></svg>
+          </div>
+          <div class="explorer-ctrl">
+            <label class="slider">
+              <span>현의 길이</span>
+              <input id="sl-act1-len" type="range" min="36" max="126" step="2" value="84">
+            </label>
+            <label class="slider">
+              <span>현의 위치(회전)</span>
+              <input id="sl-act1-rot" type="range" min="0" max="360" step="2" value="30">
+            </label>
+            <div class="readout">
+              <div>현 <i class="m">AB</i>의 이등분: <b style="color:var(--ok)"><i class="m">AM = MB</i></b></div>
+              <div style="margin-top:2px; font-weight:700; color:var(--main-d)">수직이등분선은 항상 원의 중심 <i class="m">O</i>를 통과</div>
+              <p style="margin:4px 0 0; font-size:12px; color:var(--muted)">현의 길이나 원 위의 위치를 회전시켜도, 현의 수직이등분선은 항상 원의 중심 <i class="m">O</i>를 지나며 현을 정확히 이등분합니다.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- [활동 배치 행 2] 직접 움직여 보기 ② -->
+      <section class="sec explorer" id="explorer-1-2">
+        <div class="explorer-head">
+          <span class="tag">직접 움직여 보기 ②</span>
+          <p>중심과의 거리와 두 현의 길이 관계 관찰</p>
+        </div>
+        <div class="explorer-grid">
+          <div class="explorer-vis">
+            <svg id="act2-svg" viewBox="0 0 240 210" role="img" aria-label="두 현과 중심 거리 탐색 그래프"></svg>
+          </div>
+          <div class="explorer-ctrl">
+            <label class="slider"><span>중심 거리</span><input id="sl-act2-d" type="range" min="15" max="55" step="1" value="35"></label>
+            <label class="slider"><span>현 1(AB) 회전</span><input id="sl-act2-rot1" type="range" min="0" max="360" step="5" value="45"></label>
+            <label class="slider"><span>현 2(CD) 회전</span><input id="sl-act2-rot2" type="range" min="0" max="360" step="5" value="135"></label>
+            <div class="readout">
+              <div>중심과의 거리: <i class="m">OM = ON = </i><b id="val-act2-dist">35.0</b></div>
+              <div>현 <i class="m">AB</i>의 길이: <b id="val-act2-ab">121.2</b> &nbsp;|&nbsp; 현 <i class="m">CD</i>의 길이: <b id="val-act2-cd">121.2</b></div>
+              <div style="margin-top:2px; font-weight:800; color:var(--ok)"><i class="m">AB = CD</i> (중심과의 거리가 같으면 두 현의 길이는 항상 일치)</div>
+              <p style="margin:4px 0 0; font-size:12px; color:var(--muted)">두 현을 어느 방향으로 회전시켜도 원의 중심으로부터의 거리가 같으면 현의 길이가 같습니다.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- [활동 배치 행 3] 직접 움직여 보기 ③ -->
+      <section class="sec explorer" id="explorer-1-4">
+        <div class="explorer-head">
+          <span class="tag">직접 움직여 보기 ③</span>
+          <p>원 밖의 점에서 그은 두 접선의 길이 관계 관찰</p>
+        </div>
+        <div class="explorer-grid">
+          <div class="explorer-vis">
+            <svg id="act3-svg" viewBox="0 0 240 210" role="img" aria-label="두 접선 길이 탐색 그래프"></svg>
+          </div>
+          <div class="explorer-ctrl">
+            <label class="slider"><span>점 P 거리</span><input id="sl-act3-dist" type="range" min="65" max="115" step="1" value="88"></label>
+            <label class="slider"><span>점 P 회전</span><input id="sl-act3-rot" type="range" min="0" max="360" step="5" value="180"></label>
+            <div class="readout">
+              <div>접선 <i class="m">PA</i>의 길이 = <b id="val-act3-pa">74.2</b> &nbsp;|&nbsp; 접선 <i class="m">PB</i>의 길이 = <b id="val-act3-pb">74.2</b></div>
+              <div style="margin-top:2px; font-weight:800; color:var(--ok)"><i class="m">PA = PB</i> (두 접선의 길이는 항상 일치)</div>
+              <p style="margin:4px 0 0; font-size:12px; color:var(--muted)">점 <i class="m">P</i>를 회전시키거나 거리를 바꾸어도 원에 그은 두 접선의 길이는 완벽히 일치합니다.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= Ⅱ. 원주각 ================= -->
+      <div class="zone" data-sec="u5-2" data-toc="Ⅱ 원주각"><b>Ⅱ. 원주각</b></div>
+
+      <!-- [개념 배치 행 1] 개념 1 | 개념 2 -->
+      <section class="sec cols-2">
+        <div class="col">
+          <div>
+            <h3 class="head"><span class="no">1</span>중심각과 원주각 사이의 관계</h3>
+            <p class="body ctx">① 한 호에 대한 <b class="key" data-q="inscribed_ang1">원주각</b>의 크기는 <b class="key" data-q="central_ang1">중심각</b>의 크기의 <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> 이다.</p>
+            <p class="body ctx">② 한 호에 대한 모든 <b class="key" data-q="all_inscribed">원주각</b>의 크기는 같다.</p>
+          </div>
+          <div class="fig-wrap">
+            <!-- [그림 5] 중심각과 원주각 -->
+            <svg class="fig-svg" viewBox="0 0 180 180" aria-label="중심각과 원주각 사이의 관계">
+              <rect width="180" height="180" fill="#ffffff"/>
+              <circle cx="85" cy="85" r="60" fill="none" stroke="#555555" stroke-width="2"/>
+              <path d="M 42.6,127.4 A 60 60 0 0 0 127.4,127.4" fill="none" stroke="#d946ef" stroke-width="3.6" stroke-linecap="round"/>
+              <polyline points="42.6,127.4 85,85 127.4,127.4" stroke="#222222" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+              <polyline points="42.6,127.4 64.5,28.6 127.4,127.4" stroke="#222222" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+              <polyline points="42.6,127.4 143.0,69.5 127.4,127.4" stroke="#222222" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+              <circle cx="66.2" cy="38.5" r="1.8" fill="#d946ef"/>
+              <circle cx="136.9" cy="77.4" r="1.8" fill="#d946ef"/>
+              <circle cx="81" cy="94" r="1.8" fill="#d946ef"/>
+              <circle cx="89" cy="94" r="1.8" fill="#d946ef"/>
+              <circle cx="85" cy="85" r="3.2" fill="#222222"/>
+              <text x="74" y="85" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="end">O</text>
+              <text x="60" y="22" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">P</text>
+              <text x="154" y="73" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222">Q</text>
+              <text x="32" y="145" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="end">A</text>
+              <text x="138" y="145" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222">B</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="col">
+          <div>
+            <h3 class="head"><span class="no">2</span>한 원에서 원주각과 호의 길이의 관계</h3>
+            <p class="body ctx">① 한 원에서 같은 길이의 호에 대한 <b class="key" data-q="same_inscribed">원주각</b>의 크기는 서로 같다.</p>
+            <p class="body ctx">② 한 원에서 같은 크기의 원주각에 대한 <b class="key" data-q="arc_length">호</b>의 길이는 서로 같다.</p>
+            <p class="body ctx">③ 한 원에서 호의 길이는 그 호에 대한 중심각의 크기에 <b class="key" data-q="prop_central">정비례</b>하므로 호의 길이는 그 호에 대한 원주각의 크기에 <b class="key" data-q="prop_inscribed">정비례</b>한다.</p>
+          </div>
+          <div class="fig-wrap">
+            <!-- [그림 6] 원주각과 호의 길이 -->
+            <svg class="fig-svg" viewBox="0 0 170 170" aria-label="원주각과 호의 길이">
+              <rect width="170" height="170" fill="#ffffff"/>
+              <circle cx="85" cy="85" r="60" fill="none" stroke="#555555" stroke-width="2"/>
+              <path d="M 33.0,115.0 A 60 60 0 0 0 64.5,141.4" fill="none" stroke="#d946ef" stroke-width="3.2" stroke-linecap="round"/>
+              <path d="M 105.5,141.4 A 60 60 0 0 0 137.0,115.0" fill="none" stroke="#d946ef" stroke-width="3.2" stroke-linecap="round"/>
+              <line x1="50.2" y1="129.6" x2="45.7" y2="134.9" stroke="#333333" stroke-width="1.4"/>
+              <line x1="47.1" y1="127.0" x2="42.6" y2="132.4" stroke="#333333" stroke-width="1.4"/>
+              <line x1="122.9" y1="127.0" x2="127.4" y2="132.4" stroke="#333333" stroke-width="1.4"/>
+              <line x1="119.8" y1="129.6" x2="124.3" y2="134.9" stroke="#333333" stroke-width="1.4"/>
+              <polyline points="33.0,115.0 85,85 64.5,141.4" stroke="#222222" stroke-width="1.4" fill="none" stroke-linejoin="round"/>
+              <polyline points="105.5,141.4 85,85 137.0,115.0" stroke="#222222" stroke-width="1.4" fill="none" stroke-linejoin="round"/>
+              <path d="M 72.0,92.5 A 15 15 0 0 0 79.9,99.1" fill="none" stroke="#222222" stroke-width="1.3"/>
+              <path d="M 90.1,99.1 A 15 15 0 0 0 98.0,92.5" fill="none" stroke="#222222" stroke-width="1.3"/>
+              <polyline points="33.0,115.0 59.6,30.6 64.5,141.4" stroke="#222222" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+              <path d="M 54.2,47.8 A 18 18 0 0 0 60.4,48.6 L 59.6,30.6 Z" fill="#fbcfe8" stroke="#d946ef" stroke-width="1.2" stroke-linejoin="round"/>
+              <polyline points="105.5,141.4 110.4,30.6 137.0,115.0" stroke="#222222" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+              <path d="M 109.6,48.6 A 18 18 0 0 0 115.8,47.8 L 110.4,30.6 Z" fill="#fbcfe8" stroke="#d946ef" stroke-width="1.2" stroke-linejoin="round"/>
+              <circle cx="85" cy="85" r="3" fill="#222222"/>
+              <text x="85" y="78" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">O</text>
+              <text x="21" y="120" font-family="'Times New Roman', Cambria, serif" font-size="15" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">A</text>
+              <text x="61" y="156" font-family="'Times New Roman', Cambria, serif" font-size="15" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">B</text>
+              <text x="108" y="156" font-family="'Times New Roman', Cambria, serif" font-size="15" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">C</text>
+              <text x="148" y="120" font-family="'Times New Roman', Cambria, serif" font-size="15" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">D</text>
+              <text x="51" y="24" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">P</text>
+              <text x="119" y="24" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">Q</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- [개념 배치 행 2] 개념 3 | (우측 공란) -->
+      <section class="sec cols-2">
+        <div class="col">
+          <div>
+            <h3 class="head"><span class="no">3</span>원의 접선과 현이 이루는 각에 대한 관계</h3>
+            <p class="body ctx">원의 접선과 그 접점을 지나는 현이 이루는 각의 크기는 그 각의 내부에 있는 호에 대한 <b class="key" data-q="chord_tangent_angle">원주각</b>의 크기와 같다.</p>
+            <div class="box ctx"><span class="m">∠BAT = ∠BCA</span></div>
+          </div>
+          <div class="fig-wrap">
+            <!-- [그림 7] 접선과 현이 이루는 각 -->
+            <svg class="fig-svg" viewBox="0 0 170 160" aria-label="원의 접선과 현이 이루는 각">
+              <rect width="170" height="160" fill="#ffffff"/>
+              <circle cx="85" cy="75" r="55" fill="none" stroke="#555555" stroke-width="2"/>
+              <path d="M 30.2,79.8 L 45.8,70.8 A 18 18 0 0 1 43.5,92.0 Z" fill="#fbbf24" stroke="#d97706" stroke-width="1.2" stroke-linejoin="round"/>
+              <path d="M 85.0,130.0 L 103.0,130.0 A 18 18 0 0 0 90.4,112.8 Z" fill="#fbbf24" stroke="#d97706" stroke-width="1.2" stroke-linejoin="round"/>
+              <line x1="10" y1="130" x2="162" y2="130" stroke="#222222" stroke-width="1.8" stroke-linecap="round"/>
+              <polygon points="85.0,130.0 30.2,79.8 116.6,30.0" fill="none" stroke="#222222" stroke-width="1.8" stroke-linejoin="round"/>
+              <circle cx="85" cy="75" r="3" fill="#222222"/>
+              <circle cx="145" cy="130" r="2.8" fill="#222222"/>
+              <text x="73" y="78" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">O</text>
+              <text x="85" y="146" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">A</text>
+              <text x="118" y="21" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">B</text>
+              <text x="16" y="83" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">C</text>
+              <text x="145" y="146" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">T</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 우측 열: 자연스러운 여백 (공란) -->
+        <div class="col" style="border-left:none"></div>
+      </section>
+
+      <!-- [활동 배치 행 1] 직접 움직여 보기 ④ -->
+      <section class="sec explorer" id="explorer-2-1">
+        <div class="explorer-head">
+          <span class="tag">직접 움직여 보기 ④</span>
+          <p>원주각 ↔ 중심각 관계 관찰</p>
+        </div>
+        <div class="explorer-grid">
+          <div class="explorer-vis">
+            <svg id="inscribed-svg" viewBox="0 0 220 220" role="img" aria-label="원주각 탐색기"></svg>
+          </div>
+          <div class="explorer-ctrl">
+            <label class="slider"><span>중심각 호</span><input id="sl-arc" type="range" min="40" max="160" step="10" value="100"></label>
+            <label class="slider"><span>점 P 위치</span><input id="sl-p" type="range" min="190" max="350" step="5" value="270"></label>
+            <div class="readout">
+              <div>호 <i class="m">AB</i>의 중심각: <b id="val-center">100°</b></div>
+              <div>호 <i class="m">AB</i>의 원주각 (<i class="m">∠APB</i>): <b id="val-inscribed">50°</b></div>
+              <p style="margin:4px 0 0; font-size:12px; color:var(--muted)">점 <i class="m">P</i>를 원주 위에서 움직여도 원주각의 크기는 중심각의 <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math>로 일정합니다.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- [활동 배치 행 2] 직접 움직여 보기 ⑤ -->
+      <section class="sec explorer" id="explorer-2-2">
+        <div class="explorer-head">
+          <span class="tag">직접 움직여 보기 ⑤</span>
+          <p>호의 길이와 원주각의 정비례 관계 관찰</p>
+        </div>
+        <div class="explorer-grid">
+          <div class="explorer-vis">
+            <svg id="act5-svg" viewBox="0 0 240 210" role="img" aria-label="호와 원주각 비례 탐색 그래프"></svg>
+          </div>
+          <div class="explorer-ctrl">
+            <label class="slider"><span>호 AB 중심각</span><input id="sl-act5-arc1" type="range" min="20" max="80" step="5" value="40"></label>
+            <label class="slider"><span>호 CD 중심각</span><input id="sl-act5-arc2" type="range" min="20" max="80" step="5" value="40"></label>
+            <div class="readout">
+              <div>호 <i class="m">AB</i> (중심각 <span id="val-act5-c1">40°</span>) → 원주각 <i class="m">∠APB = </i><b id="val-act5-i1">20°</b></div>
+              <div>호 <i class="m">CD</i> (중심각 <span id="val-act5-c2">40°</span>) → 원주각 <i class="m">∠CQD = </i><b id="val-act5-i2">20°</b></div>
+              <div id="val-act5-msg" style="margin-top:3px; font-weight:800; color:var(--ok)">호의 길이가 같으므로 두 원주각의 크기가 같습니다!</div>
+              <p style="margin:4px 0 0; font-size:12px; color:var(--muted)">슬라이더를 움직여 호의 길이가 늘어나는 배수만큼 원주각도 정비례함을 확인하세요.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- [활동 배치 행 3] 직접 움직여 보기 ⑥ -->
+      <section class="sec explorer" id="explorer-2-3">
+        <div class="explorer-head">
+          <span class="tag">직접 움직여 보기 ⑥</span>
+          <p>접선과 현이 이루는 각(접현각)과 원주각의 관계 관찰</p>
+        </div>
+        <div class="explorer-grid">
+          <div class="explorer-vis">
+            <svg id="act6-svg" viewBox="0 0 240 210" role="img" aria-label="접현각 탐색 그래프"></svg>
+          </div>
+          <div class="explorer-ctrl">
+            <label class="slider"><span>현 AB (점 B)</span><input id="sl-act6-b" type="range" min="-50" max="30" step="2" value="-10"></label>
+            <label class="slider"><span>원주각 점 C</span><input id="sl-act6-c" type="range" min="130" max="230" step="5" value="180"></label>
+            <div class="readout">
+              <div>접선과 현이 이루는 각 (<i class="m">∠BAT</i>): <b id="val-act6-bat">50°</b></div>
+              <div>그 호에 대한 원주각 (<i class="m">∠BCA</i>): <b id="val-act6-bca">50°</b></div>
+              <div style="margin-top:2px; font-weight:800; color:var(--ok)"><i class="m">∠BAT = ∠BCA</i> (항상 두 각의 크기 일치)</div>
+              <p style="margin:4px 0 0; font-size:12px; color:var(--muted)">점 <i class="m">C</i>를 호 위에서 자유롭게 옮겨도 주황색 원주각은 접현각과 항상 동일합니다.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= Ⅲ. 내접사각형 ================= -->
+      <div class="zone" data-sec="u5-3" data-toc="Ⅲ 내접사각형"><b>Ⅲ. 내접사각형</b></div>
+
+      <!-- [개념 배치 행 1] 개념 1 | 개념 2 -->
+      <section class="sec cols-2">
+        <div class="col">
+          <div>
+            <h3 class="head"><span class="no">1</span>네 점이 한 원 위에 있을 조건</h3>
+            <p class="body ctx">두 점 C, D가 직선 AB에 대하여 같은 쪽에 있을 때,</p>
+            <p class="body ctx">∠ACB = ∠ADB 이면 네 점 A, B, C, D는 <b class="key" data-q="on_one_circle">한 원 위</b>에 있다.</p>
+          </div>
+          <div class="fig-wrap">
+            <!-- [그림 8] 네 점이 한 원 위에 있을 조건 -->
+            <svg class="fig-svg" viewBox="0 0 170 160" aria-label="네 점이 한 원 위에 있을 조건">
+              <rect width="170" height="160" fill="#ffffff"/>
+              <circle cx="85" cy="85" r="60" fill="none" stroke="#666666" stroke-width="1.8" stroke-dasharray="4 3"/>
+              <path d="M 37.7,66.5 A 16 16 0 0 0 47.8,61.3 L 35.9,50.6 Z" fill="#fbcfe8" stroke="#d946ef" stroke-width="1.2" stroke-linejoin="round"/>
+              <path d="M 109.5,48.4 A 16 16 0 0 0 120.3,51.8 L 119.4,35.9 Z" fill="#fbcfe8" stroke="#d946ef" stroke-width="1.2" stroke-linejoin="round"/>
+              <line x1="12" y1="130" x2="158" y2="130" stroke="#222222" stroke-width="1.8" stroke-linecap="round"/>
+              <polyline points="45.3,130.0 35.9,50.6 124.7,130.0" stroke="#222222" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+              <polyline points="45.3,130.0 119.4,35.9 124.7,130.0" stroke="#222222" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+              <text x="45" y="146" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">A</text>
+              <text x="125" y="146" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">B</text>
+              <text x="26" y="47" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">C</text>
+              <text x="127" y="30" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">D</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="col">
+          <div>
+            <h3 class="head"><span class="no">2</span>원에 내접하는 사각형의 성질</h3>
+            <p class="body ctx">원에 내접하는 사각형에서 마주 보는 <b class="key" data-q="two_opposite_angles">두 내각</b>의 크기의 합은 180°이다.</p>
+            <div class="box ctx"><span class="m">∠A + ∠C = 180°</span>, &nbsp; <span class="m">∠B + ∠D = 180°</span></div>
+          </div>
+          <div class="fig-wrap">
+            <!-- [그림 9] 내접하는 사각형의 대각 -->
+            <svg class="fig-svg" viewBox="0 0 170 170" aria-label="원에 내접하는 사각형">
+              <rect width="170" height="170" fill="#ffffff"/>
+              <circle cx="85" cy="85" r="60" fill="none" stroke="#555555" stroke-width="2"/>
+              <path d="M 62.4,40.4 A 16 16 0 0 1 45.0,55.0 L 46.4,39.0 Z" fill="#fbcfe8" stroke="#d946ef" stroke-width="1.2" stroke-linejoin="round"/>
+              <path d="M 115.0,123.6 A 16 16 0 0 1 131.0,107.6 L 131.0,123.6 Z" fill="#fbcfe8" stroke="#d946ef" stroke-width="1.2" stroke-linejoin="round"/>
+              <path d="M 40.4,107.6 A 16 16 0 0 1 55.0,123.6 L 39.0,123.6 Z" fill="#bae6fd" stroke="#0284c7" stroke-width="1.2" stroke-linejoin="round"/>
+              <path d="M 131.0,62.4 A 16 16 0 0 1 115.0,45.0 L 131.0,46.4 Z" fill="#bae6fd" stroke="#0284c7" stroke-width="1.2" stroke-linejoin="round"/>
+              <polygon points="46.4,39.0 39.0,123.6 131.0,123.6 131.0,46.4" fill="none" stroke="#222222" stroke-width="1.8" stroke-linejoin="round"/>
+              <text x="34" y="32" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">A</text>
+              <text x="26" y="132" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">B</text>
+              <text x="144" y="132" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">C</text>
+              <text x="144" y="32" font-family="'Times New Roman', Cambria, serif" font-size="16" font-style="normal" font-weight="bold" fill="#222222" text-anchor="middle">D</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- [활동 배치 행 1] 직접 움직여 보기 ⑦ -->
+      <section class="sec explorer" id="explorer-3-2">
+        <div class="explorer-head">
+          <span class="tag">직접 움직여 보기 ⑦</span>
+          <p>내접사각형 네 점 조절 및 각 모으기 애니메이션</p>
+        </div>
+        <div class="explorer-grid">
+          <div class="explorer-vis">
+            <svg id="quad-compact-svg" viewBox="0 0 380 230" role="img" aria-label="내접사각형 대각 모으기 탐색기" style="max-width:360px"></svg>
+          </div>
+          <div class="explorer-ctrl">
+            <label class="slider" style="grid-template-columns:85px minmax(0,1fr); font-weight:800; color:var(--main-d)">
+              <span>각 모으기</span>
+              <input id="sl-quad-gather" type="range" min="0" max="100" step="1" value="0">
+            </label>
+            <!-- 네 점 A, B, C, D 위치 제어 4개 슬라이더 -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 14px; margin-top:8px; padding:8px 10px; border-radius:10px; background:var(--tint)">
+              <label class="slider" style="grid-template-columns:46px minmax(0,1fr); margin:0; font-size:13px">
+                <span style="font-weight:700; color:#ef4444">점 A</span>
+                <input id="sl-quad-a" type="range" min="195" max="255" step="1" value="225">
+              </label>
+              <label class="slider" style="grid-template-columns:46px minmax(0,1fr); margin:0; font-size:13px">
+                <span style="font-weight:700; color:#2563eb">점 B</span>
+                <input id="sl-quad-b" type="range" min="105" max="170" step="1" value="135">
+              </label>
+              <label class="slider" style="grid-template-columns:46px minmax(0,1fr); margin:0; font-size:13px">
+                <span style="font-weight:700; color:#ef4444">점 C</span>
+                <input id="sl-quad-c" type="range" min="20" max="80" step="1" value="45">
+              </label>
+              <label class="slider" style="grid-template-columns:46px minmax(0,1fr); margin:0; font-size:13px">
+                <span style="font-weight:700; color:#2563eb">점 D</span>
+                <input id="sl-quad-d" type="range" min="285" max="345" step="1" value="315">
+              </label>
+            </div>
+            <div class="readout" style="padding:10px 12px; margin-top:8px">
+              <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px; font-size:13.5px">
+                <span style="color:#b91c1c; font-weight:700"><i class="m">∠A = </i><span id="val-angA">90°</span>, <i class="m">∠C = </i><span id="val-angC">90°</span></span>
+                <span style="color:#b91c1c; font-weight:800">합 = 180°</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px; font-size:13.5px; margin-top:2px">
+                <span style="color:#1d4ed8; font-weight:700"><i class="m">∠B = </i><span id="val-angB">90°</span>, <i class="m">∠D = </i><span id="val-angD">90°</span></span>
+                <span style="color:#1d4ed8; font-weight:800">합 = 180°</span>
+              </div>
+              <p style="margin:5px 0 0; font-size:12px; color:var(--muted)">네 점의 위치를 바꾸어도 대각끼리 모이면 각각 항상 정확히 180° 평각(반원)을 이룹니다.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <!-- ================= 퀴즈 탭 ================= -->
+  <section class="tab-panel" id="quiz-panel" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+    <p class="quiz-guide">💡 <b>?</b> 빈칸을 눌러 정답을 입력하세요. 다 채웠으면 맨 아래 <b>[정답 확인]</b>!</p>
+    <nav class="toc" id="quiz-toc" aria-label="단원 차례"></nav>
+    <div id="quiz-body"></div>
+    <div class="quiz-bar">
+      <button id="quiz-check" class="btn primary" type="button">정답 확인</button>
+      <button id="quiz-reset" class="btn" type="button">다시 풀기</button>
+      <p id="quiz-summary" class="quiz-summary" aria-live="polite"></p>
+    </div>
+    <aside class="mid-check" aria-label="중간 점검">
+      <div class="mid-progress"><span>채운 빈칸</span><b><span id="mid-filled">0</span> / <span id="mid-total">0</span></b></div>
+      <div class="mid-bar" aria-hidden="true"><span id="mid-bar-fill"></span></div>
+      <p class="mid-result" id="mid-result" aria-live="polite" hidden></p>
+      <button id="mid-check" class="mid-btn" type="button">✔ 중간 점검</button>
+    </aside>
+  </section>
+
+  <!-- ================= 게임 탭 ================= -->
+  <section class="tab-panel" id="game-panel" role="tabpanel" aria-labelledby="tab-game" hidden>
+    <div class="game" id="game-root">
+      <div id="hub-menu">
+        <div class="game-top">
+          <h2 class="game-title">🎮 개념 게임</h2>
+          <div class="mode-switch" role="radiogroup" aria-label="플레이 방식">
+            <button type="button" role="radio" data-mode="solo" class="btn primary" id="btn-solo">👤 개인</button>
+            <button type="button" role="radio" data-mode="team" class="btn" id="btn-team">👥 팀 대결</button>
+          </div>
+        </div>
+        <p class="quiz-guide" style="margin-top:14px; border-radius:12px">원의 성질을 복습하는 미니게임 챌린지입니다!</p>
+        <div class="hub-cards" id="hub-cards"></div>
+      </div>
+      <div id="hub-play" hidden>
+        <div class="game-top">
+          <button type="button" class="btn" id="hub-back">← 게임 목록</button>
+          <h3 id="hub-play-title" style="margin:0"></h3>
+          <div class="g-stats" id="hub-stats"></div>
+        </div>
+        <div class="teambar" id="teambar" hidden>
+          <div class="team" data-team="0"><span>1팀</span><b id="score-team0">0</b></div>
+          <span style="font-weight:900">VS</span>
+          <div class="team" data-team="1"><span>2팀</span><b id="score-team1">0</b></div>
+        </div>
+        <div id="hub-stage" style="margin-top:18px"></div>
+      </div>
+      <div id="hub-result" class="g-end" hidden></div>
+    </div>
+  </section>
+</main>
+
+<!-- 모달 창: 주관식 -->
+<div class="modal" id="text-modal" role="dialog" aria-modal="true" hidden>
+  <div class="dialog">
+    <h2>빈칸에 알맞은 말을 입력하세요</h2>
+    <div class="ctx-view" id="text-ctx"></div>
+    <div class="actions">
+      <button type="button" data-close>취소</button>
+      <button type="button" class="confirm" id="text-confirm">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 모달 창: 객관식 -->
+<div class="modal" id="choice-modal" role="dialog" aria-modal="true" hidden>
+  <div class="dialog">
+    <h2>빈칸에 알맞은 것을 고르세요</h2>
+    <div class="ctx-view" id="choice-ctx"></div>
+    <div class="choices" id="choice-list" role="radiogroup"></div>
+    <div class="actions">
+      <button type="button" data-close>취소</button>
+      <button type="button" class="confirm" id="choice-confirm">확인</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite">참 잘했어요! 🎉</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  /* ---------- 퀴즈 문항 데이터베이스 ---------- */
+  const QUIZ = [
+    { id: "bisect_chord", type: "text", answers: ["이등분"] },
+    { id: "circle_center", type: "text", answers: ["중심", "원의 중심"] },
+    { id: "two_chords", type: "text", answers: ["두 현", "두현"] },
+    { id: "dist_center", type: "text", answers: ["원의 중심", "중심"] },
+    { id: "tangent_line", type: "text", answers: ["원의 접선", "접선"] },
+    { id: "two_tangents", type: "text", answers: ["두 접선", "두접선"] },
+    { id: "inscribed_ang1", type: "text", answers: ["원주각"] },
+    { id: "central_ang1", type: "text", answers: ["중심각"] },
+    { id: "all_inscribed", type: "text", answers: ["원주각"] },
+    { id: "same_inscribed", type: "text", answers: ["원주각"] },
+    { id: "arc_length", type: "text", answers: ["호", "호의 길이"] },
+    { id: "prop_central", type: "text", answers: ["정비례"] },
+    { id: "prop_inscribed", type: "text", answers: ["정비례"] },
+    { id: "chord_tangent_angle", type: "text", answers: ["원주각"] },
+    { id: "on_one_circle", type: "text", answers: ["한 원 위", "한원위", "한 원 위에"] },
+    { id: "two_opposite_angles", type: "text", answers: ["두 내각", "두내각", "마주 보는 두 각"] }
+  ];
+  const QUIZ_BY_ID = Object.fromEntries(QUIZ.map(q => [q.id, q]));
+
+  const quizBody = $('#quiz-body');
+  const checkBtn = $('#quiz-check');
+  const summary = $('#quiz-summary');
+  let activeBlank = null, pickedChoice = null;
+
+  function buildQuiz() {
+    const clone = $('#study-content').cloneNode(true);
+    clone.removeAttribute('id');
+    // 퀴즈 화면에서는 모든 활동(.explorer) 영역을 제거하여 개념 박스들만 깔끔하게 표시
+    $$('.explorer', clone).forEach(el => el.remove());
+
+    QUIZ.forEach(item => {
+      const src = clone.querySelector(`[data-q="${item.id}"]`);
+      if (!src) return;
+      const cloze = document.createElement('span');
+      cloze.className = 'cloze';
+      src.replaceWith(cloze);
+      src.classList.add('ans-src');
+      cloze.append(src);
+
+      const blank = document.createElement('button');
+      blank.type = 'button';
+      blank.className = 'blank';
+      blank.dataset.qid = item.id;
+      blank.textContent = '?';
+      cloze.append(blank);
+    });
+
+    quizBody.replaceChildren(clone);
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const blanks = $$('.blank', quizBody);
+    const filled = blanks.filter(b => b.dataset.value !== undefined).length;
+    $('#mid-filled').textContent = filled;
+    $('#mid-total').textContent = blanks.length;
+    $('#mid-bar-fill').style.width = `${blanks.length ? (filled / blanks.length) * 100 : 0}%`;
+  }
+
+  function contextView(blank, activeNode) {
+    const ctx = blank.closest('.ctx') || blank.parentElement;
+    const copy = ctx.cloneNode(true);
+    const originals = $$('.cloze', ctx);
+    $$('.cloze', copy).forEach((cloze, i) => {
+      if (originals[i] && originals[i].contains(blank)) {
+        cloze.replaceWith(activeNode);
+      } else {
+        const other = cloze.querySelector('.blank');
+        const span = document.createElement('span');
+        span.style.padding = '0 6px';
+        span.style.borderBottom = '2px solid var(--muted)';
+        span.textContent = other ? other.textContent : '?';
+        cloze.replaceWith(span);
+      }
+    });
+    return copy;
+  }
+
+  quizBody.addEventListener('click', e => {
+    const blank = e.target.closest('.blank');
+    if (!blank) return;
+    activeBlank = blank;
+    const item = QUIZ_BY_ID[blank.dataset.qid];
+    if (item.type === 'text') {
+      const input = document.createElement('input');
+      input.className = 'ctx-input';
+      input.id = 'modal-text-input';
+      input.value = blank.dataset.value || '';
+      $('#text-ctx').replaceChildren(contextView(blank, input));
+      $('#text-modal').hidden = false;
+      input.focus();
+    } else {
+      pickedChoice = blank.dataset.pick !== undefined ? +blank.dataset.pick : null;
+      const preview = document.createElement('span');
+      preview.style.color = 'var(--coral)';
+      preview.style.fontWeight = 'bold';
+      preview.textContent = pickedChoice !== null ? item.options[pickedChoice] : '?';
+      $('#choice-ctx').replaceChildren(contextView(blank, preview));
+      const list = $('#choice-list');
+      list.innerHTML = '';
+      item.order.forEach((optIdx, n) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'choice';
+        b.setAttribute('aria-checked', String(optIdx === pickedChoice));
+        b.innerHTML = `<span>${n + 1}.</span> <span>${item.options[optIdx]}</span>`;
+        b.onclick = () => {
+          pickedChoice = optIdx;
+          $$('.choice', list).forEach(c => c.setAttribute('aria-checked', 'false'));
+          b.setAttribute('aria-checked', 'true');
+          preview.textContent = item.options[optIdx];
+        };
+        list.append(b);
+      });
+      $('#choice-modal').hidden = false;
+    }
+  });
+
+  $('#text-confirm').onclick = () => {
+    const val = $('#modal-text-input').value.trim();
+    if (activeBlank) {
+      if (val) { activeBlank.dataset.value = val; activeBlank.textContent = val; }
+      else { delete activeBlank.dataset.value; activeBlank.textContent = '?'; }
+      activeBlank.classList.remove('ok', 'bad');
+    }
+    $('#text-modal').hidden = true;
+    updateProgress();
+  };
+
+  $('#choice-confirm').onclick = () => {
+    if (activeBlank && pickedChoice !== null) {
+      const item = QUIZ_BY_ID[activeBlank.dataset.qid];
+      activeBlank.dataset.value = item.options[pickedChoice];
+      activeBlank.dataset.pick = pickedChoice;
+      activeBlank.textContent = item.options[pickedChoice];
+      activeBlank.classList.remove('ok', 'bad');
+    }
+    $('#choice-modal').hidden = true;
+    updateProgress();
+  };
+
+  $$('[data-close]').forEach(b => b.onclick = () => { $('#text-modal').hidden = true; $('#choice-modal').hidden = true; });
+
+  const norm = s => s.replace(/\s+/g, '').replace(/[°]/g, '').toLowerCase();
+
+  function grade() {
+    let total = 0, correct = 0, empty = 0;
+    $$('.blank', quizBody).forEach(blank => {
+      total++;
+      const item = QUIZ_BY_ID[blank.dataset.qid];
+      if (!blank.dataset.value) { empty++; blank.classList.remove('ok', 'bad'); return; }
+      const ok = item.type === 'text'
+        ? item.answers.some(a => norm(a) === norm(blank.dataset.value))
+        : +blank.dataset.pick === item.answer;
+      blank.classList.toggle('ok', ok);
+      blank.classList.toggle('bad', !ok);
+      if (ok) correct++;
+    });
+    return { total, correct, empty };
+  }
+
+  checkBtn.onclick = () => {
+    const { total, correct, empty } = grade();
+    summary.textContent = `${total}개 중 ${correct}개 정답${empty ? ` (미응답 ${empty}개)` : ''}`;
+    if (correct === total) {
+      const toast = $('#toast');
+      toast.classList.remove('show');
+      void toast.offsetWidth;
+      toast.classList.add('show');
+    }
+  };
+
+  $('#mid-check').onclick = () => {
+    const { total, correct, empty } = grade();
+    const res = $('#mid-result');
+    const filled = total - empty;
+    res.hidden = false;
+    if (filled === 0) { res.className = 'mid-result warn'; res.textContent = '먼저 빈칸을 채워주세요.'; }
+    else if (correct === filled) { res.className = 'mid-result good'; res.textContent = `채운 ${filled}개 모두 정답! 👍`; }
+    else { res.className = 'mid-result warn'; res.textContent = `${filled}개 중 ${correct}개 정답. 빨간 칸을 확인하세요!`; }
+  };
+
+  $('#quiz-reset').onclick = buildQuiz;
+
+  /* ---------- 직접 움직여 보기 ①: 현의 수직이등분선과 중심 O (길이 및 회전) ---------- */
+  function initActivity1() {
+    const svg = $('#act1-svg'), slLen = $('#sl-act1-len'), slRot = $('#sl-act1-rot');
+    if (!svg || !slLen || !slRot) return;
+
+    function update() {
+      const L = +slLen.value;
+      const rotDeg = +slRot.value;
+      const cx = 120, cy = 105, R = 68;
+      const h = L / 2;
+      const d = Math.sqrt(Math.max(0, R * R - h * h));
+      const theta = rotDeg * Math.PI / 180;
+
+      // 현의 중점 M
+      const mx = cx + d * Math.cos(theta);
+      const my = cy + d * Math.sin(theta);
+
+      // 현의 양 끝점 A, B
+      const ax = mx - h * Math.sin(theta);
+      const ay = my + h * Math.cos(theta);
+      const bx = mx + h * Math.sin(theta);
+      const by = my - h * Math.cos(theta);
+
+      // 수직이등분선: 중심 O를 통과
+      const ext = 88;
+      const lx1 = cx - ext * Math.cos(theta);
+      const ly1 = cy - ext * Math.sin(theta);
+      const lx2 = cx + ext * Math.cos(theta);
+      const ly2 = cy + ext * Math.sin(theta);
+
+      // 직각 기호
+      const sz = 7;
+      const u_n_x = Math.cos(theta), u_n_y = Math.sin(theta);
+      const u_t_x = Math.sin(theta), u_t_y = -Math.cos(theta);
+      const p1x = mx - sz * u_n_x, p1y = my - sz * u_n_y;
+      const p2x = mx - sz * u_n_x + sz * u_t_x, p2y = my - sz * u_n_y + sz * u_t_y;
+      const p3x = mx + sz * u_t_x, p3y = my + sz * u_t_y;
+
+      // 이등분 쌍줄 표시
+      const m1x = (ax + mx) / 2, m1y = (ay + my) / 2;
+      const m2x = (bx + mx) / 2, m2y = (by + my) / 2;
+      const sp = 1.3, tl = 3.5;
+
+      svg.innerHTML = `
+        <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#64748b" stroke-width="2"/>
+        <line x1="${lx1.toFixed(1)}" y1="${ly1.toFixed(1)}" x2="${lx2.toFixed(1)}" y2="${ly2.toFixed(1)}" stroke="#222" stroke-width="1.8"/>
+        <line x1="${ax.toFixed(1)}" y1="${ay.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="#d946ef" stroke-width="2.8" stroke-linecap="round"/>
+        <polyline points="${p1x.toFixed(1)},${p1y.toFixed(1)} ${p2x.toFixed(1)},${p2y.toFixed(1)} ${p3x.toFixed(1)},${p3y.toFixed(1)}" fill="none" stroke="#333" stroke-width="1.3"/>
+        <line x1="${(m1x - sp*u_t_x - tl*u_n_x).toFixed(1)}" y1="${(m1y - sp*u_t_y - tl*u_n_y).toFixed(1)}" x2="${(m1x - sp*u_t_x + tl*u_n_x).toFixed(1)}" y2="${(m1y - sp*u_t_y + tl*u_n_x).toFixed(1)}" stroke="#333" stroke-width="1.5"/>
+        <line x1="${(m1x + sp*u_t_x - tl*u_n_x).toFixed(1)}" y1="${(m1y + sp*u_t_y - tl*u_n_y).toFixed(1)}" x2="${(m1x + sp*u_t_x + tl*u_n_x).toFixed(1)}" y2="${(m1y + sp*u_t_y + tl*u_n_x).toFixed(1)}" stroke="#333" stroke-width="1.5"/>
+        <line x1="${(m2x - sp*u_t_x - tl*u_n_x).toFixed(1)}" y1="${(m2y - sp*u_t_y - tl*u_n_y).toFixed(1)}" x2="${(m2x - sp*u_t_x + tl*u_n_x).toFixed(1)}" y2="${(m2y - sp*u_t_y + tl*u_n_x).toFixed(1)}" stroke="#333" stroke-width="1.5"/>
+        <line x1="${(m2x + sp*u_t_x - tl*u_n_x).toFixed(1)}" y1="${(m2y + sp*u_t_y - tl*u_n_y).toFixed(1)}" x2="${(m2x + sp*u_t_x + tl*u_n_x).toFixed(1)}" y2="${(m2y + sp*u_t_y + tl*u_n_x).toFixed(1)}" stroke="#333" stroke-width="1.5"/>
+        <circle cx="${cx}" cy="${cy}" r="3.2" fill="#222"/>
+        <text x="${cx - 8}" y="${cy - 4}" font-size="14">O</text>
+        <circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="3" fill="#222"/>
+        <text x="${(ax + 12 * (ax - cx)/R).toFixed(1)}" y="${(ay + 12 * (ay - cy)/R + 4).toFixed(1)}" font-size="13" text-anchor="middle">A</text>
+        <circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="3" fill="#222"/>
+        <text x="${(bx + 12 * (bx - cx)/R).toFixed(1)}" y="${(by + 12 * (by - cy)/R + 4).toFixed(1)}" font-size="13" text-anchor="middle">B</text>
+        <circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="2.8" fill="#222"/>
+        <text x="${(mx + 8*u_t_x).toFixed(1)}" y="${(my + 8*u_t_y + 4).toFixed(1)}" font-size="12" text-anchor="middle">M</text>
+      `;
+    }
+    slLen.oninput = update;
+    slRot.oninput = update;
+    update();
+  }
+
+  /* ---------- 직접 움직여 보기 ②: 중심과의 거리와 두 현의 길이 ---------- */
+  function initActivity2() {
+    const svg = $('#act2-svg'), slD = $('#sl-act2-d'), slR1 = $('#sl-act2-rot1'), slR2 = $('#sl-act2-rot2');
+    if (!svg || !slD) return;
+
+    function update() {
+      const d = +slD.value, r1 = +slR1.value, r2 = +slR2.value;
+      const cx = 120, cy = 105, r = 70;
+      const h = Math.sqrt(Math.max(0, r * r - d * d));
+      $('#val-act2-dist').textContent = d.toFixed(1);
+      $('#val-act2-ab').textContent = (h * 2).toFixed(1);
+      $('#val-act2-cd').textContent = (h * 2).toFixed(1);
+
+      function getChordPoints(rotDeg) {
+        const rad = rotDeg * Math.PI / 180;
+        const mx = cx + d * Math.cos(rad), my = cy + d * Math.sin(rad);
+        const ux = -Math.sin(rad), uy = Math.cos(rad);
+        const nx = Math.cos(rad), ny = Math.sin(rad);
+        return {
+          mx, my, rad,
+          p1x: mx - h * ux, p1y: my - h * uy,
+          p2x: mx + h * ux, p2y: my + h * uy,
+          ux, uy, nx, ny
+        };
+      }
+
+      const c1 = getChordPoints(r1);
+      const c2 = getChordPoints(r2);
+      const sz = 6.5, sp = 1.4, tl = 3.5;
+
+      const sq1_a = { x: c1.mx - sz * c1.nx, y: c1.my - sz * c1.ny };
+      const sq1_b = { x: c1.mx - sz * c1.nx + sz * c1.ux, y: c1.my - sz * c1.ny + sz * c1.uy };
+      const sq1_c = { x: c1.mx + sz * c1.ux, y: c1.my + sz * c1.uy };
+
+      const sq2_a = { x: c2.mx - sz * c2.nx, y: c2.my - sz * c2.ny };
+      const sq2_b = { x: c2.mx - sz * c2.nx + sz * c2.ux, y: c2.my - sz * c2.ny + sz * c2.uy };
+      const sq2_c = { x: c2.mx + sz * c2.ux, y: c2.my + sz * c2.uy };
+
+      const mom1 = { x: (cx + c1.mx) / 2, y: (cy + c1.my) / 2 };
+      const mom2 = { x: (cx + c2.mx) / 2, y: (cy + c2.my) / 2 };
+
+      const m_am = { x: (c1.p1x + c1.mx) / 2, y: (c1.p1y + c1.my) / 2 };
+      const m_mb = { x: (c1.p2x + c1.mx) / 2, y: (c1.p2y + c1.my) / 2 };
+      const m_cn = { x: (c2.p1x + c2.mx) / 2, y: (c2.p1y + c2.my) / 2 };
+      const m_nd = { x: (c2.p2x + c2.mx) / 2, y: (c2.p2y + c2.my) / 2 };
+
+      svg.innerHTML = `
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#64748b" stroke-width="2"/>
+        <line x1="${cx}" y1="${cy}" x2="${c1.mx.toFixed(1)}" y2="${c1.my.toFixed(1)}" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="${cx}" y1="${cy}" x2="${c2.mx.toFixed(1)}" y2="${c2.my.toFixed(1)}" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round"/>
+
+        <polyline points="${sq1_a.x.toFixed(1)},${sq1_a.y.toFixed(1)} ${sq1_b.x.toFixed(1)},${sq1_b.y.toFixed(1)} ${sq1_c.x.toFixed(1)},${sq1_c.y.toFixed(1)}" fill="none" stroke="#333" stroke-width="1.3"/>
+        <polyline points="${sq2_a.x.toFixed(1)},${sq2_a.y.toFixed(1)} ${sq2_b.x.toFixed(1)},${sq2_b.y.toFixed(1)} ${sq2_c.x.toFixed(1)},${sq2_c.y.toFixed(1)}" fill="none" stroke="#333" stroke-width="1.3"/>
+
+        <line x1="${(mom1.x - sp*c1.nx - tl*c1.ux).toFixed(1)}" y1="${(mom1.y - sp*c1.ny - tl*c1.uy).toFixed(1)}" x2="${(mom1.x - sp*c1.nx + tl*c1.ux).toFixed(1)}" y2="${(mom1.y - sp*c1.ny + tl*c1.uy).toFixed(1)}" stroke="#222" stroke-width="1.4"/>
+        <line x1="${(mom1.x + sp*c1.nx - tl*c1.ux).toFixed(1)}" y1="${(mom1.y + sp*c1.ny - tl*c1.uy).toFixed(1)}" x2="${(mom1.x + sp*c1.nx + tl*c1.ux).toFixed(1)}" y2="${(mom1.y + sp*c1.ny + tl*c1.uy).toFixed(1)}" stroke="#222" stroke-width="1.4"/>
+
+        <line x1="${(mom2.x - sp*c2.nx - tl*c2.ux).toFixed(1)}" y1="${(mom2.y - sp*c2.ny - tl*c2.uy).toFixed(1)}" x2="${(mom2.x - sp*c2.nx + tl*c2.ux).toFixed(1)}" y2="${(mom2.y - sp*c2.ny + tl*c2.uy).toFixed(1)}" stroke="#222" stroke-width="1.4"/>
+        <line x1="${(mom2.x + sp*c2.nx - tl*c2.ux).toFixed(1)}" y1="${(mom2.y + sp*c2.ny - tl*c2.uy).toFixed(1)}" x2="${(mom2.x + sp*c2.nx + tl*c2.ux).toFixed(1)}" y2="${(mom2.y + sp*c2.ny + tl*c2.uy).toFixed(1)}" stroke="#222" stroke-width="1.4"/>
+
+        <line x1="${c1.p1x.toFixed(1)}" y1="${c1.p1y.toFixed(1)}" x2="${c1.p2x.toFixed(1)}" y2="${c1.p2y.toFixed(1)}" stroke="#d946ef" stroke-width="2.6" stroke-linecap="round"/>
+        <line x1="${c2.p1x.toFixed(1)}" y1="${c2.p1y.toFixed(1)}" x2="${c2.p2x.toFixed(1)}" y2="${c2.p2y.toFixed(1)}" stroke="#d946ef" stroke-width="2.6" stroke-linecap="round"/>
+
+        <line x1="${(m_am.x - tl*c1.nx).toFixed(1)}" y1="${(m_am.y - tl*c1.ny).toFixed(1)}" x2="${(m_am.x + tl*c1.nx).toFixed(1)}" y2="${(m_am.y + tl*c1.ny).toFixed(1)}" stroke="#333" stroke-width="1.5"/>
+        <line x1="${(m_mb.x - tl*c1.nx).toFixed(1)}" y1="${(m_mb.y - tl*c1.ny).toFixed(1)}" x2="${(m_mb.x + tl*c1.nx).toFixed(1)}" y2="${(m_mb.y + tl*c1.ny).toFixed(1)}" stroke="#333" stroke-width="1.5"/>
+
+        <line x1="${(m_cn.x - tl*c2.nx).toFixed(1)}" y1="${(m_cn.y - tl*c2.ny).toFixed(1)}" x2="${(m_cn.x + tl*c2.nx).toFixed(1)}" y2="${(m_cn.y + tl*c2.ny).toFixed(1)}" stroke="#333" stroke-width="1.5"/>
+        <line x1="${(m_nd.x - tl*c2.nx).toFixed(1)}" y1="${(m_nd.y - tl*c2.ny).toFixed(1)}" x2="${(m_nd.x + tl*c2.nx).toFixed(1)}" y2="${(m_nd.y + tl*c2.ny).toFixed(1)}" stroke="#333" stroke-width="1.5"/>
+
+        <circle cx="${cx}" cy="${cy}" r="3.2" fill="#222"/>
+        <text x="${cx - 8}" y="${cy - 4}" font-size="14">O</text>
+
+        <circle cx="${c1.mx.toFixed(1)}" cy="${c1.my.toFixed(1)}" r="2.8" fill="#222"/>
+        <text x="${(c1.mx + 8*c1.ux).toFixed(1)}" y="${(c1.my + 8*c1.uy + 4).toFixed(1)}" font-size="12" text-anchor="middle">M</text>
+        <circle cx="${c2.mx.toFixed(1)}" cy="${c2.my.toFixed(1)}" r="2.8" fill="#222"/>
+        <text x="${(c2.mx + 8*c2.ux).toFixed(1)}" y="${(c2.my + 8*c2.uy + 4).toFixed(1)}" font-size="12" text-anchor="middle">N</text>
+
+        <circle cx="${c1.p1x.toFixed(1)}" cy="${c1.p1y.toFixed(1)}" r="3" fill="#222"/>
+        <text x="${(c1.p1x + 12 * (c1.p1x - cx)/r).toFixed(1)}" y="${(c1.p1y + 12 * (c1.p1y - cy)/r + 4).toFixed(1)}" font-size="13" text-anchor="middle">A</text>
+        <circle cx="${c1.p2x.toFixed(1)}" cy="${c1.p2y.toFixed(1)}" r="3" fill="#222"/>
+        <text x="${(c1.p2x + 12 * (c1.p2x - cx)/r).toFixed(1)}" y="${(c1.p2y + 12 * (c1.p2y - cy)/r + 4).toFixed(1)}" font-size="13" text-anchor="middle">B</text>
+
+        <circle cx="${c2.p1x.toFixed(1)}" cy="${c2.p1y.toFixed(1)}" r="3" fill="#222"/>
+        <text x="${(c2.p1x + 12 * (c2.p1x - cx)/r).toFixed(1)}" y="${(c2.p1y + 12 * (c2.p1y - cy)/r + 4).toFixed(1)}" font-size="13" text-anchor="middle">C</text>
+        <circle cx="${c2.p2x.toFixed(1)}" cy="${c2.p2y.toFixed(1)}" r="3" fill="#222"/>
+        <text x="${(c2.p2x + 12 * (c2.p2x - cx)/r).toFixed(1)}" y="${(c2.p2y + 12 * (c2.p2y - cy)/r + 4).toFixed(1)}" font-size="13" text-anchor="middle">D</text>
+      `;
+    }
+    slD.oninput = update;
+    slR1.oninput = update;
+    slR2.oninput = update;
+    update();
+  }
+
+  /* ---------- 직접 움직여 보기 ③: 두 접선의 길이 ---------- */
+  function initActivity3() {
+    const svg = $('#act3-svg'), slDist = $('#sl-act3-dist'), slRot = $('#sl-act3-rot');
+    if (!svg || !slDist) return;
+
+    function update() {
+      const D = +slDist.value, rot = +slRot.value;
+      const cx = 120, cy = 105, r = 46;
+      const L = Math.sqrt(Math.max(0, D * D - r * r));
+      $('#val-act3-pa').textContent = L.toFixed(1);
+      $('#val-act3-pb').textContent = L.toFixed(1);
+
+      const rad = rot * Math.PI / 180;
+      const px = cx + D * Math.cos(rad), py = cy + D * Math.sin(rad);
+      const alpha = Math.acos(r / D);
+
+      const aRad = rad - alpha, bRad = rad + alpha;
+      const ax = cx + r * Math.cos(aRad), ay = cy + r * Math.sin(aRad);
+      const bx = cx + r * Math.cos(bRad), by = cy + r * Math.sin(bRad);
+
+      const m_pa = { x: (px + ax) / 2, y: (py + ay) / 2 };
+      const m_pb = { x: (px + bx) / 2, y: (py + by) / 2 };
+      const u_pa = { x: (ax - px) / L, y: (ay - py) / L };
+      const u_pb = { x: (bx - px) / L, y: (by - py) / L };
+      const n_pa = { x: (ax - cx) / r, y: (ay - cy) / r };
+      const n_pb = { x: (bx - cx) / r, y: (by - cy) / r };
+      const sp = 1.4, tl = 3.5, sz = 6.5;
+
+      const sq_a1 = { x: ax - sz * n_pa.x, y: ay - sz * n_pa.y };
+      const sq_a2 = { x: ax - sz * n_pa.x - sz * u_pa.x, y: ay - sz * n_pa.y - sz * u_pa.y };
+      const sq_a3 = { x: ax - sz * u_pa.x, y: ay - sz * u_pa.y };
+
+      const sq_b1 = { x: bx - sz * n_pb.x, y: by - sz * n_pb.y };
+      const sq_b2 = { x: bx - sz * n_pb.x - sz * u_pb.x, y: by - sz * n_pb.y - sz * u_pb.y };
+      const sq_b3 = { x: bx - sz * u_pb.x, y: by - sz * u_pb.y };
+
+      svg.innerHTML = `
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#64748b" stroke-width="2"/>
+        <line x1="${cx}" y1="${cy}" x2="${ax.toFixed(1)}" y2="${ay.toFixed(1)}" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="3,3"/>
+        <line x1="${cx}" y1="${cy}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="3,3"/>
+        <line x1="${cx}" y1="${cy}" x2="${px.toFixed(1)}" y2="${py.toFixed(1)}" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="2,2"/>
+        
+        <polyline points="${sq_a1.x.toFixed(1)},${sq_a1.y.toFixed(1)} ${sq_a2.x.toFixed(1)},${sq_a2.y.toFixed(1)} ${sq_a3.x.toFixed(1)},${sq_a3.y.toFixed(1)}" fill="none" stroke="#333" stroke-width="1.3"/>
+        <polyline points="${sq_b1.x.toFixed(1)},${sq_b1.y.toFixed(1)} ${sq_b2.x.toFixed(1)},${sq_b2.y.toFixed(1)} ${sq_b3.x.toFixed(1)},${sq_b3.y.toFixed(1)}" fill="none" stroke="#333" stroke-width="1.3"/>
+
+        <line x1="${px.toFixed(1)}" y1="${py.toFixed(1)}" x2="${ax.toFixed(1)}" y2="${ay.toFixed(1)}" stroke="#222" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="${px.toFixed(1)}" y1="${py.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="#222" stroke-width="2.2" stroke-linecap="round"/>
+
+        <line x1="${(m_pa.x - sp*u_pa.x - tl*n_pa.x).toFixed(1)}" y1="${(m_pa.y - sp*u_pa.y - tl*n_pa.y).toFixed(1)}" x2="${(m_pa.x - sp*u_pa.x + tl*n_pa.x).toFixed(1)}" y2="${(m_pa.y - sp*u_pa.y + tl*n_pa.y).toFixed(1)}" stroke="#333" stroke-width="1.5"/>
+        <line x1="${(m_pa.x + sp*u_pa.x - tl*n_pa.x).toFixed(1)}" y1="${(m_pa.y + sp*u_pa.y - tl*n_pa.y).toFixed(1)}" x2="${(m_pa.x + sp*u_pa.x + tl*n_pa.x).toFixed(1)}" y2="${(m_pa.y + sp*u_pa.y + tl*n_pa.y).toFixed(1)}" stroke="#333" stroke-width="1.5"/>
+
+        <line x1="${(m_pb.x - sp*u_pb.x - tl*n_pb.x).toFixed(1)}" y1="${(m_pb.y - sp*u_pb.y - tl*n_pb.y).toFixed(1)}" x2="${(m_pb.x - sp*u_pb.x + tl*n_pb.x).toFixed(1)}" y2="${(m_pb.y - sp*u_pb.y + tl*n_pb.y).toFixed(1)}" stroke="#333" stroke-width="1.5"/>
+        <line x1="${(m_pb.x + sp*u_pb.x - tl*n_pb.x).toFixed(1)}" y1="${(m_pb.y + sp*u_pb.y - tl*n_pb.y).toFixed(1)}" x2="${(m_pb.x + sp*u_pb.x + tl*n_pb.x).toFixed(1)}" y2="${(m_pb.y + sp*u_pb.y + tl*n_pb.y).toFixed(1)}" stroke="#333" stroke-width="1.5"/>
+
+        <circle cx="${cx}" cy="${cy}" r="3" fill="#222"/>
+        <text x="${cx - 8}" y="${cy - 4}" font-size="13">O</text>
+        <circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="3.2" fill="#222"/>
+        <text x="${(px + (px < cx ? -12 : 7)).toFixed(1)}" y="${(py + 4).toFixed(1)}" font-size="13">P</text>
+        <circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="3" fill="#222"/>
+        <text x="${(ax + 10 * n_pa.x).toFixed(1)}" y="${(ay + 10 * n_pa.y + 4).toFixed(1)}" font-size="13" text-anchor="middle">A</text>
+        <circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="3" fill="#222"/>
+        <text x="${(bx + 10 * n_pb.x).toFixed(1)}" y="${(by + 10 * n_pb.y + 4).toFixed(1)}" font-size="13" text-anchor="middle">B</text>
+      `;
+    }
+    slDist.oninput = update;
+    slRot.oninput = update;
+    update();
+  }
+
+  /* ---------- 직접 움직여 보기 ④: 원주각 ↔ 중심각 관계 ---------- */
+  function initActivity4() {
+    const svg = $('#inscribed-svg'), slArc = $('#sl-arc'), slP = $('#sl-p');
+    if (!svg || !slArc) return;
+
+    function update() {
+      const arc = +slArc.value;
+      const pDeg = +slP.value;
+      $('#val-center').textContent = `${arc}°`;
+      $('#val-inscribed').textContent = `${arc / 2}°`;
+
+      const cx = 110, cy = 110, r = 78;
+      const aAng = (90 - arc / 2) * Math.PI / 180;
+      const bAng = (90 + arc / 2) * Math.PI / 180;
+      const ax = cx + r * Math.cos(aAng), ay = cy + r * Math.sin(aAng);
+      const bx = cx + r * Math.cos(bAng), by = cy + r * Math.sin(bAng);
+      const pRad = pDeg * Math.PI / 180;
+      const px = cx + r * Math.cos(pRad), py = cy + r * Math.sin(pRad);
+
+      svg.innerHTML = `
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#64748b" stroke-width="2"/>
+        <path d="M ${ax.toFixed(1)} ${ay.toFixed(1)} A ${r} ${r} 0 0 1 ${bx.toFixed(1)} ${by.toFixed(1)}" fill="none" stroke="#d946ef" stroke-width="3.5" stroke-linecap="round"/>
+        <polyline points="${ax.toFixed(1)},${ay.toFixed(1)} ${cx},${cy} ${bx.toFixed(1)},${by.toFixed(1)}" stroke="#475569" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+        <polyline points="${ax.toFixed(1)},${ay.toFixed(1)} ${px.toFixed(1)},${py.toFixed(1)} ${bx.toFixed(1)},${by.toFixed(1)}" stroke="var(--blue)" stroke-width="2.2" fill="none" stroke-linejoin="round"/>
+        
+        <circle cx="${cx}" cy="${cy}" r="3.2" fill="#222"/>
+        <text x="${cx - 4}" y="${cy - 7}" font-size="14">O</text>
+        <circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="3.2" fill="#222"/>
+        <text x="${ax + 8}" y="${ay + 8}" font-size="14">A</text>
+        <circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="3.2" fill="#222"/>
+        <text x="${bx - 16}" y="${by + 8}" font-size="14">B</text>
+        <circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="4" fill="var(--blue)"/>
+        <text x="${px - 4}" y="${py - 8}" font-size="14">P</text>
+      `;
+    }
+    slArc.oninput = update;
+    slP.oninput = update;
+    update();
+  }
+
+  /* ---------- 직접 움직여 보기 ⑤: 호의 길이와 원주각의 정비례 ---------- */
+  function initActivity5() {
+    const svg = $('#act5-svg'), sl1 = $('#sl-act5-arc1'), sl2 = $('#sl-act5-arc2');
+    if (!svg || !sl1) return;
+
+    function update() {
+      const arc1 = +sl1.value, arc2 = +sl2.value;
+      $('#val-act5-c1').textContent = `${arc1}°`;
+      $('#val-act5-c2').textContent = `${arc2}°`;
+      $('#val-act5-i1').textContent = `${arc1 / 2}°`;
+      $('#val-act5-i2').textContent = `${arc2 / 2}°`;
+
+      const msg = $('#val-act5-msg');
+      if (arc1 === arc2) {
+        msg.style.color = 'var(--ok)';
+        msg.textContent = '두 호의 길이가 같으므로 원주각의 크기도 서로 같습니다!';
+      } else {
+        msg.style.color = 'var(--main-d)';
+        msg.textContent = `호의 길이의 비 (${arc1} : ${arc2}) = 원주각의 비 (${arc1/2} : ${arc2/2}) 정비례 성립!`;
+      }
+
+      const cx = 120, cy = 105, r = 68;
+      const a1_s = 150 * Math.PI / 180, a1_e = (150 - arc1) * Math.PI / 180;
+      const ax = cx + r * Math.cos(a1_s), ay = cy + r * Math.sin(a1_s);
+      const bx = cx + r * Math.cos(a1_e), by = cy + r * Math.sin(a1_e);
+
+      const a2_s = 30 * Math.PI / 180, a2_e = (30 + arc2) * Math.PI / 180;
+      const dx = cx + r * Math.cos(a2_s), dy = cy + r * Math.sin(a2_s);
+      const cpx = cx + r * Math.cos(a2_e), cpy = cy + r * Math.sin(a2_e);
+
+      const px = cx + r * Math.cos(245 * Math.PI / 180), py = cy + r * Math.sin(245 * Math.PI / 180);
+      const qx = cx + r * Math.cos(295 * Math.PI / 180), qy = cy + r * Math.sin(295 * Math.PI / 180);
+
+      const mid_arc1 = 150 - arc1 / 2;
+      const m1_rad = mid_arc1 * Math.PI / 180;
+      const m1_x = cx + r * Math.cos(m1_rad), m1_y = cy + r * Math.sin(m1_rad);
+      const u1_t = { x: -Math.sin(m1_rad), y: Math.cos(m1_rad) };
+      const u1_n = { x: Math.cos(m1_rad), y: Math.sin(m1_rad) };
+
+      const mid_arc2 = 30 + arc2 / 2;
+      const m2_rad = mid_arc2 * Math.PI / 180;
+      const m2_x = cx + r * Math.cos(m2_rad), m2_y = cy + r * Math.sin(m2_rad);
+      const u2_t = { x: -Math.sin(m2_rad), y: Math.cos(m2_rad) };
+      const u2_n = { x: Math.cos(m2_rad), y: Math.sin(m2_rad) };
+      const sp = 1.3, tl = 3.5;
+
+      svg.innerHTML = `
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#64748b" stroke-width="2"/>
+        
+        <path d="M ${ax.toFixed(1)} ${ay.toFixed(1)} A ${r} ${r} 0 0 0 ${bx.toFixed(1)} ${by.toFixed(1)}" fill="none" stroke="#d946ef" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M ${cpx.toFixed(1)} ${cpy.toFixed(1)} A ${r} ${r} 0 0 0 ${dx.toFixed(1)} ${dy.toFixed(1)}" fill="none" stroke="#d946ef" stroke-width="3.5" stroke-linecap="round"/>
+
+        <line x1="${(m1_x - sp*u1_t.x - tl*u1_n.x).toFixed(1)}" y1="${(m1_y - sp*u1_t.y - tl*u1_n.y).toFixed(1)}" x2="${(m1_x - sp*u1_t.x + tl*u1_n.x).toFixed(1)}" y2="${(m1_y - sp*u1_t.y + tl*u1_n.y).toFixed(1)}" stroke="#333" stroke-width="1.4"/>
+        <line x1="${(m1_x + sp*u1_t.x - tl*u1_n.x).toFixed(1)}" y1="${(m1_y + sp*u1_t.y - tl*u1_n.y).toFixed(1)}" x2="${(m1_x + sp*u1_t.x + tl*u1_n.x).toFixed(1)}" y2="${(m1_y + sp*u1_t.y + tl*u1_n.y).toFixed(1)}" stroke="#333" stroke-width="1.4"/>
+
+        <line x1="${(m2_x - sp*u2_t.x - tl*u2_n.x).toFixed(1)}" y1="${(m2_y - sp*u2_t.y - tl*u2_n.y).toFixed(1)}" x2="${(m2_x - sp*u2_t.x + tl*u2_n.x).toFixed(1)}" y2="${(m2_y - sp*u2_t.y + tl*u2_n.y).toFixed(1)}" stroke="#333" stroke-width="1.4"/>
+        <line x1="${(m2_x + sp*u2_t.x - tl*u2_n.x).toFixed(1)}" y1="${(m2_y + sp*u2_t.y - tl*u2_n.y).toFixed(1)}" x2="${(m2_x + sp*u2_t.x + tl*u2_n.x).toFixed(1)}" y2="${(m2_y + sp*u2_t.y + tl*u2_n.y).toFixed(1)}" stroke="#333" stroke-width="1.4"/>
+
+        <polyline points="${ax.toFixed(1)},${ay.toFixed(1)} ${px.toFixed(1)},${py.toFixed(1)} ${bx.toFixed(1)},${by.toFixed(1)}" stroke="#222" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+        <polyline points="${cpx.toFixed(1)},${cpy.toFixed(1)} ${qx.toFixed(1)},${qy.toFixed(1)} ${dx.toFixed(1)},${dy.toFixed(1)}" stroke="#222" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+
+        <polyline points="${ax.toFixed(1)},${ay.toFixed(1)} ${cx},${cy} ${bx.toFixed(1)},${by.toFixed(1)}" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+        <polyline points="${cpx.toFixed(1)},${cpy.toFixed(1)} ${cx},${cy} ${dx.toFixed(1)},${dy.toFixed(1)}" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+
+        <circle cx="${cx}" cy="${cy}" r="3" fill="#222"/>
+        <text x="${cx - 8}" y="${cy - 4}" font-size="13">O</text>
+
+        <circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="3" fill="#222"/>
+        <text x="${(ax - 12).toFixed(1)}" y="${(ay + 6).toFixed(1)}" font-size="13">A</text>
+        <circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="3" fill="#222"/>
+        <text x="${(bx - 4).toFixed(1)}" y="${(by + 14).toFixed(1)}" font-size="13">B</text>
+        <circle cx="${cpx.toFixed(1)}" cy="${cpy.toFixed(1)}" r="3" fill="#222"/>
+        <text x="${(cpx + 4).toFixed(1)}" y="${(cpy + 14).toFixed(1)}" font-size="13">C</text>
+        <circle cx="${dx.toFixed(1)}" cy="${dy.toFixed(1)}" r="3" fill="#222"/>
+        <text x="${(dx + 8).toFixed(1)}" y="${(dy + 6).toFixed(1)}" font-size="13">D</text>
+
+        <circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="3.2" fill="#222"/>
+        <text x="${px.toFixed(1)}" y="${(py - 6).toFixed(1)}" font-size="13" text-anchor="middle">P</text>
+        <circle cx="${qx.toFixed(1)}" cy="${qy.toFixed(1)}" r="3.2" fill="#222"/>
+        <text x="${qx.toFixed(1)}" y="${(qy - 6).toFixed(1)}" font-size="13" text-anchor="middle">Q</text>
+      `;
+    }
+    sl1.oninput = update;
+    sl2.oninput = update;
+    update();
+  }
+
+  /* ---------- 직접 움직여 보기 ⑥: 접현각과 원주각의 일치 ---------- */
+  function initActivity6() {
+    const svg = $('#act6-svg'), slB = $('#sl-act6-b'), slC = $('#sl-act6-c');
+    if (!svg || !slB) return;
+
+    function update() {
+      const bDeg = +slB.value, cDeg = +slC.value;
+      const cx = 120, cy = 95, r = 58;
+      const ax = cx, ay = cy + r;
+      const bRad = bDeg * Math.PI / 180;
+      const bx = cx + r * Math.cos(bRad), by = cy + r * Math.sin(bRad);
+      const cRad = cDeg * Math.PI / 180;
+      const cpx = cx + r * Math.cos(cRad), cpy = cy + r * Math.sin(cRad);
+
+      const ang = Math.round((90 - bDeg) / 2);
+      $('#val-act6-bat').textContent = `${ang}°`;
+      $('#val-act6-bca').textContent = `${ang}°`;
+
+      const alpha = Math.atan2(by - ay, bx - ax);
+      const rSec = 20;
+      const batSector = `M ${ax},${ay} L ${ax + rSec},${ay} A ${rSec} ${rSec} 0 0 0 ${(ax + rSec * Math.cos(alpha)).toFixed(1)},${(ay + rSec * Math.sin(alpha)).toFixed(1)} Z`;
+
+      const beta1 = Math.atan2(by - cpy, bx - cpx);
+      const beta2 = Math.atan2(ay - cpy, ax - cpx);
+      const bcaSector = `M ${cpx.toFixed(1)},${cpy.toFixed(1)} L ${(cpx + rSec * Math.cos(beta1)).toFixed(1)},${(cpy + rSec * Math.sin(beta1)).toFixed(1)} A ${rSec} ${rSec} 0 0 1 ${(cpx + rSec * Math.cos(beta2)).toFixed(1)},${(cpy + rSec * Math.sin(beta2)).toFixed(1)} Z`;
+
+      svg.innerHTML = `
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#64748b" stroke-width="2"/>
+        <path d="${batSector}" fill="#fbbf24" fill-opacity="0.75" stroke="#d97706" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="${bcaSector}" fill="#fbbf24" fill-opacity="0.75" stroke="#d97706" stroke-width="1.3" stroke-linejoin="round"/>
+        
+        <line x1="15" y1="${ay}" x2="225" y2="${ay}" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+        <polygon points="${ax},${ay} ${bx.toFixed(1)},${by.toFixed(1)} ${cpx.toFixed(1)},${cpy.toFixed(1)}" fill="none" stroke="#222" stroke-width="1.8" stroke-linejoin="round"/>
+        
+        <circle cx="${cx}" cy="${cy}" r="3" fill="#222"/>
+        <text x="${cx - 8}" y="${cy - 4}" font-size="13">O</text>
+        <circle cx="${ax}" cy="${ay}" r="3.2" fill="#222"/>
+        <text x="${ax}" y="${ay + 15}" font-size="13" text-anchor="middle">A</text>
+        <circle cx="210" cy="${ay}" r="2.8" fill="#222"/>
+        <text x="210" y="${ay + 15}" font-size="13" text-anchor="middle">T</text>
+        <circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="3.2" fill="#222"/>
+        <text x="${(bx + 8).toFixed(1)}" y="${(by + 4).toFixed(1)}" font-size="13">B</text>
+        <circle cx="${cpx.toFixed(1)}" cy="${cpy.toFixed(1)}" r="3.2" fill="#222"/>
+        <text x="${(cpx - 10).toFixed(1)}" y="${(cpy + 4).toFixed(1)}" font-size="13">C</text>
+      `;
+    }
+    slB.oninput = update;
+    slC.oninput = update;
+    update();
+  }
+
+  /* ---------- 직접 움직여 보기 ⑦: 내접사각형 대각 모으기 ---------- */
+  function initActivity7() {
+    const svg = $('#quad-compact-svg');
+    const slGather = $('#sl-quad-gather');
+    const slA = $('#sl-quad-a'), slB = $('#sl-quad-b'), slC = $('#sl-quad-c'), slD = $('#sl-quad-d');
+    if (!svg || !slGather) return;
+
+    const normRad = a => {
+      let r = a % (2 * Math.PI);
+      return r < 0 ? r + 2 * Math.PI : r;
+    };
+    const diffAngle = (a1, a2) => {
+      let d = (a2 - a1) % (2 * Math.PI);
+      if (d > Math.PI) d -= 2 * Math.PI;
+      if (d < -Math.PI) d += 2 * Math.PI;
+      return d;
+    };
+    const easeInOut = t => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+
+    function makeWedge(cx, cy, radius, startAng, span) {
+      const sx = cx + radius * Math.cos(startAng);
+      const sy = cy + radius * Math.sin(startAng);
+      const ex = cx + radius * Math.cos(startAng + span);
+      const ey = cy + radius * Math.sin(startAng + span);
+      const largeArc = span > Math.PI ? 1 : 0;
+      return `M ${cx.toFixed(1)} ${cy.toFixed(1)} L ${sx.toFixed(1)} ${sy.toFixed(1)} A ${radius.toFixed(1)} ${radius.toFixed(1)} 0 ${largeArc} 1 ${ex.toFixed(1)} ${ey.toFixed(1)} Z`;
+    }
+
+    function update() {
+      const tRaw = +slGather.value / 100;
+      const t = easeInOut(tRaw);
+      const degA = +slA.value, degB = +slB.value, degC = +slC.value, degD = +slD.value;
+
+      const cx = 95, cy = 115, r = 55;
+      const toRad = deg => deg * Math.PI / 180;
+
+      const pts = [
+        { name: 'A', color: '#ef4444', textFill: '#b91c1c', fill: '#f87171', stroke: '#ef4444', x: cx + r * Math.cos(toRad(degA)), y: cy + r * Math.sin(toRad(degA)) },
+        { name: 'B', color: '#2563eb', textFill: '#1e40af', fill: '#60a5fa', stroke: '#2563eb', x: cx + r * Math.cos(toRad(degB)), y: cy + r * Math.sin(toRad(degB)) },
+        { name: 'C', color: '#ef4444', textFill: '#86198f', fill: '#fbcfe8', stroke: '#d946ef', x: cx + r * Math.cos(toRad(degC)), y: cy + r * Math.sin(toRad(degC)) },
+        { name: 'D', color: '#2563eb', textFill: '#0369a1', fill: '#bae6fd', stroke: '#0284c7', x: cx + r * Math.cos(toRad(degD)), y: cy + r * Math.sin(toRad(degD)) }
+      ];
+
+      const vData = pts.map((curr, i) => {
+        const prev = pts[(i + 3) % 4];
+        const next = pts[(i + 1) % 4];
+        const angPrev = Math.atan2(prev.y - curr.y, prev.x - curr.x);
+        const angNext = Math.atan2(next.y - curr.y, next.x - curr.x);
+        const delta = normRad(angNext - angPrev);
+        let startAngle, span;
+        if (delta <= Math.PI) {
+          startAngle = angPrev;
+          span = delta;
+        } else {
+          startAngle = angNext;
+          span = 2 * Math.PI - delta;
+        }
+        return { ...curr, startAngle: normRad(startAngle), span, deg: span * (180 / Math.PI) };
+      });
+
+      const angA_deg = Math.round(vData[0].deg);
+      const angC_deg = 180 - angA_deg;
+      const angB_deg = Math.round(vData[1].deg);
+      const angD_deg = 180 - angB_deg;
+
+      $('#val-angA').textContent = `${angA_deg}°`;
+      $('#val-angC').textContent = `${angC_deg}°`;
+      $('#val-angB').textContent = `${angB_deg}°`;
+      $('#val-angD').textContent = `${angD_deg}°`;
+
+      const tx = 275, ty = 115;
+      const curR = (1 - t) * 22 + t * 36;
+      const spanA = vData[0].span, spanB = vData[1].span, spanC = vData[2].span, spanD = vData[3].span;
+
+      const targets = [
+        { cx: tx, cy: ty, startAngle: Math.PI, span: spanA },
+        { cx: tx, cy: ty, startAngle: 0, span: spanB },
+        { cx: tx, cy: ty, startAngle: Math.PI + spanA, span: spanC },
+        { cx: tx, cy: ty, startAngle: spanB, span: spanD }
+      ];
+
+      let svgContent = `
+        <line x1="172" y1="18" x2="172" y2="212" stroke="#e2e8f0" stroke-dasharray="4,4" stroke-width="1.2"/>
+        <text x="180" y="24" font-size="11">대각 모으기</text>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#64748b" stroke-width="1.8"/>
+        <polygon points="${pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}" fill="none" stroke="#334155" stroke-width="2" stroke-linejoin="round"/>
+      `;
+
+      if (tRaw > 0.05) {
+        vData.forEach(v => {
+          const dGhost = makeWedge(v.x, v.y, 22, v.startAngle, v.span);
+          svgContent += `<path d="${dGhost}" fill="none" stroke="#94a3b8" stroke-dasharray="3,3" stroke-width="1.2" opacity="${(tRaw * 0.75).toFixed(2)}"/>`;
+        });
+      }
+
+      pts.forEach(p => {
+        svgContent += `
+          <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${p.color}"/>
+          <text x="${(p.x + (p.x < cx ? -12 : 7)).toFixed(1)}" y="${(p.y + (p.y < cy ? -5 : 12)).toFixed(1)}" font-size="13" fill="${p.color}">${p.name}</text>
+        `;
+      });
+
+      svgContent += `
+        <line x1="205" y1="${ty}" x2="345" y2="${ty}" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="4,4"/>
+        <circle cx="${tx}" cy="${ty}" r="3" fill="#475569"/>
+      `;
+
+      vData.forEach((v, i) => {
+        const tgt = targets[i];
+        const curX = (1 - t) * v.x + t * tgt.cx;
+        const curY = (1 - t) * v.y + t * tgt.cy;
+        const deltaAng = diffAngle(v.startAngle, tgt.startAngle);
+        const curStart = v.startAngle + deltaAng * t;
+        const wedgePath = makeWedge(curX, curY, curR, curStart, v.span);
+        const midAngle = curStart + v.span / 2;
+        const lblX = curX + curR * 0.58 * Math.cos(midAngle);
+        const lblY = curY + curR * 0.58 * Math.sin(midAngle);
+
+        svgContent += `
+          <path d="${wedgePath}" fill="${v.fill}" fill-opacity="0.65" stroke="${v.stroke}" stroke-width="1.5" stroke-linejoin="round"/>
+          <text x="${lblX.toFixed(1)}" y="${lblY.toFixed(1)}" font-size="12" fill="${v.textFill}" text-anchor="middle" dominant-baseline="central">${v.name}</text>
+        `;
+      });
+
+      const opac = Math.max(0.18, t).toFixed(2);
+      svgContent += `
+        <text x="${tx}" y="${ty - 48}" font-size="12.5" fill="#b91c1c" text-anchor="middle" opacity="${opac}">
+          ∠A + ∠C = 180° (위쪽 평각)
+        </text>
+        <text x="${tx}" y="${ty + 58}" font-size="12.5" fill="#1d4ed8" text-anchor="middle" opacity="${opac}">
+          ∠B + ∠D = 180° (아래쪽 평각)
+        </text>
+      `;
+
+      svg.innerHTML = svgContent;
+    }
+
+    slGather.oninput = update;
+    slA.oninput = update;
+    slB.oninput = update;
+    slC.oninput = update;
+    slD.oninput = update;
+    update();
+  }
+
+  /* ---------- 게임 시스템 ---------- */
+  const hubGames = [
+    {
+      id: "angle-speed",
+      icon: "⚡",
+      title: "원주각 ↔ 중심각 헌터",
+      desc: "중심각과 원주각의 관계(1/2배, 2배)를 빠르게 계산하세요!",
+      play: (stage, onFinish) => {
+        let score = 0, qNum = 0;
+        const total = 5;
+        function nextQ() {
+          if (qNum >= total) { onFinish(score, total * 20); return; }
+          qNum++;
+          const isCenterToInscribed = Math.random() < 0.5;
+          const inscribed = Math.floor(Math.random() * 60 + 20);
+          const center = inscribed * 2;
+          const prompt = isCenterToInscribed
+            ? `호에 대한 중심각이 <b>${center}°</b>일 때, <b>원주각</b>은?`
+            : `호에 대한 원주각이 <b>${inscribed}°</b>일 때, <b>중심각</b>은?`;
+          const ans = isCenterToInscribed ? inscribed : center;
+          const opts = shuffle([ans, ans + 10, ans - 10, ans * 2].filter(x => x > 0)).slice(0, 4);
+          if (!opts.includes(ans)) opts[0] = ans;
+          const finalOpts = shuffle(opts);
+
+          stage.innerHTML = `
+            <div style="font-size:18px; margin-bottom:14px">[문제 ${qNum}/${total}] ${prompt}</div>
+            <div class="choices">
+              ${finalOpts.map(o => `<button class="choice" style="font-size:20px; font-weight:bold">${o}°</button>`).join('')}
+            </div>
+            <p id="game-feedback" style="min-height:24px; font-weight:bold; margin-top:14px"></p>
+          `;
+          stage.querySelectorAll('.choice').forEach(b => {
+            b.onclick = () => {
+              stage.querySelectorAll('.choice').forEach(x => x.disabled = true);
+              const ok = parseInt(b.textContent) === ans;
+              if (ok) score += 20;
+              const fb = stage.querySelector('#game-feedback');
+              fb.style.color = ok ? 'var(--ok)' : 'var(--bad)';
+              fb.textContent = ok ? '정답입니다! (+20점)' : `오답입니다! 정답은 ${ans}°입니다.`;
+              setTimeout(nextQ, 900);
+            };
+          });
+        }
+        nextQ();
+      }
+    },
+    {
+      id: "ox-challenge",
+      icon: "⭕",
+      title: "원의 성질 스피드 O/X",
+      desc: "현, 접선, 원주각의 성질 문장을 보고 참·거짓을 판별하세요.",
+      play: (stage, onFinish) => {
+        const list = shuffle([
+          { q: "원의 중심에서 현에 내린 수선은 그 현을 이등분한다.", a: true },
+          { q: "한 원에서 길이가 같은 두 현은 원의 중심으로부터 거리가 다르다.", a: false },
+          { q: "원 밖의 한 점에서 그은 두 접선의 길이는 서로 같다.", a: true },
+          { q: "호의 길이는 원주각의 크기에 반비례한다.", a: false },
+          { q: "원에 내접하는 사각형에서 마주 보는 두 각의 합은 항상 180°이다.", a: true },
+          { q: "반원에 대한 원주각의 크기는 항상 90°이다.", a: true }
+        ]).slice(0, 5);
+        let score = 0, idx = 0;
+        function run() {
+          if (idx >= list.length) { onFinish(score, list.length * 20); return; }
+          const item = list[idx++];
+          stage.innerHTML = `
+            <div style="font-size:19px; min-height:56px; margin-bottom:16px">${item.q}</div>
+            <div style="display:flex; gap:16px">
+              <button class="btn" style="flex:1; font-size:36px; color:var(--blue)" id="ox-o">O</button>
+              <button class="btn" style="flex:1; font-size:36px; color:var(--coral)" id="ox-x">X</button>
+            </div>
+            <p id="ox-fb" style="margin-top:14px; font-weight:bold"></p>
+          `;
+          const judge = choice => {
+            stage.querySelectorAll('button').forEach(b => b.disabled = true);
+            const ok = choice === item.a;
+            if (ok) score += 20;
+            const fb = stage.querySelector('#ox-fb');
+            fb.style.color = ok ? 'var(--ok)' : 'var(--bad)';
+            fb.textContent = ok ? '정답! 👏' : '틀렸습니다! 😮';
+            setTimeout(run, 850);
+          };
+          stage.querySelector('#ox-o').onclick = () => judge(true);
+          stage.querySelector('#ox-x').onclick = () => judge(false);
+        }
+        run();
+      }
+    }
+  ];
+
+  function initGames() {
+    const hubCards = $('#hub-cards');
+    hubCards.innerHTML = hubGames.map(g => `
+      <div class="hub-card">
+        <div class="icon">${g.icon}</div>
+        <h3>${g.title}</h3>
+        <p>${g.desc}</p>
+        <button class="btn primary" style="margin-top:8px" data-gid="${g.id}">게임 시작</button>
+      </div>
+    `).join('');
+
+    let isTeam = false;
+    $('#btn-solo').onclick = () => { isTeam = false; $('#btn-solo').className = 'btn primary'; $('#btn-team').className = 'btn'; };
+    $('#btn-team').onclick = () => { isTeam = true; $('#btn-team').className = 'btn primary'; $('#btn-solo').className = 'btn'; };
+
+    hubCards.onclick = e => {
+      const b = e.target.closest('[data-gid]');
+      if (!b) return;
+      const game = hubGames.find(g => g.id === b.dataset.gid);
+      $('#hub-menu').hidden = true;
+      $('#hub-play').hidden = false;
+      $('#hub-play-title').textContent = `${game.icon} ${game.title}`;
+      $('#teambar').hidden = !isTeam;
+
+      game.play($('#hub-stage'), (score, max) => {
+        $('#hub-play').hidden = true;
+        $('#hub-result').hidden = false;
+        $('#hub-result').innerHTML = `
+          <div class="g-end-card">
+            <h3>🎉 도전 완료!</h3>
+            <p style="font-size:24px; font-weight:bold; color:var(--main); margin:12px 0">${score} / ${max}점</p>
+            <button class="btn primary" id="hub-res-back">목록으로</button>
+          </div>
+        `;
+        $('#hub-res-back').onclick = () => { $('#hub-result').hidden = true; $('#hub-menu').hidden = false; };
+      });
+    };
+
+    $('#hub-back').onclick = () => { $('#hub-play').hidden = true; $('#hub-menu').hidden = false; };
+  }
+
+  /* ---------- 탭 제어 ---------- */
+  $$('.tab').forEach(tab => {
+    tab.onclick = () => {
+      $$('.tab').forEach(t => t.setAttribute('aria-selected', 'false'));
+      $$('.tab-panel').forEach(p => p.hidden = true);
+      tab.setAttribute('aria-selected', 'true');
+      $(`#${tab.getAttribute('aria-controls')}`).hidden = false;
+    };
+  });
+
+  // 초기화 실행
+  initActivity1();
+  initActivity2();
+  initActivity3();
+  initActivity4();
+  initActivity5();
+  initActivity6();
+  initActivity7();
+  buildQuiz();
+  initGames();
+})();
+</script>
+
+<script>
+/* ---------- 단원 차례(목차): 정리·퀴즈 탭 맨 위, 누르면 그 구역으로 ---------- */
+(function () {
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const tocs = [[$('#study-toc'), () => $('#study-content')], [$('#quiz-toc'), () => $('#quiz-body')]].filter(([nav]) => nav);
+  const zones = $$('#study-content .zone[data-sec]');
+  if (!tocs.length || !zones.length) return;
+  tocs.forEach(([nav, root]) => {
+    nav.innerHTML = zones.map((z) => `<button type="button" data-sec="${z.dataset.sec}">${z.dataset.toc}</button>`).join('');
+    nav.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-sec]');
+      const host = root();
+      const z = b && host && host.querySelector(`.zone[data-sec="${b.dataset.sec}"]`);
+      if (z) z.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      tocs.forEach(([nav, root]) => {
+        if (nav.closest('[hidden]')) return;
+        const host = root();
+        if (!host) return;
+        const list = $$('.zone[data-sec]', host);
+        let cur = list[0];
+        list.forEach((z) => { if (z.getBoundingClientRect().top < 120) cur = z; });
+        $$('button', nav).forEach((b) => {
+          const on = cur && b.dataset.sec === cur.dataset.sec;
+          if (on && b.getAttribute('aria-current') !== 'true') nav.scrollTo({ left: b.offsetLeft - nav.clientWidth / 2 + b.offsetWidth / 2, behavior: 'smooth' });
+          b.setAttribute('aria-current', String(!!on));
+        });
+      });
+    });
+  }, { passive: true });
+})();
+
+</script>
+</body>
+</html>
