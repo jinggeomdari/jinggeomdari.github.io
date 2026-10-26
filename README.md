@@ -2,7 +2,7 @@
 
 고등학교 1학년 수학 단원마다 필요한 중학교 개념을 정리 · 퀴즈 · 게임으로 확인하는 단원별 HTML(1~6단원)을 표지 하나로 묶은 사이트입니다.
 
-**사이트: https://y2672123-png.github.io/jinggeomdari/** (주소 끝에 `#u3`을 붙이면 3단원이 바로 열립니다)
+**사이트: https://jinggeomdari.github.io/** (주소 끝에 `#u3`을 붙이면 3단원이 바로 열립니다)
 
 단원 파일은 **고치지 않고 그대로** 들어가고, 표지 카드의 색·차례·빈칸 수도 단원 파일에서 읽어 옵니다.
 그래서 단원 담당자가 `units/` 폴더에 새 파일을 올리기만 하면 1~2분 뒤 사이트가 저절로 바뀝니다.
@@ -38,7 +38,9 @@
 | `check.mjs` | 단원 파일을 Chrome으로 열어 오류 찾기 (배포는 막지 않음) |
 | `.github/workflows/deploy.yml` | 파일이 올라올 때마다 만들어 GitHub Pages에 올리기 |
 
-담당자 초대: 저장소 **Settings → Collaborators → Add people**에 GitHub 아이디를 넣습니다.
+담당자 초대: 저장소 **Settings → Collaborators and teams → Add people**에 GitHub 아이디를 넣고 **Write** 권한을 줍니다.
+담당자가 웹에서 올린 커밋에는 그 담당자의 아이디가 표시됩니다.
+이 폴더에서 올리는 커밋은 작성자가 "징검다리"로 표시되도록 설정되어 있습니다 (`git config user.name`).
 
 ## 단원 파일에서 표지가 읽는 부분
 
