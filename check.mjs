@@ -68,6 +68,7 @@ for (const u of data.units) {
   const lines = Object.entries(grouped).map(([k, v]) => v.length > 1 ? `${k}: ${v.map((p) => p.slice(k.length).replace(/^[:\s]+/, '')).join(', ')}` : v[0]);
   console.log(`${u.no}단원 ${lines.length ? '⚠ ' + lines.length + '건' : '✓'}`);
   lines.forEach((l) => console.log('    ' + l));
+  if (process.env.GITHUB_ACTIONS) lines.forEach((l) => console.log(`::warning title=브라우저 검사::${u.no}단원 ${l.replace(/%/g, '%25')}`));
   report.push({ no: u.no, lines });
 }
 ws.close();

@@ -35,12 +35,25 @@ function changedAt(full) {
 }
 
 // 1) 단원 파일 찾기: 이름이 "3단원…html"인 파일. 같은 번호가 여럿이면 가장 최근에 바뀐 파일을 쓴다.
+// 쓰지 않는 파일은 알려 준다. 담당자가 이름 규칙을 어기거나 엉뚱한 곳에 올리면 아무 일도 안 일어난 것처럼 보이기 때문.
 const found = {};
-for (const file of readdirSync(SRC_DIR)) {
+for (const ent of readdirSync(SRC_DIR, { withFileTypes: true })) {
+  const file = ent.name;
+  if (file.startsWith('.')) continue;
   const m = /^(\d+)\s*단원.*\.html?$/i.exec(file.normalize('NFC'));
-  if (!m) continue;
+  if (!m || !ent.isFile()) {
+    warn(`쓰지 않은 파일: ${file} — ` + (ent.isDirectory() ? '폴더 안의 파일은 쓰지 않아요. 파일을 units 폴더 바로 안에 올려 주세요'
+      : /\.html?$/i.test(file) ? '이름이 "번호+단원"으로 시작해야 해요 (예: 4단원_도형의 방정식.html)'
+      : 'HTML 파일만 쓸 수 있어요'));
+    continue;
+  }
   const full = path.join(SRC_DIR, file);
   (found[Number(m[1])] ||= []).push({ file, full, time: changedAt(full) });
+}
+if (SRC_DIR === path.join(here, 'units')) {
+  for (const file of readdirSync(here)) {
+    if (/\.html?$/i.test(file) && file !== 'hub.html') warn(`쓰지 않은 파일: ${file} — units 폴더 밖에 있어요. units 폴더에 올려 주세요`);
+  }
 }
 const nos = Object.keys(found).map(Number).sort((a, b) => a - b);
 if (!nos.length) {
@@ -90,6 +103,11 @@ console.log('단원  색        빈칸  차례 / 사용한 파일');
 units.forEach((u) => console.log(`${String(u.no).padStart(2)}    ${u.color.padEnd(8)}  ${String(u.blanks).padStart(3)}   ${u.sections.join(' · ')}\n                      ${u.file}`));
 if (errors.length) console.log('\n배포할 수 없음:\n' + errors.map((e) => '  - ' + e).join('\n'));
 if (warnings.length) console.log('\n확인할 것:\n' + warnings.map((w) => '  - ' + w).join('\n'));
+if (process.env.GITHUB_ACTIONS) {
+  // 실행 결과 화면 맨 위에 노란 경고·빨간 오류로 보이게 한다
+  errors.forEach((e) => console.log(`::error title=배포할 수 없음::${e.replace(/%/g, '%25')}`));
+  warnings.forEach((w) => console.log(`::warning title=확인할 것::${w.replace(/%/g, '%25')}`));
+}
 if (process.env.GITHUB_STEP_SUMMARY) {
   const md = ['## 단원 파일', '', '| 단원 | 사용한 파일 | 빈칸 | 차례 |', '|---|---|---|---|',
     ...units.map((u) => `| ${u.no} | ${u.file} | ${u.blanks} | ${u.sections.join(' · ')} |`), ''];
