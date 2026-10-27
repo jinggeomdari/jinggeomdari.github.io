@@ -81,6 +81,9 @@
     .jump a { display: grid; place-items: center; width: 30px; height: 30px; border: 1.5px solid var(--c); border-radius: 50%; background: #fff; color: var(--c); font-size: 14px; font-weight: 800; text-decoration: none; }
     .jump a:hover { background: color-mix(in srgb, var(--c) 12%, #fff); }
     .jump a[aria-current="page"] { background: var(--c); color: #fff; }
+    .print { display: inline-flex; align-items: center; gap: 6px; }
+    .print svg { width: 15px; height: 15px; }
+    .print-note { display: none; }
     #host { position: relative; flex: 1 1 auto; min-height: 0; }
     #host iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--paper); }
     #busy { position: absolute; z-index: 1; inset: 0; display: grid; place-items: center; background: var(--paper); color: var(--muted); font-size: 15px; font-weight: 700; }
@@ -95,9 +98,17 @@
       .vlabel { font-size: 14.5px; }
       .jump { gap: 3px; }
       .jump a { width: 27px; height: 27px; font-size: 13px; }
+      .print .ptext { display: none; }
     }
     @media (max-width: 480px) {
       .vlabel .vname { display: none; }
+      .print { display: none; }
+    }
+    /* 브라우저 메뉴로 인쇄하면 바깥 페이지가 찍힌다 (단원은 틀 안에 있어 첫 화면만 나옴). 그때는 방법을 알려 준다 */
+    @media print {
+      html.viewing body { background: #fff; }
+      html.viewing #cover, html.viewing #viewer { display: none !important; }
+      html.viewing .print-note { display: block; margin: 40px 0; font-size: 16px; line-height: 1.7; }
     }
   </style>
 </head>
@@ -119,9 +130,12 @@
     <button type="button" class="back" id="back">← 단원 고르기</button>
     <span class="vlabel" id="vlabel"></span>
     <nav class="jump" id="jump" aria-label="다른 단원으로"></nav>
+    <button type="button" class="back print" id="print" title="이 단원 인쇄 (Ctrl+P)" aria-label="이 단원 인쇄"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/></svg><span class="ptext">인쇄</span></button>
   </div>
   <div id="host"><div id="busy" hidden>단원을 불러오는 중…</div></div>
 </section>
+<p class="print-note"><b>단원 내용을 인쇄하려면</b> 단원 화면 맨 위의 <b>인쇄</b> 버튼을 누르거나 <b>Ctrl+P</b>(맥은 ⌘+P)를 눌러 주세요.<br>
+  브라우저 메뉴의 인쇄로는 단원 내용이 찍히지 않아요.</p>
 
 <script id="unit-data" type="application/json">__UNITS__</script>
 <!--__SOURCES__-->
@@ -135,6 +149,7 @@
   const byNo = Object.fromEntries(UNITS.map((u) => [String(u.no), u]));
   const LAST_KEY = 'jg-last-unit';
   const frames = {};
+  let current = null; // 지금 보고 있는 단원 번호
   const cover = $('#cover'), viewer = $('#viewer'), host = $('#host'), busy = $('#busy');
 
   const getLast = () => { try { return localStorage.getItem(LAST_KEY); } catch (e) { return null; } };
@@ -176,12 +191,17 @@
     const ifr = el('iframe');
     ifr.title = u.no + '단원 ' + u.name;
     busy.hidden = false;
-    ifr.addEventListener('load', () => { busy.hidden = true; }, { once: true });
-    host.append(ifr);
+    ifr.addEventListener('load', () => {
+      busy.hidden = true;
+      // 단원 안을 누른 뒤에는 키 입력이 단원 쪽으로 가므로 거기서도 Ctrl+P를 받는다
+      try { ifr.contentWindow.addEventListener('keydown', onPrintKey); } catch (e) {}
+    });
     // 한 파일판: 단원 원본이 이 문서 안에 들어 있다. 웹판: units/ 폴더의 파일을 연다.
+    // 주소를 먼저 정하고 붙여야 빈 페이지(about:blank)의 load가 먼저 오지 않는다
     const src = document.querySelector('script[data-unit="' + u.no + '"]');
     if (src) ifr.srcdoc = JSON.parse(src.textContent);
     else ifr.src = u.src;
+    host.append(ifr);
     return ifr;
   }
 
@@ -201,7 +221,21 @@
     Object.keys(frames).forEach((k) => { frames[k].hidden = k !== no; });
     if (frames[no]) busy.hidden = true;
     else frames[no] = load(u);
+    current = no;
     setLast(no);
+  }
+
+  // 인쇄: 단원은 틀(iframe) 안에 있어서 그냥 인쇄하면 바깥 페이지가 찍힌다.
+  // [인쇄] 버튼과 Ctrl+P는 지금 보고 있는 단원 틀만 인쇄한다 (단원 파일의 인쇄 설정이 그대로 쓰임).
+  function printUnit() {
+    const ifr = frames[current];
+    if (!ifr) return;
+    try { ifr.contentWindow.focus(); ifr.contentWindow.print(); }
+    catch (e) { window.open(ifr.src, '_blank'); } // 틀 안을 다룰 수 없을 때(내 컴퓨터에서 웹판을 열었을 때)는 단원만 새 탭으로
+  }
+  function onPrintKey(e) {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey || viewer.hidden) return;
+    if (e.code === 'KeyP' || e.key.toLowerCase() === 'p') { e.preventDefault(); printUnit(); }
   }
 
   function showCover() {
@@ -223,6 +257,8 @@
   }
 
   $('#back').addEventListener('click', goCover);
+  $('#print').addEventListener('click', printUnit);
+  document.addEventListener('keydown', onPrintKey);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !viewer.hidden) goCover(); });
   window.addEventListener('hashchange', route);
   route();
