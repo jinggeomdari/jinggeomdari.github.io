@@ -198,6 +198,19 @@
     .ctx-view .mini-blank { display: inline-block; min-width: 2.6em; padding: 0 8px; border: 1.5px solid #9aa7a5; border-radius: 7px; background: #fff; color: #8a9593; text-align: center; line-height: 1.5; }
     .ctx-view .mini-blank.active { border: 2.2px solid var(--coral); color: var(--ink); }
     .ctx-input { width: 8em; padding: 2px 8px; border: 2.2px solid var(--coral); border-radius: 8px; background: #fff; color: var(--ink); font: 700 19px var(--sans); text-align: center; }
+    .linked-contexts { display: grid; gap: 16px; overflow-wrap: anywhere; }
+    .linked-contexts > .ctx { min-width: 0; margin: 0; padding: 12px; border: 1px solid var(--rule); border-radius: 10px; background: #fffefb; }
+    .linked-contexts .tag { max-width: 100%; white-space: normal; }
+    .linked-entry { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 18px; }
+    .linked-entry .ctx-input { max-width: 100%; min-width: 0; }
+    .linked-root { display: inline-flex; align-items: center; vertical-align: middle; }
+    .linked-root > .radicand { border-top: 1.5px solid currentColor; padding: 2px 3px 0; }
+    #text-modal.linked-term-modal .dialog { max-height: calc(100dvh - 40px); overscroll-behavior: contain; }
+    @media (max-width: 600px) {
+      #text-modal.linked-term-modal { padding: 12px; }
+      #text-modal.linked-term-modal .dialog { padding: 16px; max-height: calc(100dvh - 24px); }
+      #text-modal.linked-term-modal .ctx-view { padding: 10px; font-size: 17px; }
+    }
     .choices { display: grid; gap: 10px; margin-top: 16px; }
     .choice { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 14px; border: 1.5px solid var(--rule); border-radius: 12px; background: #fff; color: var(--ink); font-size: 18px; text-align: left; cursor: pointer; }
     .choice[aria-checked="true"] { border-color: var(--main); background: var(--mint); }
@@ -382,7 +395,13 @@
     .diagram-word { width:100%; }
     .diagram-word .box-slot { position:static; transform:none; min-height:32px; min-width:90px; font:inherit; }
     .diagram-body .box-option { font:inherit; }
-    .diagram-modal { z-index:60; }
+    #text-modal, #choice-modal, .diagram-modal { z-index:1000; overscroll-behavior:none; }
+    #text-modal .dialog, #choice-modal .dialog, .diagram-dialog { overscroll-behavior:contain; max-height:calc(100dvh - 40px); }
+    .diagram-body .box-option { touch-action:none; user-select:none; -webkit-user-select:none; min-height:36px; }
+    #text-modal button, #choice-modal button, .diagram-modal button { touch-action:manipulation; }
+    .diagram-modal .box-option { touch-action:none; }
+    .diagram-body .box-option[aria-pressed="true"] { background:var(--mint); outline:2px solid var(--main); }
+    .diagram-ghost { position:fixed; z-index:1; pointer-events:none; transform:translate(-50%,-50%); }
     .diagram-dialog { max-height:calc(100dvh - 48px); overflow-y:auto; }
     .diagram-body .cols-2 { gap:24px; }
     @media (max-width:600px) { .diagram-modal { padding:12px; } .diagram-dialog { padding:18px; max-height:calc(100dvh - 24px); } }
@@ -461,14 +480,13 @@
   </nav>
 
   <!-- ================= 정리 ================= -->
-  <section class="tab-panel" id="study-panel" role="tabpanel" aria-labelledby="tab-study"><nav class="toc" id="study-toc" aria-label="단원 차례"></nav>
-    <div id="study-content"><div class="zone" data-sec="u3-1" data-toc="Ⅰ 확률"><b>Ⅰ. 확률</b></div><section class="sec"><h3 class="head">1. 경우의 수</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q2">사건</span></span><p><span><strong class="concept-key">동일한 조건</strong>에서 <strong class="concept-key">여러 번 반복</strong>할 수 있는 실험이나 관찰에 의하여 <strong class="concept-key">나타나는 결과</strong></span></p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q4">경우의 수</span></span><p><span><strong class="concept-key">사건이 일어나는 가짓수</strong></span></p></div></div></div><div class="property-grid"><div class="box rule-box"><p class="body ctx"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 <strong class="concept-key">동시에 일어나지 않고</strong> 각각 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span>, <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span>가지이면:</p><p class="body ctx formula-line">A 또는 B가 일어나는 경우의 수 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>+</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">m+n</annotation></semantics></math></span></span></span></p></div><div class="box rule-box"><p class="body ctx"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>가 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span>가지이고 <strong class="concept-key">그 각각에 대하여</strong> B가 n가지이면:</p><p class="body ctx formula-line"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 동시에 일어나는 경우의 수 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>×</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">m\times n</annotation></semantics></math></span></span></span></p></div></div></section><section class="sec"><h3 class="head">2. 확률의 뜻과 성질</h3><div class="property-grid"><div class="box rule-box"><p class="body ctx"><strong class="concept-key">각 경우가 일어날 가능성이 같을 때</strong>, 모든 경우의 수가 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span>, 사건 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>가 일어나는 경우의 수가 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi></mrow><annotation encoding="application/x-tex">a</annotation></semantics></math></span>이면:</p><p class="body ctx formula-line">사건 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>가 일어날 확률 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span> = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mi>a</mi><mi>n</mi></mfrac></mrow><annotation encoding="application/x-tex">\frac{a}{n}</annotation></semantics></math></span></span></span></p></div><div class="box rule-box"><p class="body ctx"><span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>≤</mo><mi>p</mi><mo>≤</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0\le p\le 1</annotation></semantics></math></span></span></span>. <strong class="concept-key">절대로 일어나지 않을</strong> 사건의 확률은 <span data-q="key-impossible">0</span>, <strong class="concept-key">반드시 일어날</strong> 사건의 확률은 <span data-q="key-certain">1</span>.</p><p class="body ctx">사건 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>가 일어나지 않을 확률은 <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">1-p</annotation></semantics></math></span></span></span>.</p></div></div></section><section class="sec"><h3 class="head">3. 확률의 계산</h3><div class="property-grid"><div class="box rule-box"><p class="body ctx"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 <strong class="concept-key">동시에 일어나지 않고</strong> 각각 일어날 확률이 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span>, <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span>이면:</p><p class="body ctx formula-line">A 또는 B가 일어날 확률 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>+</mo><mi>q</mi></mrow><annotation encoding="application/x-tex">p+q</annotation></semantics></math></span></span></span></p></div><div class="box rule-box"><p class="body ctx"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 <strong class="concept-key">서로 영향을 끼치지 않고</strong> 각각 일어날 확률이 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span>, <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span>이면:</p><p class="body ctx formula-line"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 동시에 일어날 확률 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>×</mo><mi>q</mi></mrow><annotation encoding="application/x-tex">p\times q</annotation></semantics></math></span></span></span></p></div></div></section><div class="zone" data-sec="u3-2" data-toc="Ⅱ 통계"><b>Ⅱ. 통계</b></div><section class="sec"><h3 class="head">1. 줄기와 잎 그림 · 도수분포표</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q13">변량</span></span><p><span>자료를 <strong class="concept-key">수량으로 나타낸 것</strong></span></p></div><div class="term ctx"><span class="tag"><span data-q="q16">줄기와 잎 그림</span></span><p><span>변량의 자릿수를 <strong class="concept-key">줄기와 잎으로 나누어</strong> 나타낸 그림</span>. 잎은 <span><strong class="concept-key">작은 값부터 순서대로 쓴다</strong></span>.</p></div><div class="term ctx"><span class="tag"><span data-q="q20">계급</span></span><p><span>변량을 <strong class="concept-key">일정한 간격으로 나눈 구간</strong></span>. 계급의 크기는 <span><strong class="concept-key">구간의 너비</strong></span>, 도수는 <span><strong class="concept-key">각 계급에 속하는 자료의 수</strong></span>.</p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q22">도수분포표</span></span><p><span>자료를 몇 개의 계급으로 나누고 <strong class="concept-key">각 계급의 도수</strong>를 나타낸 표</span></p></div><div class="term ctx"><span class="tag"><span data-q="q24">계급값</span></span><p><span>도수분포표에서 <strong class="concept-key">각 계급의 가운데 값</strong></span></p></div></div></div><div class="box rule-box"><p class="body ctx">도수의 총합은 <span><strong class="concept-key">자료의 개수</strong></span>.</p></div></section><section class="sec"><h3 class="head">2. 히스토그램 · 도수분포다각형</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q28">히스토그램</span></span><p><span><strong class="concept-key">가로축에 계급, 세로축에 도수</strong>를 나타낸 그래프</span>. 직사각형 사이에 <span><strong class="concept-key">틈이 없다</strong></span>.</p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q30">도수분포다각형</span></span><p><span>히스토그램에서 각 직사각형 <strong class="concept-key">윗변의 가운데 점</strong>을 <strong class="concept-key">선분으로 이은</strong> 그래프</span></p></div></div></div></section><section class="sec explorer data-grid" id="linked-data" aria-label="줄기와 잎 그림과 표·그래프 연동 탐색기"><div class="explorer-head"><span class="tag">직접 움직여 보기 ①</span><p>잎을 0~9 숫자로 추가하거나 수정하고, Enter를 눌러보세요!</p></div>
+  <section class="tab-panel" id="study-panel" role="tabpanel" aria-labelledby="tab-study"><div id="study-content"><div class="zone"><b>Ⅰ. 확률</b></div><section class="sec"><h3 class="head">1. 경우의 수</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q2">사건</span></span><p><span><strong class="concept-key">동일한 조건</strong>에서 <strong class="concept-key">여러 번 반복</strong>할 수 있는 실험이나 관찰에 의하여 <strong class="concept-key">나타나는 결과</strong></span></p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q4">경우의 수</span></span><p><span><strong class="concept-key">사건이 일어나는 가짓수</strong></span></p></div></div></div><div class="property-grid"><div class="box rule-box"><p class="body ctx"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 <strong class="concept-key">동시에 일어나지 않고</strong> 각각 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span>, <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span>가지이면:</p><p class="body ctx formula-line">A 또는 B가 일어나는 경우의 수 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>+</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">m+n</annotation></semantics></math></span></span></span></p></div><div class="box rule-box"><p class="body ctx"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>가 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span>가지이고 <strong class="concept-key">그 각각에 대하여</strong> B가 n가지이면:</p><p class="body ctx formula-line"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 동시에 일어나는 경우의 수 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>×</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">m\times n</annotation></semantics></math></span></span></span></p></div></div></section><section class="sec"><h3 class="head">2. 확률의 뜻과 성질</h3><div class="property-grid"><div class="box rule-box"><p class="body ctx"><strong class="concept-key">각 경우가 일어날 가능성이 같을 때</strong>, 모든 경우의 수가 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span>, 사건 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>가 일어나는 경우의 수가 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi></mrow><annotation encoding="application/x-tex">a</annotation></semantics></math></span>이면:</p><p class="body ctx formula-line">사건 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>가 일어날 확률 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span> = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mi>a</mi><mi>n</mi></mfrac></mrow><annotation encoding="application/x-tex">\frac{a}{n}</annotation></semantics></math></span></span></span></p></div><div class="box rule-box"><p class="body ctx"><span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>≤</mo><mi>p</mi><mo>≤</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0\le p\le 1</annotation></semantics></math></span></span></span>. <strong class="concept-key">절대로 일어나지 않을</strong> 사건의 확률은 <span data-q="key-impossible">0</span>, <strong class="concept-key">반드시 일어날</strong> 사건의 확률은 <span data-q="key-certain">1</span>.</p><p class="body ctx">사건 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>가 일어나지 않을 확률은 <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">1-p</annotation></semantics></math></span></span></span>.</p></div></div></section><section class="sec"><h3 class="head">3. 확률의 계산</h3><div class="property-grid"><div class="box rule-box"><p class="body ctx"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 <strong class="concept-key">동시에 일어나지 않고</strong> 각각 일어날 확률이 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span>, <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span>이면:</p><p class="body ctx formula-line">A 또는 B가 일어날 확률 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>+</mo><mi>q</mi></mrow><annotation encoding="application/x-tex">p+q</annotation></semantics></math></span></span></span></p></div><div class="box rule-box"><p class="body ctx"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 <strong class="concept-key">서로 영향을 끼치지 않고</strong> 각각 일어날 확률이 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span>, <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span>이면:</p><p class="body ctx formula-line"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span>와 <span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span>가 동시에 일어날 확률 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>×</mo><mi>q</mi></mrow><annotation encoding="application/x-tex">p\times q</annotation></semantics></math></span></span></span></p></div></div></section><details class="sec explorer study-activity" id="probability-activity"><summary class="explorer-head"><span class="tag">직접 움직여 보기 ①</span><span>주사위·동전·룰렛 확률 실험</span></summary><div id="probability-lab" aria-label="주사위·동전·룰렛 확률 실험"></div></details><div class="zone"><b>Ⅱ. 통계</b></div><section class="sec"><h3 class="head">1. 줄기와 잎 그림 · 도수분포표</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q13">변량</span></span><p><span>자료를 <strong class="concept-key">수량으로 나타낸 것</strong></span></p></div><div class="term ctx"><span class="tag"><span data-q="q16">줄기와 잎 그림</span></span><p><span>변량의 자릿수를 <strong class="concept-key">줄기와 잎으로 나누어</strong> 나타낸 그림</span>. 잎은 <span><strong class="concept-key">작은 값부터 순서대로 쓴다</strong></span>.</p></div><div class="term ctx"><span class="tag"><span data-q="q20">계급</span></span><p><span>변량을 <strong class="concept-key">일정한 간격으로 나눈 구간</strong></span>. 계급의 크기는 <span><strong class="concept-key">구간의 너비</strong></span>, 도수는 <span><strong class="concept-key">각 계급에 속하는 자료의 수</strong></span>.</p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q22">도수분포표</span></span><p><span>자료를 몇 개의 계급으로 나누고 <strong class="concept-key">각 계급의 도수</strong>를 나타낸 표</span></p></div><div class="term ctx"><span class="tag"><span data-q="q24">계급값</span></span><p><span>도수분포표에서 <strong class="concept-key">각 계급의 가운데 값</strong></span></p></div></div></div><div class="box rule-box"><p class="body ctx">도수의 총합은 <span><strong class="concept-key">자료의 개수</strong></span>.</p></div></section><section class="sec"><h3 class="head">2. 히스토그램 · 도수분포다각형</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q28">히스토그램</span></span><p><span><strong class="concept-key">가로축에 계급, 세로축에 도수</strong>를 나타낸 그래프</span>. 직사각형 사이에 <span><strong class="concept-key">틈이 없다</strong></span>.</p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q30">도수분포다각형</span></span><p><span>히스토그램에서 각 직사각형 <strong class="concept-key">윗변의 가운데 점</strong>을 <strong class="concept-key">선분으로 이은</strong> 그래프</span></p></div></div></div></section><details class="sec explorer study-activity"><summary class="explorer-head"><span class="tag">직접 움직여 보기 ②</span><span>줄기와 잎 · 표와 그래프</span></summary><section class="data-grid" id="linked-data" aria-label="줄기와 잎 그림과 표·그래프 연동 탐색기"><div class="explorer-head"><p>잎을 0~9 숫자로 추가하거나 수정하고, Enter를 눌러보세요!</p></div>
       <div class="sub"><p class="example-note">(1 | 6은 16세)</p><div class="stem"><div class="stem-head"><span>줄기</span><span>잎</span></div><div class="stem-row"><span>1</span><input class="leaf-input" data-stem="1" value="6 7 9 9" aria-label="줄기 1의 잎"></div><div class="stem-row"><span>2</span><input class="leaf-input" data-stem="2" value="2 3 3 4 5 5 6 7 8 9" aria-label="줄기 2의 잎"></div><div class="stem-row"><span>3</span><input class="leaf-input" data-stem="3" value="0 5 6 8 9" aria-label="줄기 3의 잎"></div><div class="stem-row"><span>4</span><input class="leaf-input" data-stem="4" value="1" aria-label="줄기 4의 잎"></div></div><p id="leaf-warning" class="leaf-warning">잎에는 수가 크기순으로 나열되어야 합니다.</p></div>
       <div class="sub"><div class="table-area"><div class="table-wrap"><table><thead><tr><th>나이(세)</th><th>참가자 수(명)</th></tr></thead><tbody><tr><td>10 이상 ~ 20 미만</td><td id="freq-10">4</td></tr><tr><td>20 ~ 30</td><td id="freq-20">10</td></tr><tr><td>30 ~ 40</td><td id="freq-30">5</td></tr><tr><td><span class="selected-class">40 ~ 50</span></td><td id="freq-40">1</td></tr></tbody><tfoot><tr><td>합계</td><td id="freq-total">20</td></tr></tfoot></table></div><i class="class-bracket"></i><span class="class-label">계급</span><i class="freq-bracket"></i><span class="freq-label">도수</span></div><div class="grade-note">계급의 크기: 10세</div></div>
       <div class="sub"><svg class="histogram" viewBox="0 0 230 230" aria-label="히스토그램과 도수분포다각형"><defs><marker id="arrow-cyan" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--main)"/></marker><marker id="arrow-red" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--coral)"/></marker></defs><g fill="none" stroke="#aab0b0" stroke-width=".8"><path d="M31 19V190H209M31 53H209M31 87H209M31 121H209M31 155H209M67 19V190M102 19V190M138 19V190M173 19V190"/></g><g id="hist-bars" fill="var(--mint-2)" stroke="var(--main)" stroke-width="2"></g><polyline id="freq-polygon" fill="none" stroke="var(--violet)" stroke-width="3"></polyline><g id="freq-points" fill="#222"></g><g class="chart-label" fill="#333" font-size="12"><text x="2" y="13">(명)</text><text x="25" y="207">0</text><text x="61" y="207">10</text><text x="96" y="207">20</text><text x="132" y="207">30</text><text x="167" y="207">40</text><text x="197" y="207">50</text><text x="211" y="207">(세)</text><text x="7" y="158">2</text><text x="7" y="124">4</text><text x="7" y="90">6</text><text x="7" y="56">8</text><text x="2" y="24">10</text></g></svg></div>
-      </section><section class="sec"><h3 class="head">3. 상대도수</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q32">상대도수</span></span><p><span><strong class="concept-key">도수의 총합에 대한</strong> 그 계급의 도수의 <strong class="concept-key">비율</strong></span></p></div></div><div class="col"></div></div><div class="box rule-box"><p class="body ctx">상대도수 <span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo></mrow><annotation encoding="application/x-tex">=</annotation></semantics></math></span></span> <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mtext>그 계급의 도수</mtext><mtext>도수의 총합</mtext></mfrac></mrow><annotation encoding="application/x-tex">\frac{\text{그 계급의 도수}}{\text{도수의 총합}}</annotation></semantics></math></span></span></span></p></div><div class="box rule-box"><p class="body ctx">상대도수의 합은 <span data-q="key-total">1</span>. <strong class="concept-key">도수의 총합이 서로 다른 두 자료</strong>는 상대도수로 비교한다.</p></div></section><div class="zone" data-sec="u3-3" data-toc="Ⅲ 대푯값"><b>Ⅲ. 대푯값</b></div><section class="sec"><h3 class="head">1. 대푯값</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span>대푯값</span></span><p><span>자료 전체의 특징을 <strong class="concept-key">하나의 수</strong>로 나타낸 값</span></p></div><div class="term ctx"><span class="tag"><span data-q="q38">평균</span></span><p><span>변량의 총합 ÷ 변량의 개수</span></p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q40">중앙값</span></span><p><span>자료를 <strong class="concept-key">작은 값부터 크기순</strong>으로 나열했을 때 <strong class="concept-key">가운데 위치한 값</strong></span>. <strong class="concept-key">자료의 개수</strong>가 짝수이면 <strong class="concept-key">가운데 두 값의 평균</strong>.</p></div><div class="term ctx"><span class="tag"><span data-q="q42">최빈값</span></span><p><span>자료의 값 중에서 <strong class="concept-key">가장 많이 나타나는 값</strong></span></p></div></div></div><div class="box rule-box"><p class="body ctx"><strong class="concept-key">매우 크거나 작은 값</strong>이 있을 때에는 <span>중앙값</span>이 평균보다 자료 전체의 특징을 더 잘 나타낼 수 있다.</p></div></section><section class="sec"><h3 class="head">2. 분산과 표준편차</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span>산포도</span></span><p><span>자료들이 대푯값 주위에 <strong class="concept-key">흩어져 있는 정도</strong>를 <strong class="concept-key">하나의 수</strong>로 나타낸 값</span></p></div><div class="term ctx"><span class="tag"><span>편차</span></span><p><span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>변량</mtext><mo>−</mo><mtext>평균</mtext></mrow><annotation encoding="application/x-tex">\text{변량}-\text{평균}</annotation></semantics></math></span></span></span>. <strong class="concept-key">편차의 합은</strong> <span data-q="key-deviation">0</span>.</p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q50">분산</span></span><p><span>편차 제곱의 총합을 변량의 개수로 나눈 값</span>. 분산 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mtext>편차 제곱의 총합</mtext><mtext>변량의 개수</mtext></mfrac></mrow><annotation encoding="application/x-tex">\frac{\text{편차 제곱의 총합}}{\text{변량의 개수}}</annotation></semantics></math></span></span></span>.</p></div><div class="term ctx"><span class="tag"><span data-q="q53">표준편차</span></span><p><span><strong class="concept-key">분산의 음이 아닌 제곱근</strong></span>. <span data-q-mirror="q53">표준편차</span> = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msqrt><mtext>분산</mtext></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{\text{분산}}</annotation></semantics></math></span></span></span>.</p></div></div></div><div class="box rule-box"><p class="body ctx">분산과 <span data-q-mirror="q53">표준편차</span>가 작을수록 자료는 <span><strong class="concept-key">평균에 가까이 모여 있고</strong></span>, 클수록 <strong class="concept-key">평균에서 멀리 흩어져 있다</strong>.</p></div><div class="box rule-box"><p class="body ctx"><span data-q-mirror="q53">표준편차</span>는 <span><strong class="concept-key">변량과 같은 단위</strong></span>.</p></div></section>
-<section class="sec explorer" id="block-statistics" aria-label="블록으로 대푯값과 산포도 살펴보기">
-  <div class="explorer-head"><span class="tag">직접 움직여 보기 ②</span><p>블록을 정수 위치로 옮겨 보세요! 대푯값과 편차, 분산, 표준편차가 함께 바뀝니다!</p></div>
+      </section></details><section class="sec"><h3 class="head">3. 상대도수</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q32">상대도수</span></span><p><span><strong class="concept-key">도수의 총합에 대한</strong> 그 계급의 도수의 <strong class="concept-key">비율</strong></span></p></div></div><div class="col"></div></div><div class="box rule-box"><p class="body ctx">상대도수 <span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo></mrow><annotation encoding="application/x-tex">=</annotation></semantics></math></span></span> <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mtext>그 계급의 도수</mtext><mtext>도수의 총합</mtext></mfrac></mrow><annotation encoding="application/x-tex">\frac{\text{그 계급의 도수}}{\text{도수의 총합}}</annotation></semantics></math></span></span></span></p></div><div class="box rule-box"><p class="body ctx">상대도수의 합은 <span data-q="key-total">1</span>. <strong class="concept-key">도수의 총합이 서로 다른 두 자료</strong>는 상대도수로 비교한다.</p></div></section><div class="zone"><b>Ⅲ. 대푯값</b></div><section class="sec"><h3 class="head">1. 대푯값</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span>대푯값</span></span><p><span>자료 전체의 특징을 <strong class="concept-key">하나의 수</strong>로 나타낸 값</span></p></div><div class="term ctx"><span class="tag"><span data-q="q38">평균</span></span><p><span>변량의 총합 ÷ 변량의 개수</span></p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q40">중앙값</span></span><p><span>자료를 <strong class="concept-key">작은 값부터 크기순</strong>으로 나열했을 때 <strong class="concept-key">가운데 위치한 값</strong></span>. <strong class="concept-key">자료의 개수</strong>가 짝수이면 <strong class="concept-key">가운데 두 값의 평균</strong>.</p></div><div class="term ctx"><span class="tag"><span data-q="q42">최빈값</span></span><p><span>자료의 값 중에서 <strong class="concept-key">가장 많이 나타나는 값</strong></span></p></div></div></div><div class="box rule-box"><p class="body ctx"><strong class="concept-key">매우 크거나 작은 값</strong>이 있을 때에는 <span>중앙값</span>이 평균보다 자료 전체의 특징을 더 잘 나타낼 수 있다.</p></div></section><section class="sec"><h3 class="head">2. 분산과 표준편차</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span>산포도</span></span><p><span>자료들이 대푯값 주위에 <strong class="concept-key">흩어져 있는 정도</strong>를 <strong class="concept-key">하나의 수</strong>로 나타낸 값</span></p></div><div class="term ctx"><span class="tag"><span>편차</span></span><p><span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>변량</mtext><mo>−</mo><mtext>평균</mtext></mrow><annotation encoding="application/x-tex">\text{변량}-\text{평균}</annotation></semantics></math></span></span></span>. <strong class="concept-key">편차의 합은</strong> <span data-q="key-deviation">0</span>.</p></div></div><div class="col"><div class="term ctx"><span class="tag"><span data-q="q50">분산</span></span><p><span>편차 제곱의 총합을 변량의 개수로 나눈 값</span>. 분산 = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mtext>편차 제곱의 총합</mtext><mtext>변량의 개수</mtext></mfrac></mrow><annotation encoding="application/x-tex">\frac{\text{편차 제곱의 총합}}{\text{변량의 개수}}</annotation></semantics></math></span></span></span>.</p></div><div class="term ctx"><span class="tag"><span data-q="q53">표준편차</span></span><p><span><strong class="concept-key">분산의 음이 아닌 제곱근</strong></span>. <span data-q-mirror="q53">표준편차</span> = <span><span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msqrt><mtext>분산</mtext></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{\text{분산}}</annotation></semantics></math></span></span></span>.</p></div></div></div><div class="box rule-box"><p class="body ctx">분산과 <span data-q-mirror="q53">표준편차</span>가 작을수록 자료는 <span><strong class="concept-key">평균에 가까이 모여 있고</strong></span>, 클수록 <strong class="concept-key">평균에서 멀리 흩어져 있다</strong>.</p></div><div class="box rule-box"><p class="body ctx"><span data-q-mirror="q53">표준편차</span>는 <span><strong class="concept-key">변량과 같은 단위</strong></span>.</p></div></section>
+<details class="sec explorer study-activity"><summary class="explorer-head"><span class="tag">직접 움직여 보기 ③</span><span>블록으로 대푯값과 산포도 살펴보기</span></summary><section class="sec explorer" id="block-statistics" aria-label="블록으로 대푯값과 산포도 살펴보기">
+  <div class="explorer-head"><p>블록을 정수 위치로 옮겨 보세요! 대푯값과 편차, 분산, 표준편차가 함께 바뀝니다!</p></div>
   <div class="block-stat-tables">
     <div class="block-stat-card"><h4>대푯값</h4><table><tbody>
       <tr><th scope="row">평균</th><td id="block-mean"></td></tr>
@@ -488,10 +506,9 @@
   <p class="block-stat-guide">블록 1개는 자료 1개입니다. 블록 위에 숫자는 편차입니다.</p>
   <p class="block-stat-status" id="block-stat-status" role="status" aria-live="polite"></p>
 </section>
-<section class="sec"><h3 class="head">3. 산점도와 상관관계</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q57">산점도</span></span><p><span>두 변량 <span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo separator="true">,</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">x,y</annotation></semantics></math></span></span>를 <strong class="concept-key">순서쌍</strong> <span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(x,y)</annotation></semantics></math></span></span>로 하여 <strong class="concept-key">좌표평면</strong> 위에 나타낸 그림</span></p></div><div class="term ctx"><span class="tag"><span>상관관계</span></span><p><span>두 변량 중 한쪽이 증가할 때 다른 한쪽이 <strong class="concept-key">증가 또는 감소</strong>하는 경향을 나타내는 관계</span></p></div></div><div class="col"><div class="term ctx"><span class="tag"><span>양의 상관관계</span></span><p><span>x가 증가함에 따라 y도 <strong class="concept-key">대체로 증가</strong>하는 경향</span></p></div><div class="term ctx"><span class="tag"><span>음의 상관관계</span></span><p><span>x가 증가함에 따라 y는 <strong class="concept-key">대체로 감소</strong>하는 경향</span></p></div></div></div><div class="box rule-box"><p class="body ctx">산점도에서 점들이 <strong class="concept-key">한 직선 주위에 가까이</strong> 모일수록 <span><strong class="concept-key">상관관계가 강하고</strong></span>, <strong class="concept-key">흩어져 있을수록 약하다</strong>.</p></div><div class="box rule-box"><p class="body ctx">증가·감소 경향이 분명하지 않으면 <span><strong class="concept-key">상관관계가 없다</strong></span>.</p></div></section></div></section>
+</details><section class="sec"><h3 class="head">3. 산점도와 상관관계</h3><div class="cols-2"><div class="col"><div class="term ctx"><span class="tag"><span data-q="q57">산점도</span></span><p><span>두 변량 <span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo separator="true">,</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">x,y</annotation></semantics></math></span></span>를 <strong class="concept-key">순서쌍</strong> <span class="formula-key"><span class="katex"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(x,y)</annotation></semantics></math></span></span>로 하여 <strong class="concept-key">좌표평면</strong> 위에 나타낸 그림</span></p></div><div class="term ctx"><span class="tag"><span>상관관계</span></span><p><span>두 변량 중 한쪽이 증가할 때 다른 한쪽이 <strong class="concept-key">증가 또는 감소</strong>하는 경향을 나타내는 관계</span></p></div></div><div class="col"><div class="term ctx"><span class="tag"><span>양의 상관관계</span></span><p><span>x가 증가함에 따라 y도 <strong class="concept-key">대체로 증가</strong>하는 경향</span></p></div><div class="term ctx"><span class="tag"><span>음의 상관관계</span></span><p><span>x가 증가함에 따라 y는 <strong class="concept-key">대체로 감소</strong>하는 경향</span></p></div></div></div><div class="box rule-box"><p class="body ctx">산점도에서 점들이 <strong class="concept-key">한 직선 주위에 가까이</strong> 모일수록 <span><strong class="concept-key">상관관계가 강하고</strong></span>, <strong class="concept-key">흩어져 있을수록 약하다</strong>.</p></div><div class="box rule-box"><p class="body ctx">증가·감소 경향이 분명하지 않으면 <span><strong class="concept-key">상관관계가 없다</strong></span>.</p></div></section></div></section>
   <section class="tab-panel" id="quiz-panel" role="tabpanel" aria-labelledby="tab-quiz" hidden>
     <p class="quiz-guide">💡 단답 8문항 · 객관식 4문항 · 용어 드래그 8문항. <b>?</b> 빈칸을 눌러 답을 넣으세요. 그림의 빈 이름표는 아래 이름표를 <b>끌어다 놓거나</b>, <b>눌러서 고른 뒤 자리를 누르면</b> 됩니다. 다 채웠으면 맨 아래 <b>[정답 확인]</b>!</p>
-    <nav class="toc" id="quiz-toc" aria-label="단원 차례"></nav>
     <div id="quiz-body"></div>
     <div class="quiz-bar">
       <button id="quiz-check" class="btn primary" type="button">정답 확인</button>
@@ -519,10 +536,10 @@
             <span class="hub-card-description">벽돌을 알맞은 잎 사이에 놓고 성벽을 지켜 보세요.</span>
             <span class="hub-card-action">게임 들어가기 →</span>
           </button>
-          <button type="button" class="hub-card" id="probability-launch" aria-controls="probability-lab" style="margin-top:16px">
-            <span class="icon" aria-hidden="true">🎲 🪙 🎯</span>
-            <span class="hub-card-title">주사위, 동전, 룰렛 확률 알아보기 게임</span>
-            <span class="hub-card-description">직접 시행하고 이론적 확률과 실험의 상대도수를 비교해 보세요.</span>
+          <button type="button" class="hub-card" id="forge-launch" aria-controls="dice-forge" style="margin-top:16px">
+            <span class="icon" aria-hidden="true">🔨</span>
+            <span class="hub-card-title">대장장이의 주사위: 1의 저주</span>
+            <span class="hub-card-description">강화할까, 판매할까? 광석 3개로 최고의 무기를 만들어 보세요.</span>
             <span class="hub-card-action">게임 들어가기 →</span>
           </button>
         </div>
@@ -1162,11 +1179,50 @@
     }
   }
 
+  const LINKED_TERMS = new Set(['q50', 'q53']);
+
+  function prepareLinkedTerms(root) {
+    const section = $('[data-q="q50"]', root).closest('.sec');
+    const radical = $$('msqrt', section).find(node => node.textContent === '분산');
+    const formula = document.createElement('span');
+    formula.className = 'linked-root';
+    const sign = document.createElement('span');
+    sign.textContent = '√';
+    sign.setAttribute('role', 'img');
+    sign.setAttribute('aria-label', '제곱근');
+    const radicand = document.createElement('span');
+    radicand.className = 'radicand';
+    radicand.textContent = '분산';
+    formula.append(sign, radicand);
+    radical.closest('.katex').replaceWith(formula);
+    const walker = document.createTreeWalker(section, NodeFilter.SHOW_TEXT);
+    const targets = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (node.textContent.includes('분산') && node.parentElement.closest('.ctx') &&
+          !node.parentElement.closest('[data-q], [data-q-mirror], math')) targets.push(node);
+    }
+    targets.forEach(node => {
+      const fragment = document.createDocumentFragment();
+      node.textContent.split('분산').forEach((part, index) => {
+        if (index) {
+          const source = document.createElement('span');
+          source.dataset.qMirror = 'q50';
+          source.textContent = '분산';
+          fragment.append(source);
+        }
+        fragment.append(document.createTextNode(part));
+      });
+      node.replaceWith(fragment);
+    });
+  }
+
   function buildQuiz() {
     const clone = $('#study-content').cloneNode(true);
     clone.removeAttribute('id');
     $$('.explorer', clone).forEach((el) => el.remove());
     $$('[id]', clone).forEach((el) => el.removeAttribute('id'));
+    prepareLinkedTerms(clone);
     QUIZ.forEach((item) => {
       if (item.type === 'drag') return;
       if (item.type === 'place') { makePlace(clone, item); return; }
@@ -1192,7 +1248,6 @@
     buildWordDragGroups(clone);
     quizBody.replaceChildren(clone);
     selectedChip = null;
-    draggedBoxOption = null;
 
     resetCheckState();
   }
@@ -1235,11 +1290,34 @@
   const textModal = $('#text-modal'), choiceModal = $('#choice-modal');
   let activeBlank = null, pickedIndex = null;
 
-  function openModal(modal) { modal.hidden = false; }
+  let quizIsolation = [], quizOverflow = '';
+  function openModal(modal) {
+    quizOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    let branch = modal;
+    while (branch.parentElement) {
+      Array.from(branch.parentElement.children).filter(element => element !== branch).forEach(element => {
+        quizIsolation.push([element, element.inert]);
+        element.inert = true;
+      });
+      branch = branch.parentElement;
+      if (branch === document.body) break;
+    }
+    modal.hidden = false;
+    const heading = modal.querySelector('h2');
+    heading.tabIndex = -1;
+    heading.focus({preventScroll: true});
+  }
+  function releaseQuizModal() {
+    quizIsolation.forEach(([element, inert]) => { element.inert = inert; });
+    quizIsolation = [];
+    document.documentElement.style.overflow = quizOverflow;
+  }
   function closeModals() {
     textModal.hidden = true;
     choiceModal.hidden = true;
-    if (activeBlank) activeBlank.focus();
+    releaseQuizModal();
+    if (activeBlank) activeBlank.focus({preventScroll: true});
     activeBlank = null;
   }
 
@@ -1251,10 +1329,46 @@
     input.setAttribute('aria-label', '답 입력');
     input.value = blank.dataset.value || '';
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); confirmText(); } });
-    $('#text-ctx').replaceChildren(contextView(blank, input));
+    const linked = LINKED_TERMS.has(blank.dataset.qid);
+    textModal.classList.toggle('linked-term-modal', linked);
+    $('#text-modal-title').textContent = linked
+      ? '여러 설명의 빈칸에 공통으로 들어갈 말을 쓰세요.'
+      : '빈칸에 알맞은 말을 써 넣으세요.';
+    if (linked) {
+      const contexts = document.createElement('div');
+      contexts.className = 'linked-contexts';
+      const peers = $$(`.blank[data-qid="${blank.dataset.qid}"]`, quizBody);
+      const originals = [...new Set(peers.map(peer => peer.closest('.ctx')))];
+      originals.forEach(original => {
+        const copy = original.cloneNode(true);
+        $$('.cloze', copy).forEach(cloze => {
+          const slot = $('.blank, .slot', cloze);
+          const placeholder = document.createElement('span');
+          const current = slot.dataset.qid === blank.dataset.qid;
+          placeholder.className = 'mini-blank' + (current ? ' active' : '');
+          placeholder.textContent = current ? '?' : (slot.dataset.value || '?');
+          placeholder.setAttribute('aria-label', current ? '공통 답 빈칸' : '다른 용어 빈칸');
+          cloze.replaceWith(placeholder);
+        });
+        $$('script, style, annotation, annotation-xml', copy).forEach(node => node.remove());
+        [copy, ...$$('*', copy)].forEach(node => {
+          [...node.attributes].forEach(attribute => {
+            if (attribute.name === 'id' || attribute.name.startsWith('data-') ||
+                attribute.name.startsWith('on') || attribute.name === 'tabindex') {
+              node.removeAttribute(attribute.name);
+            }
+          });
+        });
+        contexts.append(copy);
+      });
+      const entry = document.createElement('label');
+      entry.className = 'linked-entry';
+      entry.append('공통 답', input);
+      $('#text-ctx').replaceChildren(contexts, entry);
+    } else {
+      $('#text-ctx').replaceChildren(contextView(blank, input));
+    }
     openModal(textModal);
-    input.focus();
-    input.select();
   }
   function confirmText() {
     const value = $('#text-input').value.trim();
@@ -1312,6 +1426,15 @@
   [textModal, choiceModal].forEach((modal) => modal.addEventListener('click', (e) => { if (e.target === modal) closeModals(); }));
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && (!textModal.hidden || !choiceModal.hidden)) closeModals();
+    const foreground = [textModal, choiceModal, diagramModal].find(modal => !modal.hidden);
+    if (e.key === 'Escape' && foreground === diagramModal) closeDiagramModal();
+    if (e.key === 'Tab' && foreground) {
+      const controls = $$('input, button', foreground).filter(control => !control.disabled && !control.hidden);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      else if (!controls.includes(document.activeElement)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+    }
   });
 
   /* 이름표 놓기 (마우스 드래그 + 터치 드래그 + 눌러서 놓기) */
@@ -1407,16 +1530,52 @@
   quizBody.addEventListener('pointercancel', (e) => endDrag(e, true));
 
   const diagramModal = $('#diagram-modal'), diagramBody = $('#diagram-body');
-  let draggedBoxOption = null, activeDiagram = null, activeDiagramKind = null;
+  let activeDiagram = null, activeDiagramKind = null;
+  let diagramDrag = null, diagramReturn = null, diagramSelection = null;
+  function cancelDiagramDrag() {
+    const previous = diagramDrag;
+    diagramDrag = null;
+    if (previous?.scrollFrame !== undefined) cancelAnimationFrame(previous.scrollFrame);
+    previous?.ghost?.remove();
+    if (previous?.option.hasPointerCapture(previous.id)) previous.option.releasePointerCapture(previous.id);
+    $$('.drag-over', diagramBody).forEach(slot => slot.classList.remove('drag-over'));
+  }
+  function scrollDiagramDrag() {
+    if (!diagramDrag?.ghost) return;
+    const dialog = diagramBody.closest('.diagram-dialog');
+    const bounds = dialog.getBoundingClientRect();
+    if (diagramDrag.clientX >= bounds.left && diagramDrag.clientX <= bounds.right) {
+      if (diagramDrag.clientY < bounds.top + 40) dialog.scrollTop -= 8;
+      else if (diagramDrag.clientY > bounds.bottom - 40) dialog.scrollTop += 8;
+    }
+    const slot = document.elementFromPoint(diagramDrag.clientX, diagramDrag.clientY)?.closest('#diagram-body .box-slot');
+    $$('.box-slot', diagramBody).forEach(candidate => candidate.classList.toggle('drag-over', candidate === slot));
+    diagramDrag.scrollFrame = requestAnimationFrame(scrollDiagramDrag);
+  }
+  function placeDiagramOption(option, slot) {
+    if (slot.dataset.value) {
+      const previous = $$('.box-option', diagramBody).find(candidate => candidate.dataset.value === slot.dataset.value);
+      if (previous) previous.hidden = false;
+    }
+    slot.dataset.value = option.dataset.value;
+    slot.textContent = option.dataset.value;
+    option.hidden = true;
+    diagramSelection = null;
+    $$('.box-option', diagramBody).forEach(candidate => candidate.setAttribute('aria-pressed', 'false'));
+  }
   function closeDiagramModal() {
+    cancelDiagramDrag();
     diagramModal.hidden = true;
+    releaseQuizModal();
+    if (diagramReturn?.isConnected) diagramReturn.focus({preventScroll: true});
     activeDiagram = null;
     activeDiagramKind = null;
   }
   function openWordDiagram(source) {
+    diagramReturn = document.activeElement;
+    diagramSelection = null;
     activeDiagram = source;
     activeDiagramKind = source.dataset.wordGroup;
-    draggedBoxOption = null;
     const frame = source.querySelector('.cols-2').cloneNode(true);
     frame.classList.add('diagram-word');
     const slots = frame.querySelectorAll('.word-slot');
@@ -1433,7 +1592,7 @@
     }
     shuffledLabels.forEach((label) => {
       const option = document.createElement('button');
-      option.type = 'button'; option.className = 'box-option'; option.draggable = true;
+      option.type = 'button'; option.className = 'box-option'; option.draggable = false;
       option.dataset.value = label; option.textContent = label;
       if ([...slots].some((slot) => slot.dataset.value === label)) option.hidden = true;
       options.append(option);
@@ -1441,8 +1600,7 @@
     diagramBody.replaceChildren(frame, options);
     $('#diagram-dialog-title').textContent = activeDiagramKind === 'distribution'
       ? '다섯 용어를 알맞은 설명 앞에 끌어 놓으세요.' : '세 대푯값을 알맞은 설명 앞에 끌어 놓으세요.';
-    diagramModal.hidden = false;
-    $('#diagram-cancel').focus();
+    openModal(diagramModal);
   }
   quizBody.addEventListener('click', event => {
     const slot = event.target.closest('.word-slot');
@@ -1462,36 +1620,56 @@
   });
   $('#diagram-cancel').addEventListener('click', closeDiagramModal);
   diagramModal.addEventListener('click', (event) => { if (event.target === diagramModal) closeDiagramModal(); });
-  diagramModal.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); $('#diagram-confirm').click(); } });
-    diagramBody.addEventListener('dragstart', (event) => {
-      const option = event.target.closest('.box-option');
-      if (!option) return;
-      draggedBoxOption = option;
-      event.dataTransfer.setData('text/plain', option.dataset.value);
-      event.dataTransfer.effectAllowed = 'move';
-    });
-    diagramBody.addEventListener('dragover', (event) => {
-      const slot = event.target.closest('.box-slot');
-      if (!slot) return;
-      event.preventDefault();
-      slot.classList.add('drag-over');
-    });
-    diagramBody.addEventListener('dragleave', (event) => event.target.closest('.box-slot')?.classList.remove('drag-over'));
-    diagramBody.addEventListener('drop', (event) => {
-      const slot = event.target.closest('.box-slot');
-      if (!slot || !draggedBoxOption) return;
-      event.preventDefault();
-      const previousValue = slot.dataset.value;
-      if (previousValue) {
-        const previousOption = diagramBody.querySelector(`.box-option[data-value="${previousValue}"]`);
-        if (previousOption) previousOption.hidden = false;
-      }
-      slot.dataset.value = draggedBoxOption.dataset.value;
-      slot.textContent = draggedBoxOption.dataset.value;
-      slot.classList.remove('drag-over');
-      draggedBoxOption.hidden = true;
-      draggedBoxOption = null;
-    });
+  diagramModal.addEventListener('keydown', (event) => { if (event.key === 'Enter' && event.target.tagName !== 'BUTTON') { event.preventDefault(); $('#diagram-confirm').click(); } });
+  diagramBody.addEventListener('click', event => {
+    if (suppressClick) return;
+    const option = event.target.closest('.box-option');
+    if (option) {
+      diagramSelection = option;
+      $$('.box-option', diagramBody).forEach(candidate => candidate.setAttribute('aria-pressed', String(candidate === option)));
+    }
+    const slot = event.target.closest('.box-slot');
+    if (slot && diagramSelection) placeDiagramOption(diagramSelection, slot);
+  });
+  diagramBody.addEventListener('pointerdown', event => {
+    const option = event.target.closest('.box-option');
+    if (!option || !event.isPrimary || event.button !== 0 || diagramDrag) return;
+    diagramDrag = {option, id: event.pointerId, x: event.clientX, y: event.clientY, ghost: null};
+    option.setPointerCapture(event.pointerId);
+  });
+  diagramBody.addEventListener('pointermove', event => {
+    if (!diagramDrag || diagramDrag.id !== event.pointerId) return;
+    diagramDrag.clientX = event.clientX;
+    diagramDrag.clientY = event.clientY;
+    if (!diagramDrag.ghost && Math.hypot(event.clientX - diagramDrag.x, event.clientY - diagramDrag.y) > 6) {
+      diagramDrag.ghost = document.createElement('span');
+      diagramDrag.ghost.className = 'box-option diagram-ghost';
+      diagramDrag.ghost.textContent = diagramDrag.option.dataset.value;
+      diagramDrag.ghost.setAttribute('aria-hidden', 'true');
+      diagramModal.append(diagramDrag.ghost);
+      diagramDrag.scrollFrame = requestAnimationFrame(scrollDiagramDrag);
+    }
+    if (!diagramDrag.ghost) return;
+    diagramDrag.ghost.style.left = event.clientX + 'px';
+    diagramDrag.ghost.style.top = event.clientY + 'px';
+    const slot = document.elementFromPoint(event.clientX, event.clientY)?.closest('#diagram-body .box-slot');
+    $$('.box-slot', diagramBody).forEach(candidate => candidate.classList.toggle('drag-over', candidate === slot));
+  }, {passive: false});
+  diagramBody.addEventListener('pointerup', event => {
+    if (!diagramDrag || diagramDrag.id !== event.pointerId) return;
+    const {option, ghost} = diagramDrag;
+    const slot = document.elementFromPoint(event.clientX, event.clientY)?.closest('#diagram-body .box-slot');
+    cancelDiagramDrag();
+    if (!ghost) return;
+    suppressClick = true;
+    setTimeout(() => { suppressClick = false; }, 0);
+    if (slot) placeDiagramOption(option, slot);
+  });
+  diagramBody.addEventListener('pointercancel', cancelDiagramDrag);
+  diagramBody.addEventListener('lostpointercapture', cancelDiagramDrag);
+  window.addEventListener('blur', cancelDiagramDrag);
+  window.addEventListener('resize', cancelDiagramDrag);
+  diagramBody.addEventListener('dragstart', event => event.preventDefault());
   const norm = (s) => s.replace(/\s+/g, '').replace(/（/g, '(').replace(/）/g, ')').replace(/[−–]/g, '-').replace(/＝/g, '=').toLowerCase();
   // 채운 칸만 채점해서 색을 칠하고, 개수를 돌려준다 (빈 칸은 표시하지 않음)
   function grade() {
@@ -1576,7 +1754,7 @@
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT), texts=[];
     let node;
     while ((node=walker.nextNode())) {
-      if (!node.parentElement || node.parentElement.closest('math,svg,script,style,input,textarea,.head,.zone,.tag,#block-statistics,#block-calculation-modal,#hist-defense,#probability-lab')) continue;
+      if (!node.parentElement || node.parentElement.closest('math,svg,script,style,input,textarea,.head,.zone,.tag,.linked-contexts .mini-blank,#block-statistics,#block-calculation-modal,#hist-defense,#probability-lab,#dice-forge')) continue;
       pattern.lastIndex=0;
       if (pattern.test(node.nodeValue)) texts.push(node);
     }
@@ -1874,10 +2052,197 @@
 #hist-defense .hd-controls label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; }
 #hist-defense select { max-width: 100%; min-height: 44px; border: 1px solid var(--main); border-radius: 8px; padding: 6px; background: var(--paper); color: var(--main-d); font: inherit; }
 #hist-defense .hd-dialog { width: min(420px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 26px; border: 3px solid #5b5fc7; border-radius: 16px; background: var(--paper); color: var(--main-d); text-align: center; }
-#hist-defense .hd-dialog::backdrop { background: #17183cb8; }
 #hist-defense .hd-dialog h3 { font-size: 25px; }
 #hist-defense .hd-dialog button { display: block; width: 100%; margin-top: 12px; }
+#hist-defense .hd-rotate { display:none; }
+@media (pointer:coarse) and (max-width:1000px) and (orientation:portrait) {
+  #hist-defense .hd-rotate { display:block; padding:12px; border:2px solid var(--main); border-radius:10px; background:var(--mint); font-weight:800; }
+}
+@media (pointer:coarse) and (max-height:600px) and (orientation:landscape) {
+  html:has(#game-panel:not([hidden]) #hist-defense:not([hidden])) { overflow:hidden; }
+  #hist-defense:not([hidden]) { position:fixed; z-index:100; left:var(--hd-view-left,0px); top:var(--hd-view-top,0px); width:var(--hd-view-width,100dvw); height:var(--hd-view-height,100dvh); margin:0; padding:5px 8px; border-radius:0; display:grid; grid-template-columns:minmax(0,42fr) minmax(0,58fr); grid-template-rows:36px 18px minmax(0,1fr) 94px 18px; gap:3px 12px; overscroll-behavior:none; }
+  #hist-defense > .hub-back { grid-column:1; grid-row:1; justify-self:start; }
+  #hist-defense .hd-top { grid-column:2; grid-row:1; }
+  #hist-defense .hd-top h2 { display:none; }
+  #hist-defense .hd-controls { width:100%; flex-wrap:nowrap; gap:4px; }
+  #hist-defense .hd-controls label { flex-wrap:nowrap; gap:0; font-size:0; }
+  #hist-defense .hd-controls button { white-space:nowrap; }
+  #hist-defense button, #hist-defense select { min-height:36px; padding:3px 7px; font-size:12px; }
+  #hist-defense .hd-stats { grid-column:1; grid-row:2; margin:0; flex-wrap:nowrap; gap:3px; font-size:10px; }
+  #hist-defense .hd-stats span { padding:0 3px; white-space:nowrap; }
+  #hist-defense .hd-wave { grid-column:2; grid-row:2; margin:0; min-height:0; font-size:11px; line-height:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #hist-defense .hd-arena { grid-column:1; grid-row:3 / 5; height:100%; margin:0 4px 0 20px; padding-top:20px; padding-bottom:42px; }
+  #hist-defense .hd-column { height:100%; }
+  #hist-defense .hd-lane { height:100%; }
+  #hist-defense .hd-field { top:20px; height:calc(100% - 62px); }
+  #hist-defense .hd-lower { display:contents; }
+  #hist-defense .hd-panel { min-height:0; padding:2px 4px; overflow:hidden; }
+  #hist-defense .hd-panel:first-child { grid-column:2; grid-row:3; display:flex; flex-direction:column; }
+  #hist-defense .hd-panel:last-child { grid-column:2; grid-row:4; display:grid; grid-template-rows:12px minmax(0,1fr); gap:2px; }
+  #hist-defense h3 { margin:0; font-size:11px; line-height:12px; }
+  #hist-defense .hd-note, #hist-defense .hd-instruction, #hist-defense thead { display:none; }
+  #hist-defense table { flex:1; height:100%; font-size:12px; }
+  #hist-defense th, #hist-defense td { padding:0 2px; }
+  #hist-defense th:first-child { width:26px; }
+  #hist-defense .hd-leaves { min-height:24px; height:24px; padding:0; }
+  #hist-defense .hd-gap { height:24px; min-width:24px; flex-basis:24px; }
+  #hist-defense .hd-leaf { height:24px; flex-basis:24px; font-size:14px; }
+  #hist-defense .hd-inventory { grid-template-columns:repeat(6,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(36px,1fr)); gap:4px; }
+  #hist-defense button.hd-brick { font-size:18px; padding:0; }
+  #hist-defense .hd-feedback { grid-column:1 / -1; grid-row:5; margin:0; min-height:0; line-height:18px; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+}
+@media (pointer:coarse) and (max-height:340px) and (orientation:landscape) {
+  #hist-defense:not([hidden]) { padding-block:3px; gap:2px 12px; grid-template-rows:36px 18px minmax(0,1fr) 84px 16px; }
+  #hist-defense .hd-panel:last-child { grid-template-rows:minmax(0,1fr); }
+  #hist-defense .hd-panel:last-child h3 { display:none; }
+}
 </style>
+
+<style>
+.study-activity { padding:0; border:1px solid var(--main); border-radius:12px; }
+.study-activity > summary { padding:16px 20px; margin-bottom:0; cursor:pointer; color:var(--main); font-weight:700; }
+.study-activity > summary::before { content:'+'; font-size:20px; }
+.study-activity[open] > summary::before { content:'−'; }
+.study-activity > summary:focus-visible { outline:3px solid var(--main); outline-offset:-3px; }
+.game-guide-root { position:relative; isolation:isolate; }
+.game-guide-layer { position:absolute; inset:0; z-index:30; overflow:hidden; border-radius:inherit; background:#f4f3ff99; }
+.game-guide-layer[hidden] { display:none; }
+#game-panel .game-guide-layer .game-guide { position:absolute; box-sizing:border-box; width:min(460px,calc(100% - 24px)); margin:0; overflow:auto; overscroll-behavior:contain; padding:20px; border:1px solid var(--main); border-radius:16px; background:var(--paper); color:var(--main-d); box-shadow:0 8px 24px #24245125; transform:translate(-50%,-50%); }
+.game-guide-layer button { min-height:44px; }
+.game-guide h2 { margin:0 0 12px; font-size:21px; }
+.game-guide p,.game-guide li { font-size:14px; line-height:1.6; }
+.game-guide ul { padding-left:20px; }
+.game-guide footer { display:flex; flex-wrap:wrap; gap:8px; position:sticky; bottom:-20px; padding:12px 0; background:var(--paper); }
+.game-guide button { flex:1 1 90px; min-height:44px; border:1px solid var(--main); border-radius:8px; background:var(--mint-2); color:var(--main-d); font:inherit; cursor:pointer; }
+#game-panel #dice-forge .df-layout { display:block; }
+#game-panel #dice-forge .df-status { min-height:0; }
+#game-panel #dice-forge [data-df="retry"] { flex:0 1 auto; background:#fff; color:var(--main-d); border-color:#c6c7e4; }
+#dice-forge .df-history:empty { display:none; }
+#dice-forge .df-top { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; }
+#game-panel [data-hd="help"], #game-panel [data-df="help"] { flex:0 0 auto; margin-left:auto; padding:6px 10px; font-size:13px; }
+</style>
+<script>
+window.createLocalGameDialog = (root, modal, onCancel) => {
+  const layer = document.createElement('div');
+  layer.className = 'game-guide-layer';
+  layer.hidden = true;
+  modal.classList.add('game-guide');
+  modal.setAttribute('role', 'dialog');
+  const heading = modal.querySelector('h2,h3');
+  heading.tabIndex = -1;
+  root.classList.add('game-guide-root');
+  layer.append(modal);
+  root.append(layer);
+  const panel = document.getElementById('game-panel');
+  let previous, blocked = [], positionFrame = null;
+  function position() {
+    positionFrame = null;
+    if (layer.hidden || root.hidden || panel.hidden || !root.isConnected) return;
+    const bounds = layer.getBoundingClientRect();
+    const top = Math.max(bounds.top, 0), bottom = Math.min(bounds.bottom, innerHeight);
+    const left = Math.max(bounds.left, 0), right = Math.min(bounds.right, innerWidth);
+    modal.style.left = ((left + right) / 2 - bounds.left) + 'px';
+    modal.style.top = ((top + Math.max(top, bottom)) / 2 - bounds.top) + 'px';
+    modal.style.maxHeight = Math.max(0, bottom - top - 16) + 'px';
+  }
+  function schedulePosition() {
+    if (!layer.hidden && positionFrame === null) positionFrame = requestAnimationFrame(position);
+  }
+  Object.defineProperty(modal, 'open', {get: () => !layer.hidden});
+  modal.show = () => {
+    if (modal.open) return;
+    previous = document.activeElement;
+    blocked = Array.from(root.children).filter(element => element !== layer).map(element => [element, element.inert]);
+    blocked.forEach(([element]) => { element.inert = true; });
+    layer.hidden = false;
+    position();
+    heading.focus({preventScroll:true});
+  };
+  modal.close = () => {
+    if (!modal.open) return;
+    layer.hidden = true;
+    blocked.forEach(([element, inert]) => { element.inert = inert; });
+    blocked = [];
+    if (positionFrame !== null) cancelAnimationFrame(positionFrame);
+    positionFrame = null;
+    if (previous?.isConnected && !root.hidden && !panel.hidden && !previous.inert) previous.focus({preventScroll:true});
+  };
+  modal.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); onCancel(); }
+  });
+  window.addEventListener('scroll', schedulePosition, {passive:true, capture:true});
+  window.addEventListener('resize', schedulePosition);
+  new ResizeObserver(schedulePosition).observe(root);
+  const observer = new MutationObserver(schedulePosition);
+  observer.observe(panel, {attributes:true, attributeFilter:['hidden']});
+  observer.observe(root, {attributes:true, attributeFilter:['hidden']});
+  return modal;
+};
+window.createGameGuide = ({root, prefix, title, content, primary, onStart, onCancel, onChange}) => {
+  const layer = document.createElement('div');
+  layer.className = 'game-guide-layer';
+  layer.hidden = true;
+  const modal = document.createElement('section');
+  modal.className = 'game-guide';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-labelledby', prefix + '-guide-title');
+  modal.innerHTML = '<h2 id="' + prefix + '-guide-title" tabindex="-1">' + title + '</h2>' + content + '<footer><button type="button" data-guide="accept"></button><button type="button" data-guide="cancel"></button></footer>';
+  layer.append(modal);
+  root.classList.add('game-guide-root');
+  root.append(layer);
+  const panel = document.getElementById('game-panel');
+  let intro = false, previous, blocked = [], positionFrame = null;
+  const accept = modal.querySelector('[data-guide="accept"]');
+  const cancel = modal.querySelector('[data-guide="cancel"]');
+  function position() {
+    positionFrame = null;
+    if (layer.hidden || root.hidden || panel.hidden) return;
+    const bounds = layer.getBoundingClientRect();
+    const top = Math.max(bounds.top, 0), bottom = Math.min(bounds.bottom, window.innerHeight);
+    const left = Math.max(bounds.left, 0), right = Math.min(bounds.right, window.innerWidth);
+    modal.style.left = ((left + right) / 2 - bounds.left) + 'px';
+    modal.style.top = ((top + Math.max(top, bottom)) / 2 - bounds.top) + 'px';
+    modal.style.maxHeight = Math.max(0, bottom - top - 16) + 'px';
+  }
+  function schedulePosition() {
+    if (!layer.hidden && positionFrame === null) positionFrame = requestAnimationFrame(position);
+  }
+  function dismiss() {
+    layer.hidden = true;
+    blocked.forEach(([element, inert]) => { element.inert = inert; });
+    blocked = [];
+    if (positionFrame !== null) cancelAnimationFrame(positionFrame);
+    positionFrame = null;
+  }
+  function close(confirmed) {
+    const wasIntro = intro;
+    dismiss();
+    onChange();
+    if (wasIntro) { if (confirmed) onStart(); else onCancel(); }
+    else if (previous && previous.isConnected && !root.hidden && !panel.hidden) previous.focus({preventScroll:true});
+  }
+  accept.addEventListener('click', () => close(true));
+  cancel.addEventListener('click', () => close(false));
+  modal.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(false); }
+  });
+  window.addEventListener('scroll', schedulePosition, {passive:true, capture:true});
+  window.addEventListener('resize', schedulePosition);
+  new ResizeObserver(schedulePosition).observe(root);
+  const visibilityObserver = new MutationObserver(schedulePosition);
+  visibilityObserver.observe(panel, {attributes:true, attributeFilter:['hidden']});
+  visibilityObserver.observe(root, {attributes:true, attributeFilter:['hidden']});
+  return { get open() { return !layer.hidden; }, dismiss, show(isIntro = false) {
+    if (!layer.hidden) return;
+    intro = isIntro; previous = document.activeElement;
+    accept.textContent = intro ? primary : '계속하기';
+    cancel.textContent = intro ? '취소 · 게임 목록' : '닫기';
+    blocked = Array.from(root.children).filter(element => element !== layer).map(element => [element, element.inert]);
+    blocked.forEach(([element]) => { element.inert = true; });
+    layer.hidden = false; onChange(); position(); modal.querySelector('h2').focus({preventScroll:true});
+  }};
+};
+</script>
 <script>
 (() => {
   const panel = document.getElementById('game-panel');
@@ -1888,14 +2253,14 @@
   root.hidden = true;
   root.id = 'hist-defense';
   root.setAttribute('aria-label', '히스토그램 성벽 디펜스');
-  root.innerHTML = `<button type="button" class="hub-back" data-hd="back">← 게임 목록으로</button><div class="hd-top"><h2>🏰 히스토그램 성벽 디펜스</h2><div class="hd-controls"><label>난이도 <select data-hd="difficulty" aria-label="난이도와 줄기 개수"><option value="3">쉬움 · 줄기 3개</option><option value="4" selected>보통 · 줄기 4개</option><option value="5">어려움 · 줄기 5개</option></select></label><button type="button" class="hd-start" data-hd="start">시작</button></div></div>
+  root.innerHTML = `<button type="button" class="hub-back" data-hd="back">← 게임 목록으로</button><div class="hd-top"><h2>🏰 히스토그램 성벽 디펜스</h2><div class="hd-controls"><label>난이도 <select data-hd="difficulty" aria-label="난이도와 줄기 개수"><option value="3">쉬움 · 줄기 3개</option><option value="4" selected>보통 · 줄기 4개</option><option value="5">어려움 · 줄기 5개</option></select></label><button type="button" class="hd-start" data-hd="start">시작</button><button type="button" data-hd="help">게임설명</button></div></div>
     <div class="hd-stats"><span data-hd="lives"></span><span data-hd="score"></span><span data-hd="phase"></span></div>
     <p class="hd-wave" data-hd="wave" role="status"></p>
     <div class="hd-arena" aria-label="각 줄기 열을 따라 다가오는 몬스터와 히스토그램 성벽"></div>
     <div class="hd-lower"><div class="hd-panel"><h3>줄기와 잎 · 남아 있는 성벽</h3><table><thead><tr><th scope="col">줄기</th><th scope="col">잎</th></tr></thead><tbody></tbody></table><p class="hd-note">2 | 0 = 20 · 잎 1개 = 도수 1 = 성벽 1칸</p><p class="hd-note">무리는 한 번에 방어 · 뚫려도 생명 1개</p></div>
     <div class="hd-panel"><h3>벽돌 12개</h3><p class="hd-instruction" id="hd-instruction">벽돌을 끌어 같은 줄기의 잎 사이에 놓으세요. 작은 잎 → 큰 잎 순서!</p><div class="hd-inventory" role="group" aria-label="4열 3행 드래그 벽돌" aria-describedby="hd-instruction"></div><p class="hd-note">십의 자리 = 줄기 · 일의 자리 = 잎 · 긴 줄은 좌우로 밀기</p></div></div>
     <p class="hd-feedback" role="status" aria-live="polite"></p>
-    <dialog class="hd-dialog" aria-labelledby="hd-dialog-title" aria-describedby="hd-dialog-description"><h3 id="hd-dialog-title"></h3><p id="hd-dialog-description"></p><button type="button" class="hd-start" data-hd="continue"></button><button type="button" data-hd="choose">취소</button><button type="button" class="hub-back" data-hd="menu">게임 목록으로</button></dialog>`;
+    <section class="hd-dialog" aria-labelledby="hd-dialog-title" aria-describedby="hd-dialog-description"><h3 id="hd-dialog-title"></h3><p id="hd-dialog-description"></p><button type="button" class="hd-start" data-hd="continue"></button><button type="button" data-hd="choose">취소</button><button type="button" class="hub-back" data-hd="menu">게임 목록으로</button></section>`;
   function launch() {
     if (mounted) return;
     mounted = true;
@@ -1903,9 +2268,12 @@
     panel.append(root);
     menu.hidden = true;
     root.hidden = false;
-    reset(false);
+    sizeViewport();
+    reset(false, true);
+    guide.show(true);
   }
   function returnToMenu() {
+    guide.dismiss();
     cancelDrag();
     stopClock();
     if (dialog.open) dialog.close();
@@ -1928,7 +2296,23 @@
   const inventory = root.querySelector('.hd-inventory');
   const feedback = root.querySelector('.hd-feedback');
   const arena = root.querySelector('.hd-arena');
-  const dialog = root.querySelector('dialog');
+  const rotateNotice = document.createElement('p');
+  rotateNotice.className = 'hd-rotate';
+  rotateNotice.setAttribute('role', 'status');
+  rotateNotice.textContent = '휴대전화를 가로로 돌려 주세요. 가로 화면에서는 성벽, 줄기와 잎, 벽돌 12개를 한 화면에서 볼 수 있어요.';
+  root.prepend(rotateNotice);
+  function sizeViewport() {
+    cancelDrag();
+    const viewport = window.visualViewport;
+    root.style.setProperty('--hd-view-width', (viewport?.width ?? window.innerWidth) + 'px');
+    root.style.setProperty('--hd-view-height', (viewport?.height ?? window.innerHeight) + 'px');
+    root.style.setProperty('--hd-view-left', (viewport?.offsetLeft ?? 0) + 'px');
+    root.style.setProperty('--hd-view-top', (viewport?.offsetTop ?? 0) + 'px');
+  }
+  window.addEventListener('resize', sizeViewport);
+  window.visualViewport?.addEventListener('resize', sizeViewport);
+  window.visualViewport?.addEventListener('scroll', sizeViewport);
+  const dialog = window.createLocalGameDialog(root, root.querySelector('.hd-dialog'), () => reset(false));
   inventory.innerHTML = Array.from({length: 12}, (_, index) => `<button type="button" class="hd-brick" data-cell="${index}" aria-pressed="false" tabindex="-1" draggable="false"></button>`).join('');
   const buttons = Array.from(inventory.children);
   const stages = [
@@ -1946,7 +2330,11 @@
   let spaceHeld = false;
   let dialogSpaceArmed = false;
   let drag = null;
-  const visible = () => mounted && !root.hidden && !panel.hidden && !document.hidden;
+  const guide = window.createGameGuide({root, prefix:'hd', title:'성벽을 쌓아 5스테이지 지키기', primary:'준비하기',
+    content:'<p>목표: 목숨 3개로 5스테이지를 버티세요.</p><ul><li>십의 자리는 줄기, 일의 자리는 잎: 24 → 2 | 4.</li><li>재고 벽돌을 같은 줄기의 잎 사이로 드래그하세요. 1·4·8에서 4는 1과 8 사이! 작은 수부터 정렬합니다.</li><li>쌓은 잎 1개 = 해당 열 성벽 1칸. 괴물 1마리당 1칸 소모, 무리를 막기에 부족하면 목숨 1개를 잃어요.</li><li>빛나는 틈은 선택한 삽입 위치일 뿐, 정답 표시가 아닙니다.</li></ul><p>준비하기 → 난이도(줄기 3·4·5개) 선택 → 시작을 누르세요.</p>',
+    onStart:() => reset(false), onCancel:returnToMenu, onChange:() => { cancelDrag(); syncVisibility(); }
+  });
+  const visible = () => mounted && !root.hidden && !panel.hidden && !document.hidden && !guide.open;
   const message = text => { feedback.textContent = text; };
   function refillSlot(slot) {
     const remaining = state.inventory.filter((value, index) => index !== slot && Number.isFinite(value));
@@ -1964,22 +2352,26 @@
     drawField();
   }
   function project(stem, depth) {
-    return {x: arena.clientWidth * (stem + .5) / state.stems, y: 18 + 332 * depth};
+    return {x: arena.clientWidth * (stem + .5) / state.stems, y: (18 + 332 * depth) * laneHeight() / 350};
   }
+  const laneHeight = () => columns[0]?.querySelector('.hd-lane').clientHeight || 350;
+  const wallUnit = () => laneHeight() * (176 / 350) / state.axisMax;
+  const arenaTop = () => parseFloat(getComputedStyle(arena).paddingTop);
   function drawField() {
     const width = arena.clientWidth;
     if (!width || !field) return;
-    field.setAttribute('viewBox', `0 0 ${width} 350`);
+    const height = laneHeight();
+    field.setAttribute('viewBox', `0 0 ${width} ${height}`);
     const step = Math.max(1, Math.ceil(state.axisMax / 4));
     const frequencies = Array.from({length: Math.floor(state.axisMax / step) + 1}, (_, index) => index * step);
-    field.innerHTML = `<path d="M0 0V350H${width}" fill="none" stroke="currentColor"/>` +
+    field.innerHTML = `<path d="M0 0V${height}H${width}" fill="none" stroke="currentColor"/>` +
       Array.from({length: state.stems + 1}, (_, index) => {
         const boundaryX = width * index / state.stems;
-        return `<g class="hd-boundary" data-boundary="${(index + 1) * 10}"><line x1="${boundaryX}" y1="350" x2="${boundaryX}" y2="355" stroke="currentColor"/><text x="${boundaryX}" y="371" text-anchor="middle" fill="currentColor">${(index + 1) * 10}</text></g>`;
+        return `<g class="hd-boundary" data-boundary="${(index + 1) * 10}"><line x1="${boundaryX}" y1="${height}" x2="${boundaryX}" y2="${height + 5}" stroke="currentColor"/><text x="${boundaryX}" y="${height + 21}" text-anchor="middle" fill="currentColor">${(index + 1) * 10}</text></g>`;
       }).join('') + frequencies.map(count => {
-        const frequencyY = 350 - count * 176 / state.axisMax;
+        const frequencyY = height - count * wallUnit();
         return `<g class="hd-frequency"><line x1="-4" y1="${frequencyY}" x2="0" y2="${frequencyY}" stroke="currentColor"/><text x="-4" y="${frequencyY + 3}" text-anchor="end" font-size="10" ${count >= 1000 ? 'textLength="18" lengthAdjust="spacingAndGlyphs"' : ''} fill="currentColor">${count}</text></g>`;
-      }).join('') + `<text x="0" y="-12" fill="currentColor">도수</text><text x="${width}" y="391" text-anchor="end" fill="currentColor">변량</text>`;
+      }).join('') + `<text x="0" y="-12" fill="currentColor">도수</text><text x="${width}" y="${height + 41}" text-anchor="end" fill="currentColor">변량</text>`;
     root.style.setProperty('--hd-monster-size', `${Math.min(width <= 600 ? 32 : 36, width / state.stems - 8)}px`);
     state.monsters.forEach(positionGroup);
   }
@@ -1994,9 +2386,9 @@
     const perRow = Math.max(1, Math.min(group.size, Math.floor((laneWidth - 4) / (size + 4))));
     const rows = Math.ceil(group.size / perRow);
     const height = rows * (size * 30 / 28 + 4) - 4;
-    const point = project(group.stem, Math.max(depth, (height + 4 - 18) / 332));
+    const point = project(group.stem, Math.max(depth, ((height + 4) * 350 / laneHeight() - 18) / 332));
     group.node.style.left = `${point.x}px`;
-    group.node.style.top = `${34 + point.y}px`;
+    group.node.style.top = `${arenaTop() + point.y}px`;
     Array.from(group.node.children).forEach((monster, index) => {
       const row = Math.floor(index / perRow);
       const count = Math.min(perRow, group.size - row * perRow);
@@ -2014,7 +2406,7 @@
     arena.append(node);
     state.monsters.push(group);
     positionGroup(group);
-    group.depth = (parseFloat(node.style.top) - 34 - 18) / 332;
+    group.depth = ((parseFloat(node.style.top) - arenaTop()) * 350 / laneHeight() - 18) / 332;
     return group;
   }
   function stopClock() {
@@ -2035,7 +2427,7 @@
   }
   function renderData() {
     state.axisMax = Math.max(state.axisMax, ...state.leaves.map(items => items.length));
-    const unit = 176 / state.axisMax;
+    const unit = wallUnit();
     root.style.setProperty('--hd-unit', `${unit}px`);
     columns.forEach((column, stem) => {
       const leaves = state.leaves[stem];
@@ -2047,9 +2439,11 @@
       const row = root.querySelector(`[data-leaves="${stem}"]`);
       row.innerHTML = leaves.map((leaf, index) => `<span class="hd-gap" data-gap="${index}" aria-hidden="true"></span><span class="hd-leaf" data-index="${index}">${leaf}</span>`).join('') + `<span class="hd-gap" data-gap="${leaves.length}" aria-hidden="true">${leaves.length ? '' : '여기에 놓기'}</span>`;
     });
+    const inventoryColumns = getComputedStyle(inventory).gridTemplateColumns.split(' ').length;
+    inventory.setAttribute('aria-label', `${inventoryColumns}열 ${12 / inventoryColumns}행 드래그 벽돌`);
     buttons.forEach((button, cell) => {
       button.textContent = state.inventory[cell];
-      button.setAttribute('aria-label', `${Math.floor(cell / 4) + 1}행 ${cell % 4 + 1}열, ${state.inventory[cell]}, 잎 사이로 드래그`);
+      button.setAttribute('aria-label', `${Math.floor(cell / inventoryColumns) + 1}행 ${cell % inventoryColumns + 1}열, ${state.inventory[cell]}, 잎 사이로 드래그`);
       button.disabled = state.phase !== 'running' || state.suspended;
     });
     drawField();
@@ -2094,7 +2488,7 @@
     dialogSpaceArmed = false;
     message(title);
     renderData();
-    if (!dialog.open) dialog.showModal();
+    if (!dialog.open) dialog.show();
     get('continue').focus({preventScroll: true});
   }
   function insert(slot, stem, index) {
@@ -2156,14 +2550,17 @@
     renderData();
     if (!suspended) scheduleFrame();
   }
-  function reset(start) {
+  function reset(start, awaitingIntro = false) {
     cancelDrag();
     stopClock();
     if (dialog.open) dialog.close();
     dialogSpaceArmed = false;
     const stems = Number(get('difficulty').value);
     state = {phase: 'ready', stems, axisMax: 8, suspended: false, leaves: Array.from({length: stems}, () => []), inventory: [], selected: 0, lives: 3, score: 0, stage: 0, stageTime: 0, pending: [], monsters: []};
-    for (let slot = 0; slot < 12; slot++) refillSlot(slot);
+    for (let slot = 0; slot < 12; slot++) {
+      if (awaitingIntro) state.inventory[slot] = '';
+      else refillSlot(slot);
+    }
     buildColumns();
     renderData();
     if (start) prepareStage();
@@ -2171,8 +2568,10 @@
   }
   root.addEventListener('click', event => {
     const button = event.target.closest('button');
-    if (!button || button.disabled) return;
-    if (['back', 'menu'].includes(button.dataset.hd)) returnToMenu();
+    if (!button || button.disabled || guide.open) return;
+    if (dialog.open && !dialog.contains(button)) return;
+    if (button.dataset.hd === 'help') { if (!dialog.open) guide.show(); }
+    else if (['back', 'menu'].includes(button.dataset.hd)) returnToMenu();
     else if (button.dataset.hd === 'start' && !dialog.open) reset(true);
     else if (button.dataset.hd === 'continue' && dialog.open) {
       const phase = state.phase;
@@ -2202,8 +2601,10 @@
   }
   function scrollDrag() {
     if (!drag?.moved) return;
-    if (drag.clientY < 64) window.scrollBy(0, -12);
-    else if (drag.clientY > window.innerHeight - 64) window.scrollBy(0, 12);
+    if (getComputedStyle(root).position !== 'fixed') {
+      if (drag.clientY < 64) window.scrollBy(0, -12);
+      else if (drag.clientY > window.innerHeight - 64) window.scrollBy(0, 12);
+    }
     const row = dropRow(drag.clientX, drag.clientY);
     if (row) {
       const rect = row.getBoundingClientRect();
@@ -2276,14 +2677,7 @@
   });
   inventory.addEventListener('lostpointercapture', event => { if (drag?.id === event.pointerId) cancelDrag(); });
 
-  dialog.addEventListener('cancel', event => event.preventDefault());
   dialog.addEventListener('keydown', event => {
-    if (event.key === 'Tab') {
-      event.preventDefault();
-      const choices = [get('continue'), get('choose'), get('menu')].filter(button => !button.hidden);
-      const index = choices.indexOf(document.activeElement);
-      choices[(index + (event.shiftKey ? choices.length - 1 : 1)) % choices.length].focus();
-    }
     if (event.key === ' ') {
       event.preventDefault();
       event.stopPropagation();
@@ -2305,7 +2699,7 @@
   window.addEventListener('blur', () => { spaceHeld = false; dialogSpaceArmed = false; cancelDrag(); });
   document.addEventListener('visibilitychange', syncVisibility);
   new MutationObserver(syncVisibility).observe(panel, {attributes: true, attributeFilter: ['hidden']});
-  new ResizeObserver(drawField).observe(arena);
+  new ResizeObserver(() => { if (state) renderData(); }).observe(arena);
 })();
 
 </script>
@@ -2349,30 +2743,14 @@
 @keyframes pl-flip { from { transform:scaleX(1) translateY(0); } to { transform:scaleX(.08) translateY(-16px); } }
 @media(max-width:760px) { #probability-lab { padding:16px; } #probability-lab .pl-layout { grid-template-columns:minmax(0,1fr); } #probability-lab .pl-card { padding:12px; } #probability-lab h2 { font-size:21px; } }
 @media(prefers-reduced-motion:reduce) { #probability-lab .pl-token { animation:none !important; transition:none !important; } }
-
-    /* ===== 단원 차례(목차) — 2단원과 동일 형식 ===== */
-    .toc { position: sticky; top: 0; z-index: 30; display: flex; gap: 6px; overflow-x: auto; padding: 10px 26px; border-bottom: 1px solid var(--rule); background: #ffffffee; scrollbar-width: thin; }
-    .toc button { flex: none; padding: 5px 12px; border: 1.5px solid var(--rule); border-radius: 999px; background: #fff; color: var(--muted); font-size: 13.5px; font-weight: 800; white-space: nowrap; cursor: pointer; }
-    .toc button[aria-current="true"] { border-color: var(--main); background: var(--main); color: #fff; }
-    .zone { scroll-margin-top: 64px; }
-    @media (max-width: 760px) { .toc { padding: 8px 12px; } }
-    @media print { .toc { display: none !important; } }
-
-  </style>
+</style>
 <script>
 (() => {
-  const launcher = document.getElementById('probability-launch');
-  const panel = document.getElementById('game-panel');
-  const menuRoot = document.getElementById('game-root');
-  let activeRoot = null;
-  launcher.addEventListener('click', () => {
-    if (activeRoot) return;
-    const root = document.createElement('section');
-    activeRoot = root;
-    root.id = 'probability-lab';
-    root.setAttribute('aria-label', '주사위, 동전, 룰렛 확률 알아보기 게임');
-    root.innerHTML = `<button type="button" class="hub-back" data-pl="back">← 게임 목록으로</button>
-      <h2 tabindex="-1">주사위, 동전, 룰렛 확률 알아보기 게임</h2>
+  const panel = document.getElementById('study-panel');
+  const activity = document.getElementById('probability-activity');
+  const root = document.getElementById('probability-lab');
+  const isActive = () => activity.open && !panel.hidden && !document.hidden && root.isConnected;
+    root.innerHTML = `<h3 class="pl-title">주사위·동전·룰렛 확률 실험</h3>
       <p class="pl-note">먼저 결과를 예상하고 시행해 보세요. 이론은 기준, 상대도수는 실제 실험의 기록이에요.</p>
       <div class="pl-modes" role="group" aria-label="실험 종류"><button type="button" data-mode="die" aria-pressed="true">🎲 주사위</button><button type="button" data-mode="coin" aria-pressed="false">🪙 동전</button><button type="button" data-mode="spinner" aria-pressed="false">🎯 룰렛</button></div>
       <div class="pl-layout"><div class="pl-card">
@@ -2390,8 +2768,6 @@
         <label for="pl-event">관찰할 사건 선택 · 학습용 확장</label><select id="pl-event" data-pl="event"></select><div class="pl-comparison" data-pl="comparison"></div>
       </div></div><p class="pl-note" data-pl="lesson"></p>
       <p class="pl-note">탐구: 10회와 1,000회의 분포를 비교해 보세요. 시행이 많아지면 상대도수가 이론적 확률에 가까워지는 경향이 있지만, 반드시 일치하거나 차이가 매번 줄어드는 것은 아닙니다. 이 실험은 공정한 도구를 컴퓨터의 의사난수로 모형화합니다.</p>`;
-    menuRoot.hidden = true;
-    panel.append(root);
     const controller = new AbortController();
     const on = (node, type, handler) => node.addEventListener(type, handler, {signal:controller.signal});
     const get = name => root.querySelector(`[data-pl="${name}"]`);
@@ -2481,7 +2857,7 @@
       render();
     }
     function run() {
-      if (busy || panel.hidden || document.hidden || !root.isConnected) return;
+      if (busy || !isActive()) return;
       const amount = Number(get('batch').value);
       if (total > Number.MAX_SAFE_INTEGER - amount) { stop(); get('result').textContent = '기록 한도에 도달했습니다. 초기화해 주세요.'; return; }
       const pending = Array(counts.length).fill(0);
@@ -2504,6 +2880,7 @@
       }
       timer = setTimeout(() => {
         timer = null;
+        if (!isActive()) { stop(); return; }
         counts = counts.map((count,index) => count + pending[index]);
         total += amount;
         busy = false;
@@ -2528,65 +2905,283 @@
     on(get('event'), 'change', compare);
     on(get('sections'), 'change', () => { sections = Number(get('sections').value); reset(); });
     root.querySelectorAll('button[data-mode]').forEach(button => on(button, 'click', () => { mode = button.dataset.mode; reset(); }));
-    const suspend = () => { if (panel.hidden || document.hidden) stop(); };
+    const suspend = () => { if (!isActive() && (busy || automatic)) stop(); };
     on(document, 'visibilitychange', suspend);
+    on(window, 'pagehide', () => stop(false));
+    on(activity, 'toggle', suspend);
     const observer = new MutationObserver(suspend);
     observer.observe(panel, {attributes:true, attributeFilter:['hidden']});
-    on(get('back'), 'click', () => {
-      stop(false);
-      observer.disconnect();
-      controller.abort();
-      root.remove();
-      activeRoot = null;
-      menuRoot.hidden = false;
-      launcher.focus({preventScroll:true});
-    });
+    observer.observe(activity, {attributes:true, attributeFilter:['open']});
     reset();
-    root.querySelector('h2').focus({preventScroll:true});
-  });
 })();
 </script>
-
+<style>
+#dice-forge { --df-accent:#5b5fc7; margin:20px; padding:22px; border:2px solid #b5b7dc; border-radius:18px; color:var(--main-d); background:radial-gradient(ellipse at top,#ededff,transparent 65%),var(--paper); }
+#dice-forge * { box-sizing:border-box; }
+#dice-forge [hidden] { display:none !important; }
+#dice-forge h2 { margin:16px 0 6px; font-size:25px; }
+#dice-forge h3 { margin:0 0 10px; font-size:18px; }
+#dice-forge p { line-height:1.7; }
+#dice-forge button { min-height:44px; max-width:100%; padding:10px 14px; border:1.5px solid var(--df-accent); border-radius:12px; font:700 15px var(--sans); color:#34377e; background:#fff; cursor:pointer; white-space:normal; }
+#dice-forge button:disabled { opacity:.5; cursor:default; }
+#dice-forge button:focus-visible, #dice-forge summary:focus-visible { outline:3px solid #d48a24; outline-offset:3px; }
+#dice-forge .df-primary { background:var(--df-accent); color:#fff; }
+#dice-forge .df-note { font-size:14px; color:var(--muted); }
+#dice-forge .df-stats { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+#dice-forge .df-stats span { flex:1 1 130px; padding:12px; border:1px solid #c6c7e4; border-radius:12px; background:#fff; }
+#dice-forge .df-stats strong { display:block; font-size:21px; color:#34377e; }
+#dice-forge .df-layout { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:16px; }
+#dice-forge .df-card { min-width:0; padding:18px; border:1px solid #c6c7e4; border-radius:15px; background:#ffffffd9; }
+#dice-forge .df-stage { display:flex; justify-content:center; align-items:center; gap:28px; min-height:170px; border-radius:12px; background:radial-gradient(ellipse,#e1e2fc,transparent 70%); }
+#dice-forge .df-weapon { display:inline-block; font-size:76px; filter:drop-shadow(0 8px 5px #34377e25); }
+#dice-forge .df-die { flex-shrink:0; width:76px; height:76px; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); gap:5px; padding:12px; border:2px solid #5b5fc7; border-radius:14px; background:#fff; box-shadow:0 5px 0 #b5b7dc; }
+#dice-forge .df-pip { width:100%; height:100%; border-radius:50%; background:#34377e; visibility:hidden; }
+#dice-forge .df-pip.on { visibility:visible; }
+#dice-forge .df-rolling .df-die { animation:df-roll .22s ease-in-out infinite alternate; }
+#dice-forge .df-rolling .df-weapon { animation:df-hammer .4s ease-in-out infinite alternate; }
+#dice-forge.df-paused .df-stage * { animation-play-state:paused; }
+#dice-forge .df-shake { animation:df-shake .4s ease-out; }
+#dice-forge .df-status { min-height:4em; padding:10px; margin:12px 0; border-radius:10px; background:#f0f0ff; font-weight:700; overflow-wrap:anywhere; }
+#dice-forge .df-actions { display:flex; flex-wrap:wrap; gap:10px; }
+#dice-forge .df-actions button { flex:1 1 150px; }
+#dice-forge .df-history { padding-left:22px; font-size:14px; line-height:1.8; }
+#dice-forge details { margin-top:16px; padding:12px; border:1px solid #c6c7e4; border-radius:12px; background:#fff; }
+#dice-forge summary { min-height:32px; cursor:pointer; font-weight:700; }
+#dice-forge table { width:100%; border-collapse:collapse; text-align:center; font-size:14px; margin-top:12px; }
+#dice-forge caption { text-align:left; margin-bottom:8px; }
+#dice-forge th, #dice-forge td { padding:6px 3px; border-bottom:1px solid #ddddec; }
+#dice-forge tr[data-current="true"] { background:#ededff; font-weight:800; }
+#dice-forge .df-end-dialog button { width:100%; margin-top:10px; }
+@keyframes df-roll { from { transform:rotate(-12deg) translateY(-5px); } to { transform:rotate(12deg) translateY(5px); } }
+@keyframes df-hammer { to { transform:rotate(-20deg) translateY(-8px); } }
+@keyframes df-shake { 20%,60% { transform:translateX(-6px); } 40%,80% { transform:translateX(6px); } }
+@media(max-width:760px) { #dice-forge { margin:12px 8px; padding:12px; } #dice-forge h2 { font-size:21px; } #dice-forge .df-layout { grid-template-columns:minmax(0,1fr); } #dice-forge .df-card { padding:12px; } }
+@media(prefers-reduced-motion:reduce) { #dice-forge *, #dice-forge { animation:none !important; transition:none !important; } }
+</style>
 <script>
-/* ---------- 단원 차례(목차): 정리·퀴즈 탭 맨 위, 누르면 그 구역으로 ---------- */
-(function () {
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-  const tocs = [[$('#study-toc'), () => $('#study-content')], [$('#quiz-toc'), () => $('#quiz-body')]].filter(([nav]) => nav);
-  const zones = $$('#study-content .zone[data-sec]');
-  if (!tocs.length || !zones.length) return;
-  tocs.forEach(([nav, root]) => {
-    nav.innerHTML = zones.map((z) => `<button type="button" data-sec="${z.dataset.sec}">${z.dataset.toc}</button>`).join('');
-    nav.addEventListener('click', (e) => {
-      const b = e.target.closest('button[data-sec]');
-      const host = root();
-      const z = b && host && host.querySelector(`.zone[data-sec="${b.dataset.sec}"]`);
-      if (z) z.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+(() => {
+  const prices = [100,200,400,800,1800,4000,10000,25000,60000,150000,500000];
+  const weapons = ['🔨','🔨','🗡️','🗡️','⚔️','⚔️','⚔️','🔱','🔱','🔱','👑'];
+  const pipPositions = [[4],[0,8],[0,4,8],[0,2,6,8],[0,2,4,6,8],[0,2,3,5,6,8]];
+  const panel = document.getElementById('game-panel');
+  const hub = document.getElementById('game-root');
+  const launcher = document.getElementById('forge-launch');
+  const root = document.createElement('section');
+  root.id = 'dice-forge';
+  root.hidden = true;
+  root.setAttribute('aria-label','대장장이의 주사위: 1의 저주');
+  root.innerHTML = `<button type="button" data-df="back">← 게임 목록으로 · 진행 초기화</button>
+    <div class="df-top"><h2>🔨 대장장이의 주사위: 1의 저주</h2>
+    <button type="button" data-df="help">게임설명</button></div>
+    <div class="df-stats"><span>🪙 확정 누적 골드<strong data-df="gold"></strong></span><span>🪨 남은 광석 (현재 무기 포함)<strong data-df="ores"></strong></span><span>현재 무기 단계<strong data-df="level"></strong></span></div>
+    <div class="df-layout"><div class="df-card"><div class="df-stage"><span class="df-weapon" data-df="weapon" role="img"></span><div class="df-die" data-df="die" role="img">${Array.from({length:9},()=>'<i class="df-pip" aria-hidden="true"></i>').join('')}</div></div>
+    <p data-df="status" class="df-status" role="status" aria-live="polite"></p>
+    <div class="df-actions"><button type="button" class="df-primary" data-df="start">시작하기 · 광석 3개</button><button type="button" class="df-primary" data-df="enhance">강화하기</button><button type="button" data-df="sell"></button><button type="button" class="df-primary" data-df="next">다음 무기 만들기 · +0</button><button type="button" class="df-primary" data-df="retry">다시 도전 · 처음부터</button></div>
+
+    </div>
+    </div>
+    <details><summary>정산 기록</summary><ol class="df-history" data-df="history" aria-label="광석별 정산 기록"></ol></details>
+    <details><summary>도움말 · 판매 가격표</summary><p class="df-note">시작하면 첫 광석의 +0 무기가 준비됩니다. 강화 성공으로는 광석이 줄지 않습니다. <b>판매 또는 파괴할 때만 광석 1개가 소모</b>됩니다. 판매는 현재 가치를 확정 골드에 더하고, 파괴는 0G를 더합니다. 이전에 확정한 골드는 잃지 않습니다. 다음 광석은 다시 +0입니다. 세 자루를 모두 정산한 뒤 합계가 최종 점수입니다. +0도 100G에 판매할 수 있고, +10은 더 강화하지 못하므로 직접 판매해야 합니다.</p>
+    <table><caption>무기 단계별 판매 가치</caption><thead><tr><th scope="col">단계</th><th scope="col">판매 골드</th></tr></thead><tbody>${prices.map((price,index)=>`<tr data-price-level="${index}"><th scope="row">+${index}${index===10?' MAX':''}</th><td>${price.toLocaleString('en-US')}G</td></tr>`).join('')}</tbody></table></details>
+    <section class="df-end-dialog" aria-labelledby="df-end-title" aria-describedby="df-end-description"><h2 id="df-end-title"></h2><p id="df-end-description"></p><button type="button" class="df-primary" data-df="dialog-retry" autofocus>다시 도전 · 광석 3개</button><button type="button" data-df="dialog-cancel">닫기 · 결과 보기</button><button type="button" data-df="dialog-menu">게임 목록으로</button></section>`;
+  panel.append(root);
+  const get = name => root.querySelector(`[data-df="${name}"]`);
+  const dialog = window.createLocalGameDialog(root, root.querySelector('.df-end-dialog'), () => { dialog.close(); get('retry').focus({preventScroll:true}); });
+  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  let state;
+  let pending = null;
+  let timer = null;
+  let deadline = 0;
+  let remaining = 0;
+  const money = amount => amount.toLocaleString('en-US');
+  const guide = window.createGameGuide({root, prefix:'df', title:'강화할까, 지금 팔까?', primary:'게임 시작',
+    content:'<p>목표: 광석 3개로 무기 3자루를 정산해 최종 골드를 모으세요.</p><ul><li>강화하기를 누르세요. 주사위 2~6은 +1 성공, 1은 무기 파괴(0G)입니다.</li><li>원할 때 판매하기로 골드를 확정하세요. 이미 확정한 골드는 잃지 않아요.</li><li>판매·파괴하면 광석 1개 소모. 다음 무기는 +0, 세 자루 정산 후 합계가 최종 골드입니다.</li><li>+10은 최대 단계: 판매하세요. +0도 100G에 판매할 수 있어요.</li></ul>',
+    onStart:() => get('start').click(), onCancel:back, onChange:syncVisibility
   });
-  let ticking = false;
-  window.addEventListener('scroll', () => {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      ticking = false;
-      tocs.forEach(([nav, root]) => {
-        if (nav.closest('[hidden]')) return;
-        const host = root();
-        if (!host) return;
-        const list = $$('.zone[data-sec]', host);
-        let cur = list[0];
-        list.forEach((z) => { if (z.getBoundingClientRect().top < 120) cur = z; });
-        $$('button', nav).forEach((b) => {
-          const on = cur && b.dataset.sec === cur.dataset.sec;
-          if (on && b.getAttribute('aria-current') !== 'true') nav.scrollTo({ left: b.offsetLeft - nav.clientWidth / 2 + b.offsetWidth / 2, behavior: 'smooth' });
-          b.setAttribute('aria-current', String(!!on));
-        });
+  const active = () => !root.hidden && !panel.hidden && !document.hidden && !guide.open;
+  function drawDie(value) {
+    get('die').setAttribute('aria-label',value ? `주사위 ${value}` : '주사위 굴리는 중 · 결과 미표시');
+    get('die').querySelectorAll('.df-pip').forEach((pip,index)=>pip.classList.toggle('on',Boolean(value && pipPositions[value-1].includes(index))));
+  }
+  function render() {
+    get('gold').textContent = `${money(state.gold)}G`;
+    get('ores').textContent = `${3-state.settled}개 ${'🪨'.repeat(3-state.settled)}`;
+    get('level').textContent = state.phase==='ready' ? '시작 대기 · +0' : state.phase==='between'||state.phase==='finished' ? '정산 완료' : `+${state.level}${state.level===10?' MAX':''}`;
+    get('weapon').textContent = state.broken ? '💥' : weapons[state.level];
+    get('weapon').setAttribute('aria-label',state.broken?'파괴된 무기':`+${state.level} 무기`);
+    get('status').textContent = state.message;
+    get('start').hidden = true;
+    get('enhance').hidden = !['active','rolling'].includes(state.phase);
+    get('sell').hidden = !['active','rolling'].includes(state.phase);
+    get('enhance').disabled = state.phase!=='active'||state.level===10;
+    get('sell').disabled = state.phase!=='active';
+    get('sell').textContent = `${money(prices[state.level])}G에 판매하기`;
+    get('next').hidden = state.phase!=='between';
+    get('retry').hidden = state.phase==='ready';
+    get('retry').disabled = state.phase==='rolling';
+    root.querySelector('.df-stage').classList.toggle('df-rolling',state.phase==='rolling');
+    get('history').replaceChildren(...state.history.map(text=>{ const item=document.createElement('li'); item.textContent=text; return item; }));
+    root.querySelectorAll('[data-price-level]').forEach(row=>row.dataset.current=String(Number(row.dataset.priceLevel)===state.level));
+  }
+  function cancelPending() {
+    clearTimeout(timer); timer=null; pending=null; remaining=0;
+    root.classList.remove('df-paused');
+  }
+  function reset(awaitingIntro = false) {
+    cancelPending();
+    if(dialog.open) dialog.close();
+    state={gold:0,settled:0,level:0,phase:'ready',broken:false,history:[],message:'강화에 성공하면 같은 광석으로 계속 도전! 시작하기를 누르세요.'};
+    drawDie(1); get('weapon').classList.remove('df-shake'); render();
+    root.querySelectorAll('details').forEach(item => item.open = false);
+    if (awaitingIntro) guide.show(true);
+    else get('start').click();
+  }
+  function title() {
+    if(state.gold===1500000) return '전설의 대장장이 · 세 자루 모두 MAX!';
+    if(state.gold>=500000) return '명장의 탄생!';
+    if(state.gold>=10000) return '노련한 대장장이!';
+    if(state.gold>0) return '차곡차곡 대장장이!';
+    return '불굴의 견습생 · 다시 도전!';
+  }
+  function settle(sold) {
+    const value=sold?prices[state.level]:0;
+    state.gold+=value; state.settled+=1; state.broken=!sold;
+    const record=`${state.settled}번째 광석: +${state.level} ${sold?'판매':'파괴'} → ${money(value)}G · 누적 ${money(state.gold)}G`;
+    state.history.push(record);
+    state.phase=state.settled===3?'finished':'between';
+    state.message=`${sold ? `${money(value)}G 판매 완료` : '주사위 1 · 무기 파괴 (0G)'} · ${state.settled}/3 정산`;
+    render();
+    if(state.phase==='finished') {
+      root.querySelector('#df-end-title').textContent=title();
+      root.querySelector('#df-end-description').textContent=`세 광석의 정산 완료 · 최종 누적 골드 ${money(state.gold)}G. ${state.history.join(' / ')}`;
+      dialog.show();
+    } else get('next').focus({preventScroll:true});
+  }
+  function finishRoll() {
+    timer=null;
+    if(!active()) { remaining=0; root.classList.add('df-paused'); return; }
+    if(pending===null||state.phase!=='rolling') return;
+    const outcome=pending;
+    pending=null; root.classList.remove('df-paused'); drawDie(outcome);
+    if(outcome===1) {
+      get('weapon').classList.remove('df-shake');
+      void get('weapon').offsetWidth;
+      get('weapon').classList.add('df-shake');
+      settle(false);
+    } else {
+      state.level+=1; state.phase='active';
+      state.message=`주사위 ${outcome} · +${state.level} 성공!${state.level===10?' MAX · 판매하세요.':''}`;
+      render(); (state.level===10?get('sell'):get('enhance')).focus({preventScroll:true});
+    }
+  }
+  function resumeRoll() {
+    if(timer!==null||pending===null) return;
+    root.classList.remove('df-paused'); deadline=performance.now()+remaining;
+    timer=setTimeout(finishRoll,remaining);
+  }
+  function syncVisibility() {
+    if(!state||root.hidden) return;
+    if(!active()) {
+      if(timer!==null) { remaining=Math.max(0,deadline-performance.now()); clearTimeout(timer); timer=null; }
+      if(pending!==null) root.classList.add('df-paused');
+    } else {
+      if(pending!==null) resumeRoll();
+    }
+  }
+  function back() {
+    guide.dismiss(); cancelPending(); if(dialog.open) dialog.close();
+    root.hidden=true; hub.hidden=false; state=null;
+    launcher.focus({preventScroll:true});
+  }
+  launcher.addEventListener('click',()=>{ hub.hidden=true; root.hidden=false; reset(true); });
+  root.addEventListener('click',event=>{
+    const button=event.target.closest('button[data-df]');
+    if(!button||button.disabled||!state||!active()) return;
+    if(dialog.open&&!dialog.contains(button)) return;
+    const action=button.dataset.df;
+    if(action==='help') { guide.show(); return; }
+    if(action==='back'||action==='dialog-menu') { back(); return; }
+    if(state.phase==='rolling') return;
+    if(action==='retry'||action==='dialog-retry') { reset(); return; }
+    if(action==='dialog-cancel') { dialog.close(); get('retry').focus({preventScroll:true}); return; }
+    if((action==='start'&&state.phase==='ready')||(action==='next'&&state.phase==='between')) {
+      state.level=0; state.broken=false; state.phase='active'; state.message=`${state.settled+1}번째 무기 · 강화하거나 판매하세요.`;
+      drawDie(1); get('weapon').classList.remove('df-shake'); render(); get('enhance').focus({preventScroll:true});
+    } else if(action==='sell'&&state.phase==='active') settle(true);
+    else if(action==='enhance'&&state.phase==='active'&&state.level<10) {
+      state.phase='rolling'; pending=Math.floor(Math.random()*6)+1; remaining=motion.matches?180:850;
+      state.message=`+${state.level+1} 도전 · 굴리는 중…`;
+      drawDie(0); render(); resumeRoll();
+    }
+  });
+  document.addEventListener('visibilitychange',syncVisibility);
+  window.addEventListener('pagehide',()=>{
+    if(timer!==null) { remaining=Math.max(0,deadline-performance.now()); clearTimeout(timer); timer=null; }
+    if(pending!==null) root.classList.add('df-paused');
+  });
+  window.addEventListener('pageshow',syncVisibility);
+  new MutationObserver(syncVisibility).observe(panel,{attributes:true,attributeFilter:['hidden']});
+})();
+</script>
+<style>
+  .unit-toc { display:flex; gap:6px; min-width:0; overflow-x:auto; padding:10px 26px; border-bottom:1px solid var(--rule); background:#ffffffee; scrollbar-width:thin; }
+  .unit-toc button { flex:none; padding:5px 12px; border:1.5px solid var(--rule); border-radius:999px; background:#fff; color:var(--muted); font:800 13.5px var(--sans); white-space:nowrap; cursor:pointer; }
+  .unit-toc button[aria-current="true"] { border-color:var(--main); background:var(--main); color:#fff; }
+  #study-content > .zone, #quiz-body .zone { scroll-margin-top:64px; }
+  @media (max-width:760px) { .unit-toc { padding:8px 12px; } }
+  @media print { .unit-toc { display:none !important; } }
+</style>
+<script>
+(() => {
+  const entries = [
+    { panel:document.getElementById('study-panel'), body:document.getElementById('study-content'), id:'study-toc' },
+    { panel:document.getElementById('quiz-panel'), body:document.getElementById('quiz-body'), id:'quiz-toc' }
+  ];
+  entries.forEach(entry => {
+    const nav = document.createElement('nav');
+    nav.className = 'unit-toc';
+    nav.id = entry.id;
+    nav.setAttribute('aria-label', '대단원 차례');
+    document.querySelectorAll('#study-content > .zone').forEach((zone, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = zone.textContent.trim().replace('.', '');
+      button.addEventListener('click', () => {
+        entry.body.querySelectorAll('.zone')[index]?.scrollIntoView({ behavior:'smooth', block:'start' });
+      });
+      nav.append(button);
+    });
+    entry.body.before(nav);
+    entry.nav = nav;
+  });
+  function updateCurrent() {
+    entries.forEach(entry => {
+      if (entry.panel.hidden) return;
+      const zones = [...entry.body.querySelectorAll('.zone')];
+      let current = 0;
+      zones.forEach((zone, index) => { if (zone.getBoundingClientRect().top < 120) current = index; });
+      [...entry.nav.children].forEach((button, index) => {
+        const selected = index === current;
+        if (selected && button.getAttribute('aria-current') !== 'true') {
+          entry.nav.scrollTo({ left:button.offsetLeft - entry.nav.offsetLeft - entry.nav.clientWidth / 2 + button.offsetWidth / 2, behavior:'smooth' });
+        }
+        button.setAttribute('aria-current', String(selected));
       });
     });
-  }, { passive: true });
+  }
+  let scheduled = false;
+  function scheduleUpdate() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => { scheduled = false; updateCurrent(); });
+  }
+  window.addEventListener('scroll', scheduleUpdate, { passive:true });
+  window.addEventListener('resize', scheduleUpdate);
+  const observer = new MutationObserver(scheduleUpdate);
+  entries.forEach(entry => observer.observe(entry.panel, { attributes:true, attributeFilter:['hidden'] }));
+  observer.observe(document.getElementById('quiz-body'), { childList:true });
+  updateCurrent();
 })();
-
 </script>
 </body>
 </html>
