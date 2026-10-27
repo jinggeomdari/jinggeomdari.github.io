@@ -137,6 +137,29 @@
 <p class="print-note"><b>단원 내용을 인쇄하려면</b> 단원 화면 맨 위의 <b>인쇄</b> 버튼을 누르거나 <b>Ctrl+P</b>(맥은 ⌘+P)를 눌러 주세요.<br>
   브라우저 메뉴의 인쇄로는 단원 내용이 찍히지 않아요.</p>
 
+<!-- 단원을 인쇄할 때 입히는 모양. 단원이 열릴 때 단원 문서에 붙인다 (단원 파일의 인쇄 설정 뒤라서 그것을 덮음).
+     단원 파일은 모두 같은 템플릿(.page .banner .zone .sec .cols-2 …)이라 한 벌로 맞춘다. -->
+<template id="unit-print"><style media="print">
+  @page { margin: 12mm 10mm 13mm; }
+  html, body { background: #fff !important; }
+  /* 인쇄 창의 "배경 그래픽"이 꺼져 있어도 띠·번호·이름표 색을 찍는다 */
+  *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  /* 정리만 찍는다 (인쇄 설정이 없는 단원도 있어서 템플릿의 규칙을 다시 적음) */
+  .tabs, .toc, .unit-toc, #quiz-panel, #game-panel, .explorer, .toast, .mid-check { display: none !important; }
+  #study-panel { display: block !important; }
+  .page { width: auto !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: visible !important; zoom: .84; }
+  .banner { border-radius: 14px; }
+  .zone { padding-top: 14px !important; }
+  .jg-keep { break-inside: avoid; }
+  /* 쪽 나눔: 소단원 덩어리는 쪼개도 되게 해서 빈 반쪽을 없애고, 그 안의 작은 덩어리와 제목은 붙여 둔다 */
+  .sec { break-inside: auto !important; }
+  .col > *, .sec > :not(.cols-2), .term, .box, .tip, .brace, .card, .fig, figure, table, svg { break-inside: avoid; }
+  h2, h3, h4, .zone, .term > .tag { break-after: avoid; }
+  /* 띠 제목은 바로 아래 소단원과 .jg-keep으로 묶는다 (beforeprint에서). 뒤가 두 단 격자면 break-after: avoid가 지켜지지 않아 제목만 쪽 끝에 남는다 */
+  /* 접어 둔 예시도 펼쳐서 찍는다 (펼치기는 beforeprint에서) */
+  #study-panel details > summary { list-style: none; box-shadow: none !important; }
+</style></template>
+
 <script id="unit-data" type="application/json">__UNITS__</script>
 <!--__SOURCES__-->
 <script>
@@ -194,7 +217,7 @@
     ifr.addEventListener('load', () => {
       busy.hidden = true;
       // 단원 안을 누른 뒤에는 키 입력이 단원 쪽으로 가므로 거기서도 Ctrl+P를 받는다
-      try { ifr.contentWindow.addEventListener('keydown', onPrintKey); } catch (e) {}
+      try { ifr.contentWindow.addEventListener('keydown', onPrintKey); preparePrint(ifr.contentWindow); } catch (e) {}
     });
     // 한 파일판: 단원 원본이 이 문서 안에 들어 있다. 웹판: units/ 폴더의 파일을 연다.
     // 주소를 먼저 정하고 붙여야 빈 페이지(about:blank)의 load가 먼저 오지 않는다
@@ -232,6 +255,40 @@
     if (!ifr) return;
     try { ifr.contentWindow.focus(); ifr.contentWindow.print(); }
     catch (e) { window.open(ifr.src, '_blank'); } // 틀 안을 다룰 수 없을 때(내 컴퓨터에서 웹판을 열었을 때)는 단원만 새 탭으로
+  }
+  // 단원 문서에 인쇄용 모양을 붙이고, 인쇄하는 동안만 접힌 예시(details)를 펼친다
+  function preparePrint(win) {
+    const doc = win.document;
+    // 인쇄할 때는 폭이 약 720px로 잡혀 단원의 좁은 화면 규칙(max-width)이 켜지고 한 단으로 찍힌다.
+    // 그 규칙들을 화면에서만 쓰이게 바꿔 인쇄는 넓은 화면 배치(두 단)로 나오게 한다. 화면 모습은 그대로다.
+    const screenOnly = (rules) => [...rules].forEach((r) => {
+      if (r.type === 4) r.media.mediaText = [...r.media].map((m) => /max-width/.test(m) && !/\b(screen|print)\b/.test(m) ? 'screen and ' + m : m).join(', ');
+      if (r.cssRules) screenOnly(r.cssRules);
+    });
+    [...doc.styleSheets].forEach((s) => { try { screenOnly(s.cssRules); } catch (e) {} });
+    doc.head.append(document.importNode($('#unit-print').content, true));
+    let printing = false, opened = [], kept = [];
+    win.addEventListener('beforeprint', () => {
+      if (printing) return;
+      printing = true;
+      opened = [...doc.querySelectorAll('#study-panel details:not([open]):not(.explorer)')];
+      opened.forEach((d) => { d.open = true; });
+      kept = [...doc.querySelectorAll('#study-panel .zone')].map((zone) => {
+        let next = zone.nextElementSibling;
+        while (next && next.matches('.explorer')) next = next.nextElementSibling; // 인쇄에서 숨는 활동은 건너뜀
+        const box = doc.createElement('div');
+        box.className = 'jg-keep';
+        zone.before(box);
+        box.append(zone);
+        if (next && next.matches('.sec')) box.append(next);
+        return box;
+      });
+    });
+    win.addEventListener('afterprint', () => {
+      opened.forEach((d) => { d.open = false; });
+      kept.forEach((box) => box.replaceWith(...box.childNodes));
+      printing = false; opened = []; kept = [];
+    });
   }
   function onPrintKey(e) {
     if (!(e.ctrlKey || e.metaKey) || e.altKey || viewer.hidden) return;
