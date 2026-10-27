@@ -1,0 +1,2008 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>도형의 방정식</title>
+  <style>
+    /* ===== 토큰 ===== */
+    :root {
+      /* ★ 단원 테마 색: 이 값 하나만 바꾸면 배너·탭·태그·상자·버튼·그래프 선이 모두 따라 바뀐다.
+         (배너의 흰 글자가 잘 보이도록 충분히 진한 색으로. 주황·빨강·파랑 계열은 강조색과 겹치므로 피하기) */
+      --main: #2d6a9f;
+      /* 아래는 --main에서 자동으로 만들어지는 색 (직접 고치지 않음) */
+      --main-d: color-mix(in srgb, var(--main) 72%, #000);      /* 진한 테마색: 대단원 띠, 강조 글자 */
+      --mint: color-mix(in srgb, var(--main) 12%, #fff);        /* 아주 연한 배경 */
+      --mint-2: color-mix(in srgb, var(--main) 30%, #fff);      /* 태그 배경 */
+      --tint: color-mix(in srgb, var(--main) 5%, #fff);         /* 공식 상자 배경 */
+      --tint-2: color-mix(in srgb, var(--main) 3%, #fff);       /* 탐색기 배경 */
+      --bg: color-mix(in srgb, var(--main) 6%, #f6f6f6);        /* 페이지 바깥 배경 */
+      --rule: color-mix(in srgb, var(--main) 7%, #e5e5e5);      /* 구분선 */
+      --grid: color-mix(in srgb, var(--main) 6%, #eeeeee);      /* 모눈·진행 막대 바탕 */
+      --tag-ink: color-mix(in srgb, var(--main) 22%, #1a1f1e);  /* 태그 글자 */
+      --shadow: color-mix(in srgb, var(--main-d) 8%, transparent);
+      --shadow-2: color-mix(in srgb, var(--main-d) 20%, transparent);
+      --ink: #22302e; --muted: #5d6b69; --paper: #ffffff;
+      --coral: #f2624f; --blue: #2b72d6; --violet: #7656c9; --gold: #e9a417; --hl: #fff1b0;
+      --ok: #1f6fd1; --bad: #e04545;
+      --sans: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      --serif: "Cambria", "Times New Roman", "Batang", serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.6; }
+    i { font-family: var(--serif); font-style: italic; }
+    sup { font-size: .68em; line-height: 0; }
+    math { font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", math, serif; font-size: 1.12em; }
+    button { font-family: var(--sans); }
+
+    /* ===== 레이아웃 ===== */
+    .page { width: min(1180px, calc(100% - 28px)); margin: 24px auto 40px; overflow: hidden; border: 2px solid var(--main); border-radius: 20px; background: var(--paper); box-shadow: 0 10px 30px var(--shadow); }
+    .banner { padding: 12px 16px 10px; background: var(--main); color: #fff; text-align: center; font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.3; }
+    .banner small { display: block; font-size: 13px; font-weight: 600; opacity: .85; letter-spacing: 0; }
+    .tabs { display: flex; gap: 6px; padding: 14px 24px 0; border-bottom: 2px solid var(--main); background: color-mix(in srgb, var(--main) 4%, #fff); }
+    .tab { margin-bottom: -2px; padding: 9px 26px; border: 1.5px solid var(--rule); border-bottom: 2px solid transparent; border-radius: 12px 12px 0 0; background: color-mix(in srgb, var(--main) 4%, #f5f5f5); color: var(--muted); font-size: 16px; font-weight: 700; cursor: pointer; }
+    .tab[aria-selected="true"] { border-color: var(--main); border-bottom-color: var(--paper); background: var(--paper); color: var(--ink); }
+    .tab:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid #ffc9a8; outline-offset: 2px; }
+
+    .zone { display: flex; align-items: center; gap: 12px; padding: 22px 26px 2px; }
+    .zone b { padding: 4px 20px; border-radius: 999px; background: var(--main-d); color: #fff; font-size: 17px; }
+    .zone::after { content: ""; flex: 1; height: 2px; background: var(--mint-2); }
+    .sec { padding: 18px 26px; border-bottom: 1px solid var(--rule); }
+    .cols-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .cols-2 > .col { min-width: 0; padding: 0 22px; }
+    .cols-2 > .col:first-child { padding-left: 0; border-right: 2px dashed var(--rule); }
+    .cols-2 > .col:last-child { padding-right: 0; }
+
+    /* ===== 개념 구성 요소 ===== */
+    .head { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 18px; }
+    .no { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--coral); color: #fff; font-size: 14px; font-weight: 800; flex: none; }
+    .tag { display: inline-block; padding: 2px 15px 3px; border-radius: 999px; background: var(--mint-2); color: var(--tag-ink); font-size: 15.5px; font-weight: 800; line-height: 1.5; white-space: nowrap; }
+    .tag.tag-coral { background: #ffd9d2; color: #6d2219; }
+    .term { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; align-items: baseline; margin: 10px 0; }
+    .term p { margin: 0; font-size: 15px; }
+    .body { margin: 6px 0; font-size: 15px; }
+    .sub { margin: -4px 0 10px 14px; font-size: 14.5px; color: #33413f; }
+    .em { color: var(--blue); font-weight: 700; }
+    .key { color: var(--coral); font-weight: 800; }
+    .blue { color: var(--blue); }
+    .m { font-family: var(--serif); font-size: 1.06em; white-space: nowrap; }
+    .big { font-size: 1.25em; }
+    .fr { display: inline-flex; flex-direction: column; margin: 0 2px; font-size: .86em; line-height: 1.12; text-align: center; vertical-align: middle; }
+    .fr > span:first-child { padding: 0 3px; border-bottom: 1px solid currentColor; }
+    .box { margin: 12px 0; padding: 10px 14px; border: 1.5px dashed var(--main); border-radius: 12px; background: var(--tint); text-align: center; font-size: 15px; line-height: 1.9; }
+    .formula { margin: 4px 0; font-size: 17px; }
+    .small { font-size: 14px; }
+    .tip { margin: 10px 0; padding: 7px 12px; border-left: 4px solid var(--gold); border-radius: 0 8px 8px 0; background: #fff8e3; font-size: 14.5px; }
+    .mini-title { margin: 6px 0 6px; color: var(--main-d); font-size: 14.5px; font-weight: 800; }
+
+    .table-scroll { overflow-x: auto; }
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
+    .mini-table th, .mini-table td { padding: 5px 6px; border: 1px solid var(--rule); }
+    .mini-table th { background: var(--mint); font-weight: 700; }
+    .mini-table .t { color: var(--blue); font-weight: 700; }
+    .mini-table .f { color: #9aa5a3; }
+
+    .steps { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: center; margin: 8px 0 4px 6px; }
+    .steps .eqn { font-size: 17px; }
+    .steps .note { padding-left: 10px; border-left: 2px solid var(--coral); color: var(--coral); font-size: 13px; line-height: 1.35; }
+    .steps .note:empty { border-left: 0; }
+    .hl { padding: 0 3px; border-radius: 5px; background: #ffe0da; color: #b4321f; }
+
+    .flow { display: grid; gap: 2px; justify-items: start; margin: 10px auto 0; padding: 12px 16px; width: fit-content; max-width: 100%; border-radius: 12px; background: #fbf7ee; font-size: 14px; }
+    .flow-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .flow-box { padding: 2px 12px; border: 1.5px solid var(--ink); border-radius: 8px; background: #fff; font-size: 16px; }
+    .flow-tag { color: var(--coral); font-weight: 700; }
+    .flow-arrow { margin-left: 26px; color: var(--muted); }
+
+    .ex-list { display: grid; gap: 8px; margin-top: 8px; }
+    .ex { padding: 8px 12px; border-radius: 10px; background: #f7f9f9; font-size: 15px; line-height: 1.9; }
+    .pill { display: inline-block; margin-left: 4px; padding: 0 10px; border-radius: 999px; background: var(--mint-2); font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+    .pill.coral { background: #ffd9d2; }
+
+    .cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .card { min-width: 0; padding: 12px 14px; border: 1.5px solid var(--rule); border-radius: 14px; background: #fff; }
+    .card h4 { margin: 0 0 8px; color: var(--coral); font-size: 16px; }
+    .lines { display: grid; gap: 2px; font-family: var(--serif); font-size: 16.5px; }
+    .lines .why { font-family: var(--sans); color: var(--muted); font-size: 12.5px; }
+    .card .box { margin: 6px 0 10px; }
+
+    .fig { position: relative; max-width: 380px; margin: 8px auto 0; }
+    .fig.small { max-width: 300px; }
+    .fig svg, .mini svg { display: block; width: 100%; height: auto; }
+    .svg-wrap { position: relative; }
+    .fig figcaption { margin-top: 4px; color: var(--muted); font-size: 13px; text-align: center; }
+    .minis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .mini { margin: 0; min-width: 0; text-align: center; }
+    .mini svg, .mini .svg-wrap { max-width: 190px; margin: 2px auto 0; }
+    .mini .svg-wrap svg { margin: 0; }
+    .mini .slot { min-width: 42px; height: 24px; padding: 0 5px; font-size: 12px; }
+    .mini figcaption { font-size: 13.5px; line-height: 1.45; }
+    .badge { display: inline-block; padding: 0 10px; border-radius: 999px; font-family: var(--serif); font-style: italic; font-size: 14px; }
+    .badge.pos { background: #ffe0da; color: #b4321f; }
+    .badge.neg { background: #dce8fb; color: #1d55a6; }
+
+    .qcards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .qcard { min-width: 0; padding: 14px 16px; border: 1.5px solid var(--rule); border-radius: 16px; background: #fff; }
+    .qtitle { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 4px; color: var(--coral); font-size: 16.5px; }
+    .plist { margin: 6px 0; padding: 0; list-style: none; font-size: 14.5px; }
+    .plist li { margin: 3px 0; padding-left: 1.9em; text-indent: -1.9em; }
+
+    /* SVG */
+    /* 글자 기본값은 상속으로만 준다 (요소의 fill·font-size 속성이 우선하도록) */
+    svg { font-family: var(--sans); font-size: 12px; }
+    svg .ax-o { font-family: var(--serif); font-size: 13px; }
+    svg .it { font-family: var(--serif); font-style: italic; font-size: 14px; }
+    svg .grid line { stroke: var(--grid); stroke-width: 1; }
+    svg .axes line { stroke: #3b4644; stroke-width: 1.2; }
+    svg .axes polygon { fill: #3b4644; }
+    svg .tick { font-family: var(--serif); font-size: 10.5px; fill: #6f7c7a; }
+    svg .ax-label { font-family: var(--serif); font-style: italic; font-size: 15px; }
+    svg .plab { font-size: 13px; font-weight: 700; paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+    svg .halo { paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+
+    /* ===== 탐색기 ===== */
+    .explorer { background: var(--tint-2); }
+    .explorer-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .explorer-head .tag { background: var(--main); color: #fff; }
+    .explorer-head p { margin: 0; color: var(--muted); font-size: 14px; }
+    .explorer-body { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+    .explorer-body svg { display: block; width: 100%; max-width: 440px; height: auto; margin: 0 auto; border: 1.5px solid var(--rule); border-radius: 14px; background: #fff; }
+    .slider { display: grid; grid-template-columns: 34px minmax(0, 1fr) 56px; gap: 10px; align-items: center; margin: 6px 0; font-size: 18px; }
+    .slider input { width: 100%; accent-color: var(--main); }
+    .slider output { font-family: var(--serif); text-align: center; font-weight: 700; }
+    .slider-hint { margin: -4px 0 6px 44px; color: var(--muted); font-size: 12.5px; }
+    .readout { margin-top: 12px; padding: 14px 16px; border-radius: 14px; background: #fff; border: 1.5px solid var(--mint-2); }
+    .eq-big { font-size: 24px; color: var(--main-d); }
+    .eq-sub { color: var(--muted); font-size: 16px; }
+    .facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; margin: 10px 0 6px; font-size: 15px; }
+    .facts dt { color: var(--muted); font-weight: 700; }
+    .facts dd { margin: 0; font-family: var(--serif); }
+    .move { margin: 6px 0 0; font-size: 14.5px; }
+    .warn { color: var(--bad); font-weight: 700; }
+
+    /* ===== 퀴즈 ===== */
+    .quiz-guide { margin: 0; padding: 14px 26px; background: #fff8e3; font-size: 14.5px; border-bottom: 1px solid var(--rule); }
+    /* 숨긴 정답과 빈칸 버튼을 같은 칸에 겹쳐 둔다 → 칸 크기만큼 자리를 차지해 옆 글자를 가리지 않음 */
+    .cloze { display: inline-grid; margin: 1px 3px; vertical-align: baseline; }
+    .cloze > .ans-src, .cloze > .blank { grid-area: 1 / 1; }
+    .ans-src { visibility: hidden; padding: 2px 10px; }
+    #quiz-body .qhide, #quiz-body .ans-hidden { visibility: hidden; }
+    .blank { display: inline-flex; align-items: center; justify-content: center; min-width: 2.8em; width: 100%; height: 100%; padding: 2px 8px; border: 1.8px solid var(--ink); border-radius: 8px; background: #fff; color: var(--ink); font: inherit; font-weight: 700; white-space: nowrap; cursor: pointer; line-height: 1.2; }
+    .blank:hover { background: #fffbea; }
+    .blank.ok, .slot.ok { border-color: var(--ok); border-style: solid; color: var(--ok); background: #eef5ff; }
+    .blank.bad, .slot.bad { border-color: var(--bad); border-style: solid; color: var(--bad); background: #fff0f0; }
+    .place-group { margin-top: 8px; }
+    .slot { position: absolute; z-index: 2; transform: translate(-50%, -50%); min-width: 62px; height: 28px; padding: 0 8px; border: 1.8px dashed var(--coral); border-radius: 8px; background: #fff; color: var(--coral); font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .slot.filled { border-style: solid; border-color: var(--ink); color: var(--ink); }
+    .slot.drop-hover { background: #ffeee8; transform: translate(-50%, -50%) scale(1.08); }
+    .bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; padding: 10px; border: 1.5px dashed var(--mint-2); border-radius: 12px; }
+    .bank-hint { width: 100%; margin: 0; color: var(--muted); font-size: 12.5px; text-align: center; }
+    .chip { padding: 5px 14px; border: 1.8px solid var(--main); border-radius: 999px; background: #fff; color: var(--ink); font-size: 14px; font-weight: 700; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+    .chip.selected { background: var(--main); color: #fff; }
+    .chip.ghost { position: fixed; z-index: 70; pointer-events: none; transform: translate(-50%, -50%) rotate(-3deg); box-shadow: 0 8px 20px #0003; }
+    .quiz-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; padding: 26px 20px 32px; }
+    .quiz-summary { width: 100%; margin: 0; min-height: 1.5em; color: var(--muted); font-size: 15px; text-align: center; }
+    .btn { padding: 10px 24px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 3px 4px 0 var(--ink); }
+    .btn:active { transform: translate(2px, 2px); box-shadow: 1px 2px 0 var(--ink); }
+    .btn.primary { border-color: var(--main-d); background: var(--main); color: #fff; box-shadow: 3px 4px 0 var(--main-d); }
+    .btn:disabled { opacity: .45; cursor: default; }
+
+    .modal { position: fixed; z-index: 50; inset: 0; display: grid; place-items: center; padding: 20px; background: #161c1b99; }
+    .dialog { width: min(720px, 100%); max-height: calc(100vh - 40px); overflow: auto; padding: 26px; border: 2px solid var(--main); border-radius: 18px; background: #fffefb; box-shadow: 0 18px 50px #0004; }
+    .dialog h2 { margin: 0 0 16px; font-size: 20px; }
+    .ctx-view { padding: 18px 18px; border-radius: 12px; background: var(--mint); font-size: 19px; line-height: 2; }
+    .ctx-view .term p, .ctx-view .body, .ctx-view .sub, .ctx-view .box { font-size: inherit; }
+    .ctx-view .box { margin: 0; background: #fff; }
+    .ctx-view .formula { font-size: 21px; }
+    .ctx-view .mini-blank { display: inline-block; min-width: 2.6em; padding: 0 8px; border: 1.5px solid #9aa7a5; border-radius: 7px; background: #fff; color: #8a9593; text-align: center; line-height: 1.5; }
+    .ctx-view .mini-blank.active { border: 2.2px solid var(--coral); color: var(--ink); }
+    .ctx-input { width: 8em; padding: 2px 8px; border: 2.2px solid var(--coral); border-radius: 8px; background: #fff; color: var(--ink); font: 700 19px var(--sans); text-align: center; }
+    .choices { display: grid; gap: 10px; margin-top: 16px; }
+    .choice { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 14px; border: 1.5px solid var(--rule); border-radius: 12px; background: #fff; color: var(--ink); font-size: 18px; text-align: left; cursor: pointer; }
+    .choice[aria-checked="true"] { border-color: var(--main); background: var(--mint); }
+    .choice .num { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border: 1.8px solid var(--ink); border-radius: 50%; font-size: 14px; font-weight: 800; }
+    .choice .opt { font-family: var(--sans); }
+    .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .actions button { padding: 9px 20px; border: 1.5px solid #333; border-radius: 10px; background: #fff; color: #333; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .actions .confirm { border-color: var(--main-d); background: var(--main); color: #fff; }
+
+    #quiz-panel { padding-bottom: 40px; }
+    .mid-check { position: fixed; z-index: 40; right: 20px; bottom: 20px; width: 210px; padding: 12px 14px; border: 2px solid var(--main); border-radius: 16px; background: #fffffff2; box-shadow: 0 10px 28px var(--shadow-2); }
+    .mid-progress { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .mid-progress b { color: var(--main-d); }
+    .mid-bar { height: 6px; margin-top: 5px; overflow: hidden; border-radius: 99px; background: var(--grid); }
+    .mid-bar span { display: block; width: 0; height: 100%; background: var(--main); transition: width .3s; }
+    .mid-result { margin: 8px 0 0; font-size: 13.5px; font-weight: 700; line-height: 1.45; }
+    .mid-result.good { color: var(--ok); }
+    .mid-result.warn { color: var(--bad); }
+    .mid-result.info { color: var(--muted); }
+    .mid-btn { width: 100%; margin-top: 9px; padding: 9px 0; border: 0; border-radius: 12px; background: var(--coral); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 0 #a8331f; }
+    .mid-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #a8331f; }
+    .toast { position: fixed; z-index: 80; left: 50%; top: 16%; padding: 18px 34px; border: 2px solid var(--ok); border-radius: 16px; background: #f4f9ff; color: var(--ok); font-size: 25px; font-weight: 800; box-shadow: 0 12px 35px #1f6fd140; opacity: 0; pointer-events: none; transform: translate(-50%, 0); }
+    .toast.show { animation: toast 2.6s ease forwards; }
+    @keyframes toast { 0% { opacity: 0; transform: translate(-50%, -8px) scale(.94); } 14%, 75% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -10px); } }
+
+    /* ===== 게임 ===== */
+    .game { padding: 20px 26px 30px; }
+    .game-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    .game-title { margin: 0; font-size: 24px; }
+    .g-stats { display: flex; flex-wrap: wrap; gap: 6px; }
+    .g-stats span { padding: 3px 12px; border-radius: 999px; background: var(--mint); font-size: 14px; font-weight: 700; }
+    .g-stats #g-score { background: #ffe9b8; }
+    .game-guide { margin: 8px 0 0; color: var(--muted); font-size: 14.5px; }
+    .g-dots { display: flex; gap: 6px; margin-top: 10px; }
+    .g-dot { width: 14px; height: 14px; border-radius: 50%; background: color-mix(in srgb, var(--main) 7%, #e8e8e8); }
+    .g-dot.cur { box-shadow: 0 0 0 2.5px var(--main); background: #fff; }
+    .g-dot.hit { background: var(--main); }
+    .g-dot.miss { background: var(--coral); }
+    .game-body { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; margin-top: 14px; align-items: start; }
+    .game-board svg { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto; border: 1.5px solid var(--rule); border-radius: 14px; background: #fff; }
+    .legend { display: flex; justify-content: center; gap: 18px; margin-top: 6px; color: var(--muted); font-size: 13px; }
+    .legend span::before { content: ""; display: inline-block; width: 26px; height: 0; margin-right: 6px; vertical-align: middle; }
+    .legend .lg-target::before { border-top: 4px dashed var(--coral); }
+    .legend .lg-player::before { border-top: 3px solid var(--main); }
+    .g-eq-card { padding: 12px 16px; border-radius: 14px; background: var(--mint); }
+    .g-eq-card small { display: block; color: var(--muted); font-size: 13px; }
+    .g-eq-card .g-form { color: var(--muted); font-size: 14px; }
+    #g-eq { font-size: 26px; color: var(--main-d); }
+    .g-ctrl { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding: 8px 12px; border: 1.5px solid var(--rule); border-radius: 14px; }
+    .g-ctrl-label b { font-size: 22px; }
+    .g-ctrl-label small { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.3; }
+    .stepper { display: flex; align-items: center; gap: 8px; flex: none; }
+    .stepper button { width: 46px; height: 46px; border: 2px solid var(--main); border-radius: 12px; background: #fff; color: var(--main-d); font-size: 26px; font-weight: 800; line-height: 1; cursor: pointer; touch-action: manipulation; }
+    .stepper button:active { background: var(--mint); }
+    .stepper button:disabled { opacity: .35; cursor: default; }
+    .stepper output { min-width: 58px; font-family: var(--serif); font-size: 22px; font-weight: 700; text-align: center; }
+    .g-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .g-actions .btn { flex: 1; }
+    .btn.fire { border-color: #a8331f; background: var(--coral); color: #fff; box-shadow: 3px 4px 0 #a8331f; font-size: 18px; }
+    .g-feedback { min-height: 70px; margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: #f6f8f8; font-size: 15px; }
+    .g-feedback ul { margin: 6px 0 0; padding-left: 20px; }
+    .g-feedback.hit { background: color-mix(in srgb, var(--main) 9%, #fff); color: var(--main-d); }
+    .g-feedback.miss { background: #fff2ef; }
+    .g-feedback.reveal { background: #fff8e3; }
+    #g-next { width: 100%; margin-top: 12px; }
+    .g-end { display: grid; place-items: center; padding: 30px 10px; }
+    .g-end-card { width: min(560px, 100%); padding: 28px; border: 2px solid var(--main); border-radius: 20px; text-align: center; }
+    .stars { color: var(--gold); font-size: 44px; letter-spacing: 6px; }
+    .g-end-card h3 { margin: 4px 0; font-size: 24px; }
+    .g-end-card ol { margin: 16px 0 20px; padding: 0; list-style: none; text-align: left; font-size: 15px; }
+    .g-end-card li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 4px; border-bottom: 1px dashed var(--rule); }
+
+    /* ===== 반응형 / 인쇄 ===== */
+    @media (max-width: 900px) {
+      .cards3 { grid-template-columns: 1fr; }
+      .qcards { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .page { width: 100%; margin: 0; border-width: 0; border-radius: 0; }
+      .banner { font-size: 24px; }
+      .tabs { padding: 10px 12px 0; }
+      .tab { flex: 1; padding: 8px 6px; }
+      .zone { padding: 18px 16px 2px; }
+      .sec, .game { padding: 16px; }
+      .quiz-guide { padding: 12px 16px; }
+      .cols-2, .explorer-body, .game-body { display: block; }
+      .cols-2 > .col, .cols-2 > .col:first-child, .cols-2 > .col:last-child { padding: 0; border-right: 0; }
+      .cols-2 > .col:first-child { padding-bottom: 14px; margin-bottom: 14px; border-bottom: 2px dashed var(--rule); }
+      .explorer-body > * + *, .game-body > * + * { margin-top: 16px; }
+      .term { grid-template-columns: 1fr; }
+      .term .tag { justify-self: start; }
+      .dialog { padding: 18px; }
+      .ctx-view { font-size: 17px; }
+      #quiz-panel { padding-bottom: 150px; }
+      .mid-check { right: 10px; bottom: 10px; width: 168px; padding: 9px 11px; }
+      .mid-btn { font-size: 15px; padding: 8px 0; }
+    }
+    @media print {
+      body { background: #fff; }
+      .page { width: 100%; margin: 0; border-width: 1px; box-shadow: none; }
+      .tabs, #quiz-panel, #game-panel, .explorer { display: none !important; }
+      #study-panel { display: block !important; }
+      .sec, .qcard, .card { break-inside: avoid; }
+    }
+  
+/* ===== 4단원 콘텐츠 보강 토큰 (그림·게임 코드가 참조) ===== */
+:root{
+  --sub: var(--muted); --red: var(--bad); --green: #2f9a52;
+  --main-l: color-mix(in srgb, var(--main) 16%, #fff);
+  --radius: 12px; --sp1: 6px; --sp2: 10px; --sp3: 14px; --sp4: 20px;
+}
+.hidden{ display:none !important; }
+.svg-wrap{ position:relative; }
+.tb{ width:100%; border-collapse:collapse; margin:10px 0; font-size:14px; }
+.tb th,.tb td{ border:1px solid var(--rule); padding:6px 8px; text-align:center; }
+.tb th{ background:var(--mint); color:var(--tag-ink); }
+.term .t{ font-weight:700; color:var(--main-d); margin-bottom:2px; }
+.term .d{ color:var(--ink); }
+.zone small{ font-weight:600; opacity:.85; font-size:.62em; margin-left:6px; }
+.tag.alt{ background:var(--gold); color:#fff; }
+.sliders{ display:flex; flex-wrap:wrap; gap:14px; margin:8px 0; }
+.sl{ display:flex; align-items:center; gap:7px; font-size:14px; }
+.sl input[type=range]{ width:140px; accent-color:var(--main); }
+.sl output{ min-width:28px; font-weight:700; color:var(--main-d); text-align:center; }
+.readout{ display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; }
+.readout>div{ flex:1 1 120px; border:1px solid var(--rule); border-radius:10px; padding:6px 10px; background:var(--paper); font-size:13px; color:var(--muted); }
+.readout b{ display:block; font-size:16px; color:var(--main-d); }
+.qcards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin:10px 0; }
+.g-setup{ border:1px solid var(--rule); border-radius:12px; padding:10px 12px; margin:0 0 12px; background:var(--tint); }
+.g-setup .row{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.tname{ font:inherit; padding:4px 8px; border:1px solid var(--rule); border-radius:8px; width:110px; }
+.g-menu{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+.g-stage{ margin:12px 0; }
+.g-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+
+/* ===== 4단원 콘텐츠 전용 클래스 (원본 이식) ===== */
+
+.sliders{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:var(--sp2)}
+
+.sl{display:flex;align-items:center;gap:var(--sp2);font-size:13px}
+
+.sl label{min-width:58px;font-weight:700;color:var(--main-d)}
+
+.sl input[type=range]{flex:1;accent-color:var(--main);min-width:0}
+
+.sl output{min-width:52px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+
+table.tb{width:100%;border-collapse:collapse;font-size:13px;margin:var(--sp2) 0}
+
+table.tb th,table.tb td{border:1px solid var(--rule);padding:6px 8px;text-align:center}
+
+table.tb th{background:var(--mint);color:var(--main-d)}
+
+table.tb td.num{text-align:right;font-variant-numeric:tabular-nums}
+
+.bk{appearance:none;border:1.5px dashed var(--main);background:#fff;color:var(--main-d);font:inherit;
+  font-size:13.5px;font-weight:700;border-radius:7px;padding:1px 10px;min-width:64px;cursor:pointer;line-height:1.5}
+
+.bk .no-i{display:inline-block;background:var(--mint);border-radius:4px;padding:0 4px;font-size:11px;margin-right:4px;color:var(--main-d)}
+
+.bk.filled{border-style:solid;background:var(--mint)}
+
+.bk.ok{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,#fff);color:var(--blue)}
+
+.bk.no{border-color:var(--red);background:color-mix(in srgb,var(--red) 10%,#fff);color:var(--red)}
+
+.sheet .mhead{display:flex;align-items:center;gap:var(--sp2);margin-bottom:var(--sp2)}
+
+.sheet .mhead .n{background:var(--main);color:#fff;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:700}
+
+.sheet .mhead .x{margin-left:auto;appearance:none;border:0;background:none;font-size:20px;color:var(--sub);cursor:pointer}
+
+.sheet .qlabel{font-weight:700;font-size:15px;margin:0 0 var(--sp2)}
+
+.sheet .qctx{font-size:13px;color:var(--sub);background:var(--tint);border:1px solid var(--rule);
+  border-radius:8px;padding:var(--sp2);margin-bottom:var(--sp3)}
+
+.sheet input.ta{width:100%;font:inherit;font-size:16px;padding:9px 11px;border:1.5px solid var(--rule);border-radius:9px}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:var(--sp2)}
+
+.mfoot{display:flex;gap:var(--sp2);margin-top:var(--sp3)}
+
+.mfoot .btn{flex:1}
+
+.answer-reveal{margin-top:var(--sp2);font-size:13.5px;border-left:4px solid var(--blue);
+  background:color-mix(in srgb,var(--blue) 7%,#fff);border-radius:8px;padding:var(--sp2) var(--sp3)}
+
+.checkbar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#fff;border-top:1px solid var(--rule);
+  padding:9px var(--sp4);display:flex;align-items:center;gap:var(--sp2)}
+
+.checkbar[hidden]{display:none}
+
+.checkbar .info{font-size:12.5px;color:var(--sub)}
+
+.checkbar .info b{color:var(--main-d);font-size:14px}
+
+.checkbar .sp{margin-left:auto;display:flex;gap:6px}
+
+.bar{height:6px;background:var(--mint);border-radius:999px;overflow:hidden;margin-top:3px;width:120px}
+
+.bar i{display:block;height:100%;background:var(--main);width:0}
+
+.g-menu{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp3)}
+
+@media(max-width:640px){.g-menu{grid-template-columns:1fr}}
+
+.g-card{border:1px solid var(--rule);border-radius:var(--radius);background:#fff;padding:var(--sp4);text-align:left}
+
+.g-card h4{margin:0 0 4px;font-size:15px;color:var(--main-d)}
+
+.g-card p{margin:0 0 var(--sp2);font-size:13px;color:var(--sub)}
+
+.g-card .best{font-size:12px;color:var(--main-d);font-weight:700;margin-bottom:var(--sp2)}
+
+.g-setup{border:1px solid var(--rule);border-radius:var(--radius);background:#fff;padding:var(--sp3);margin-bottom:var(--sp3)}
+
+.g-setup .row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp2);font-size:13px}
+
+.g-setup input.tname{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);border-radius:7px;width:96px}
+
+.g-stage{border:1px solid var(--rule);border-radius:var(--radius);background:#fff;padding:var(--sp4)}
+
+.g-prompt{font-size:15.5px;font-weight:700;text-align:center;margin-bottom:var(--sp2)}
+
+.g-prompt small{display:block;font-size:12px;font-weight:600;color:var(--sub);margin-top:2px}
+
+.g-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:var(--sp2)}
+
+.pcards{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp2)}
+
+@media(max-width:560px){.pcards{grid-template-columns:repeat(2,1fr)}}
+
+.pcards button{appearance:none;border:1.5px solid var(--rule);background:#fff;border-radius:10px;padding:14px 4px;
+  font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+
+.pcards button[aria-pressed="true"]{border-color:var(--main);background:var(--mint)}
+
+.pcards button.done{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 10%,#fff);color:var(--blue)}
+
+.result{text-align:center}
+
+.result .score{font-size:34px;font-weight:800;color:var(--main-d);line-height:1.2}
+
+.result .detail{font-size:13px;color:var(--sub);margin:var(--sp2) 0}
+
+.hidden{display:none}
+
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+    /* ===== 단원 차례(목차) — 2단원과 동일 형식 ===== */
+    .toc { position: sticky; top: 0; z-index: 30; display: flex; gap: 6px; overflow-x: auto; padding: 10px 26px; border-bottom: 1px solid var(--rule); background: #ffffffee; scrollbar-width: thin; }
+    .toc button { flex: none; padding: 5px 12px; border: 1.5px solid var(--rule); border-radius: 999px; background: #fff; color: var(--muted); font-size: 13.5px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+    .toc button[aria-current="true"] { border-color: var(--main); background: var(--main); color: #fff; }
+    .zone { scroll-margin-top: 64px; }
+    @media (max-width: 760px) { .toc { padding: 8px 12px; } }
+    @media print { .toc { display: none !important; } }
+
+  
+/* ===== [수정] 팀 대결 차례 표시 ===== */
+.g-stats span.turn { background: var(--main); color: #fff; }
+/* ===== [수정] 그림 설명·상자 라벨 ===== */
+div.cap { margin-top: 4px; color: var(--muted); font-size: 13px; text-align: center; }
+span.cap { display: block; margin-bottom: 4px; color: var(--main-d); font-size: 13px; font-weight: 800; }
+
+/* ===== 게임 피드백 색 ===== */
+.g-feedback.ok{ color:var(--ok); font-weight:700; background:color-mix(in srgb, var(--main) 9%, #fff); }
+.g-feedback.no{ color:var(--bad); font-weight:700; background:#fff2ef; }
+
+/* ===== 게임 2 : 사분면 스피드 — 좌표평면 직접 클릭 ===== */
+.quad-board{ max-width:370px; margin:4px auto 12px; }
+.quad-board svg{ display:block; width:100%; height:auto; }
+.quad-choice{ cursor:pointer; fill:color-mix(in srgb, var(--main) 6%, transparent); stroke:color-mix(in srgb, var(--main) 26%, transparent); stroke-width:1; transition:fill .12s, stroke .12s; }
+.quad-choice:hover, .quad-choice:focus{ fill:color-mix(in srgb, var(--main) 28%, transparent); stroke:var(--main); stroke-width:3; outline:none; }
+.quad-choice:focus-visible{ stroke:var(--coral); stroke-width:4; }
+.quad-choice.selected{ fill:color-mix(in srgb, var(--blue) 24%, transparent); stroke:var(--blue); stroke-width:3; }
+.quad-choice-label{ font-family:var(--sans); font-size:15px; font-weight:800; fill:var(--ink); pointer-events:none; }
+.quad-axis-base{ stroke:var(--ink); stroke-width:2.5; pointer-events:none; }
+.quad-axis-arrow{ stroke:var(--ink); pointer-events:none; }
+.quad-axis-hit{ fill:none; stroke:color-mix(in srgb, var(--main) 12%, transparent); stroke-width:20; cursor:pointer; transition:stroke .12s; }
+.quad-axis-hit:hover, .quad-axis-hit:focus{ stroke:color-mix(in srgb, var(--main) 46%, transparent); outline:none; }
+.quad-axis-hit:focus-visible{ stroke:color-mix(in srgb, var(--coral) 50%, transparent); }
+.quad-axis-hit.selected{ stroke:color-mix(in srgb, var(--blue) 60%, transparent); }
+.quad-origin-hit{ fill:#fff; stroke:var(--ink); stroke-width:2; cursor:pointer; transition:fill .12s, stroke .12s; }
+.quad-origin-hit:hover, .quad-origin-hit:focus{ fill:color-mix(in srgb, var(--main) 32%, #fff); stroke:var(--main); stroke-width:3; outline:none; }
+.quad-origin-hit:focus-visible{ stroke:var(--coral); stroke-width:3.5; }
+.quad-origin-hit.selected{ fill:color-mix(in srgb, var(--blue) 28%, #fff); stroke:var(--blue); stroke-width:3; }
+.quad-origin-label{ font-family:var(--sans); font-size:11px; font-weight:800; fill:var(--ink); pointer-events:none; }
+.quad-axis-caption{ font-family:var(--sans); font-size:12px; font-weight:800; fill:var(--muted); pointer-events:none; }
+.quad-guide{ margin:0 0 8px; color:var(--muted); font-size:12px; text-align:center; }
+.quad-guide b{ color:var(--main-d); }
+
+/* ===== 게임 4 : 평행 짝맞추기 — 20장(4열 × 5행) 전면 공개 ===== */
+.memory-board{ display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px; max-width:760px; margin:12px auto; }
+.memory-card{ appearance:none; position:relative; min-width:0; min-height:82px; padding:5px; border:2px solid var(--rule); border-radius:10px; background:var(--main); color:#fff; font:inherit; font-weight:800; word-break:keep-all; cursor:pointer; transition:background .15s, border-color .15s; }
+.memory-card.faceup{ border-color:var(--main); background:#fff; color:var(--ink); font-family:var(--serif); font-style:italic; font-size:clamp(12px, 2.2vw, 17px); }
+.memory-card[aria-pressed="true"]{ border-color:var(--coral); background:var(--mint); box-shadow:0 0 0 2px var(--coral); }
+.memory-card.matched{ border-color:var(--blue); background:color-mix(in srgb, var(--blue) 10%, #fff); color:var(--blue); cursor:default; }
+.memory-card:focus-visible{ outline:3px solid var(--coral); outline-offset:2px; }
+@media (max-width:540px){
+  .memory-board{ gap:4px; }
+  .memory-card{ min-height:64px; padding:3px; border-radius:7px; }
+  .memory-card.faceup{ font-size:11px; }
+}
+</style>
+<body>
+<main class="page">
+  <header class="banner">도형의 방정식<small>징검다리 4단원 개념 확인 · 중1 순서쌍과 좌표평면 / 중2 일차함수와 그 그래프</small></header>
+  <nav class="tabs" role="tablist" aria-label="활동 선택">
+    <button class="tab" type="button" role="tab" id="tab-study" aria-selected="true" aria-controls="study-panel">정리</button>
+    <button class="tab" type="button" role="tab" id="tab-quiz" aria-selected="false" aria-controls="quiz-panel">퀴즈</button>
+    <button class="tab" type="button" role="tab" id="tab-game" aria-selected="false" aria-controls="game-panel">게임</button>
+  </nav>
+
+  <!-- ================= 정리 ================= -->
+  <section class="tab-panel" id="study-panel" role="tabpanel" aria-labelledby="tab-study">
+    <nav class="toc" id="study-toc" aria-label="단원 차례"></nav>
+    <div id="study-content">
+
+      <div class="zone" data-sec="u4-1" data-toc="A 좌표평면"><b>A. 순서쌍과 좌표평면</b> <small>중학교 1학년</small></div>
+
+      <section class="sec">
+        <h3 class="head"><span class="no">1</span>순서쌍</h3>
+        <div class="ctx term">
+          <div class="t"><b class="em" data-q="q1">순서쌍</b> <span class="tag">용어</span></div>
+          <div class="d">순서를 정하여 두 수를 괄호 안에 짝지어 나타낸 것</div>
+        </div>
+        <p>예) <i>(</i>1, 2<i>)</i>, <i>(</i>2, 1<i>)</i>, <i>(</i>&minus;3, 4<i>)</i></p>
+        <div class="ctx box">순서쌍은 두 수의 <b class="em" data-q="q2">순서</b>를 정하여 나타낸 것이므로
+          <i>(a</i>, <i>b)</i>와 <i>(b</i>, <i>a)</i>는 서로 <b class="em" data-q="q3">다르다</b>.</div>
+        <p class="ctx"><i>(</i>1, 2<i>)</i>와 <i>(</i>2, 1<i>)</i>을 좌표평면 위에 나타내면 <b class="em" data-q="q4">서로 다른 두 점이 된다</b>.</p>
+        <div class="fig" data-fig="pairDiff"></div>
+      </section>
+
+      <section class="sec">
+        <h3 class="head"><span class="no">2</span>좌표평면</h3>
+        <div class="cols-2">
+          <div>
+            <p class="ctx">두 수직선이 각각의 <b class="em" data-q="q5">원점</b>에서 서로 <b class="em" data-q="q6">수직</b>으로 만나게 그린다.</p>
+            <ul>
+              <li class="ctx">가로의 수직선을 <b class="em" data-q="q7">x축</b>, 세로의 수직선을 <b class="em" data-q="q8">y축</b>이라 한다.</li>
+              <li class="ctx">위의 두 수직선을 통틀어 <b class="em" data-q="q9">좌표축</b>이라고 한다.</li>
+              <li class="ctx">두 좌표축이 만나는 점 O를 좌표평면의 <b class="em" data-q="q10">원점</b>이라고 한다.</li>
+              <li class="ctx">두 좌표축이 그려진 평면을 <b class="em" data-q="q11">좌표평면</b>이라고 한다.</li>
+            </ul>
+          </div>
+          <div class="fig" data-fig="planeAxes"></div>
+        </div>
+        <p class="note">그림의 세 자리에 알맞은 이름표를 확인해 보자.</p>
+        <div class="fig" data-place-fig="q12"><div class="svg-wrap"><svg viewBox="0 0 300 270" width="100%" role="img" aria-label="이름표 놓기 그림"><line x1="20.0" y1="250.0" x2="20.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="46.0" y1="250.0" x2="46.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="72.0" y1="250.0" x2="72.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="98.0" y1="250.0" x2="98.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="124.0" y1="250.0" x2="124.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="150.0" y1="250.0" x2="150.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="176.0" y1="250.0" x2="176.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="202.0" y1="250.0" x2="202.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="228.0" y1="250.0" x2="228.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="254.0" y1="250.0" x2="254.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="280.0" y1="250.0" x2="280.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="250.0" x2="280.0" y2="250.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="227.0" x2="280.0" y2="227.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="204.0" x2="280.0" y2="204.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="181.0" x2="280.0" y2="181.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="158.0" x2="280.0" y2="158.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="135.0" x2="280.0" y2="135.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="112.0" x2="280.0" y2="112.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="89.0" x2="280.0" y2="89.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="66.0" x2="280.0" y2="66.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="43.0" x2="280.0" y2="43.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="20.0" x2="280.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="135.0" x2="280.0" y2="135.0" stroke="#39404f" stroke-width="1.4"/><line x1="150.0" y1="250.0" x2="150.0" y2="20.0" stroke="#39404f" stroke-width="1.4"/><text data-place="x축" x="243.6" y="118.9" font-size="12" fill="var(--main-d)" text-anchor="middle">x축</text><text data-place="y축" x="178.6" y="38.4" font-size="12" fill="var(--main-d)" text-anchor="middle">y축</text><text data-place="원점" x="111.0" y="158.0" font-size="12" fill="var(--main-d)" text-anchor="middle">원점</text><circle cx="150" cy="135" r="3.5" fill="var(--coral)"/></svg></div><div class="cap">두 좌표축과 원점</div></div>
+        <h4>점의 좌표</h4>
+        <div class="cols-2">
+          <div>
+            <p class="ctx">좌표평면 위의 한 점 P에서 <i>x</i>축, <i>y</i>축에 각각 내린 <b class="em" data-q="q13">수선</b>과
+              <i>x</i>축, <i>y</i>축이 만나는 점이 나타내는 수가 각각 <i>a</i>, <i>b</i>일 때,
+              순서쌍 <i>(a</i>, <i>b)</i>를 점 P의 <b class="em" data-q="q14">좌표</b>라고 한다.</p>
+            <div class="ctx box"><span class="cap">좌표의 기호</span><b class="em" data-q="q15">P<i>(a</i>, <i>b)</i></b></div>
+            <p class="ctx">이때 <i>a</i>를 점 P의 <b class="em" data-q="q16">x좌표</b>, <i>b</i>를 점 P의 <b class="em" data-q="q17">y좌표</b>라고 한다.</p>
+          </div>
+          <div class="fig" data-fig="planePoint"></div>
+        </div>
+        <ol class="steps">
+          <li class="ctx">점 A<i>(</i>&minus;2, 5<i>)</i>의 <i>x</i>좌표는 <b class="em" data-q="q18">&minus;2</b>이다.</li>
+          <li class="ctx"><i>x</i>좌표가 3, <i>y</i>좌표가 &minus;1인 점은 <b class="em" data-q="q19"><i>(</i>3, &minus;1<i>)</i></b>이다.</li>
+        </ol>
+      </section>
+
+      <section class="sec">
+        <h3 class="head"><span class="no">3</span>사분면</h3>
+        <div class="cols-2">
+          <div>
+            <p class="ctx">좌표평면은 <b class="em" data-q="q20">좌표축</b>에 의하여 <b class="em" data-q="q21">네</b> 부분으로 나누어지며, 그 각 부분을
+              제1사분면, 제2사분면, 제3사분면, 제4사분면이라고 한다.</p>
+            <div class="ctx box">이때 <b class="em" data-q="q23">좌표축</b>은 어느 사분면에도 포함되지 않는다.</div>
+            <table class="tb">
+              <tr><th>사분면</th><th>제1</th><th>제2</th><th>제3</th><th>제4</th></tr>
+              <tr><th><i>x</i>좌표의 부호</th><td>+</td><td>&minus;</td><td>&minus;</td><td>+</td></tr>
+              <tr><th><i>y</i>좌표의 부호</th><td>+</td><td>+</td><td>&minus;</td><td>&minus;</td></tr>
+            </table>
+            <p class="note">원점, <i>x</i>축 위의 점, <i>y</i>축 위의 점은 어느 사분면에도 속하지 않는다.</p>
+          </div>
+          <div class="fig" data-fig="quadrants"></div>
+        </div>
+        <div class="fig" data-place-fig="q22"><div class="svg-wrap"><svg viewBox="0 0 300 270" width="100%" role="img" aria-label="이름표 놓기 그림"><line x1="20.0" y1="135.0" x2="280.0" y2="135.0" stroke="#39404f" stroke-width="1.4"/><line x1="150.0" y1="250.0" x2="150.0" y2="20.0" stroke="#39404f" stroke-width="1.4"/><text data-place="제1사분면" x="217.6" y="70.6" font-size="12" fill="var(--main-d)" text-anchor="middle">제1사분면</text><text data-place="제2사분면" x="82.4" y="70.6" font-size="12" fill="var(--main-d)" text-anchor="middle">제2사분면</text><text data-place="제3사분면" x="82.4" y="199.4" font-size="12" fill="var(--main-d)" text-anchor="middle">제3사분면</text><text data-place="제4사분면" x="217.6" y="199.4" font-size="12" fill="var(--main-d)" text-anchor="middle">제4사분면</text></svg></div><div class="cap">좌표축이 나눈 네 부분</div></div>
+        <ul>
+          <li class="ctx">제2사분면 위의 점의 (<i>x</i>좌표, <i>y</i>좌표) 부호는 <b class="em" data-q="q24">(&minus;, +)</b>이다.</li>
+          <li class="ctx">점 <i>(</i>3, &minus;4<i>)</i>는 <b class="em" data-q="q25">제4사분면</b>에 속한다.</li>
+          <li class="ctx">점 <i>(</i>0, &minus;2<i>)</i>는 <b class="em" data-q="q26">어느 사분면에도 속하지 않는다</b>.</li>
+          <li class="ctx">제1사분면 위의 점은 <i>x</i>좌표가 <b class="em" data-q="q27">양수</b>이고 <i>y</i>좌표도 같은 부호이다.</li>
+        </ul>
+        <div class="explorer">
+          <h4>탐색기 1 <span class="tag ghost">슬라이더</span> 점 P<i>(a</i>, <i>b)</i>는 어디에 있을까</h4>
+          <div class="sliders">
+            <div class="sl"><label for="e1a"><i>a</i> (<i>x</i>좌표)</label><input type="range" id="e1a" min="-5" max="5" step="1" value="3"><output id="e1ao">3</output></div>
+            <div class="sl"><label for="e1b"><i>b</i> (<i>y</i>좌표)</label><input type="range" id="e1b" min="-5" max="5" step="1" value="2"><output id="e1bo">2</output></div>
+          </div>
+          <div class="fig" id="e1fig"></div>
+          <div class="readout">
+            <div>좌표<b id="e1coord">P(3, 2)</b></div>
+            <div>부호<b id="e1sign">(+, +)</b></div>
+            <div>위치<b id="e1quad">제1사분면</b></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="zone" data-sec="u4-2" data-toc="B 일차함수"><b>B. 일차함수와 그 그래프</b> <small>중학교 2학년</small></div>
+
+      <section class="sec">
+        <h3 class="head"><span class="no">1</span>일차함수</h3>
+        <p class="ctx">일반적으로 함수 <b class="em" data-q="q28"><i>y</i> = <i>ax</i> + <i>b</i></b> (단, <i>a</i>, <i>b</i>는 수, <b class="em" data-q="q29"><i>a</i> &ne; 0</b>)와 같이
+          <i>y</i>가 <i>x</i>에 대한 <b class="em" data-q="q30">일차식</b>으로 나타내어질 때, 이 함수를 <i>x</i>에 대한 <b class="em" data-q="q31">일차함수</b>라고 한다.</p>
+        <div class="qcards">
+          <div class="card"><b>일차함수인 것</b><br><i>y</i> = 2<i>x</i> &minus; 1, &nbsp; <i>y</i> = 3<i>x</i>, &nbsp; <i>y</i> = &minus;<i>x</i> + 5</div>
+          <div class="card"><b>일차함수가 아닌 것</b><br><i>y</i> = 5 (<i>a</i> = 0), &nbsp; <i>y</i> = <i>x</i><sup>2</sup> + 1 (이차식)</div>
+        </div>
+        <ul>
+          <li class="ctx"><i>a</i>에 대한 조건이 필요한 까닭은 <b class="em" data-q="q32"><i>a</i> = 0이면 <i>y</i> = <i>b</i>가 되어 일차식이 아니기 때문</b>이다.</li>
+          <li class="ctx">다음 중 일차함수인 것은 <b class="em" data-q="q33"><i>y</i> = 2<i>x</i> &minus; 1</b>이다.</li>
+        </ul>
+      </section>
+
+      <section class="sec">
+        <h3 class="head"><span class="no">2</span>일차함수의 그래프</h3>
+        <div class="cols-2">
+          <div>
+            <p class="ctx">일차함수 <i>y</i> = <i>ax</i> + <i>b</i>의 그래프는 일차함수 <b class="em" data-q="q34"><i>y</i> = <i>ax</i></b>의 그래프를
+              <b class="em" data-q="q35"><i>y</i>축</b>의 방향으로 <b class="em" data-q="q36"><i>b</i>만큼</b> <b class="em" data-q="q37">평행이동</b>한 직선이다.</p>
+            <h4>개념 확인</h4>
+            <div class="ctx term"><div class="t">&#9312; <b class="em" data-q="q38">평행이동</b> <span class="tag ghost">용어</span></div>
+              <div class="d">한 도형을 일정한 <b class="em" data-q="q39">방향</b>으로 일정한 <b class="em" data-q="q40">거리</b>만큼 이동하는 것</div></div>
+            <div class="ctx term"><div class="t">&#9313; <b class="em" data-q="q41">x절편</b> <span class="tag ghost">용어</span></div>
+              <div class="d">함수의 그래프가 <i>x</i>축과 만나는 점의 <b class="em" data-q="q42">x좌표</b></div></div>
+            <div class="ctx term"><div class="t">&#9314; <b class="em" data-q="q43">y절편</b> <span class="tag ghost">용어</span></div>
+              <div class="d">함수의 그래프가 <i>y</i>축과 만나는 점의 <b class="em" data-q="q44">y좌표</b></div></div>
+          </div>
+          <div>
+            <div class="fig" data-fig="translate"></div>
+            <div class="fig" data-fig="intercepts"></div>
+          </div>
+        </div>
+        <div class="ctx box"><span class="cap">일차함수 y = ax + b의 그래프에서</span>
+          <i>x</i>절편: <b class="em" data-q="q45">&minus;<i>b</i>/<i>a</i></b> , &nbsp; <i>y</i>절편: <b class="em" data-q="q46"><i>b</i></b></div>
+        <div class="fig" data-place-fig="q47"><div class="svg-wrap"><svg viewBox="0 0 300 280" width="100%" role="img" aria-label="절편과 기울기 이름표 놓기"><line x1="20.0" y1="260.0" x2="20.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="52.5" y1="260.0" x2="52.5" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="85.0" y1="260.0" x2="85.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="117.5" y1="260.0" x2="117.5" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="150.0" y1="260.0" x2="150.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="182.5" y1="260.0" x2="182.5" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="215.0" y1="260.0" x2="215.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="247.5" y1="260.0" x2="247.5" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="280.0" y1="260.0" x2="280.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="260.0" x2="280.0" y2="260.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="236.0" x2="280.0" y2="236.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="212.0" x2="280.0" y2="212.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="188.0" x2="280.0" y2="188.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="164.0" x2="280.0" y2="164.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="140.0" x2="280.0" y2="140.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="116.0" x2="280.0" y2="116.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="92.0" x2="280.0" y2="92.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="68.0" x2="280.0" y2="68.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="44.0" x2="280.0" y2="44.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="20.0" x2="280.0" y2="20.0" stroke="var(--grid)" stroke-width="1"/><line x1="20.0" y1="116.0" x2="280.0" y2="116.0" stroke="#39404f" stroke-width="1.4"/><line x1="117.5" y1="260.0" x2="117.5" y2="20.0" stroke="#39404f" stroke-width="1.4"/><line x1="85.0" y1="260.0" x2="247.5" y2="20.0" stroke="var(--main)" stroke-width="2.2"/><polyline points="117.5,212.0 150.0,212.0 150.0,164.0" fill="none" stroke="var(--coral)" stroke-width="1.5" stroke-dasharray="5 4"/><circle cx="182.5" cy="116.0" r="4" fill="var(--coral)"/><circle cx="117.5" cy="212.0" r="4" fill="var(--blue)"/><text data-place="x절편" x="221.5" y="94.4" font-size="12" fill="var(--main-d)" text-anchor="middle">x절편</text><text data-place="y절편" x="62.2" y="212.0" font-size="12" fill="var(--main-d)" text-anchor="middle">y절편</text><text data-place="기울기" x="179.2" y="173.6" font-size="12" fill="var(--main-d)" text-anchor="middle">기울기</text></svg></div><div class="cap">y = 2x &minus; 4의 그래프</div></div>
+        <h4>예) <i>y</i> = 2<i>x</i> &minus; 4의 절편</h4>
+        <ol class="steps">
+          <li class="ctx"><i>x</i> = 0을 대입하면 <i>y</i>의 값이 나오므로 <i>y</i>절편은 <b class="em" data-q="q48">&minus;4</b>이다.</li>
+          <li class="ctx"><i>y</i> = 0을 대입하면 0 = 2<i>x</i> &minus; 4이므로 <i>x</i> = <b class="em" data-q="q49">2</b>,
+            즉 <i>x</i>절편은 <b class="em" data-q="q50">2</b>이다.</li>
+          <li class="ctx">일차함수 <i>y</i> = &minus;3<i>x</i> + 6의 <i>x</i>절편은 <b class="em" data-q="q51">2</b>이다.</li>
+          <li class="ctx">일차함수 <i>y</i> = <i>ax</i> + <i>b</i>의 그래프가 <i>y</i>축과 만나는 점의 좌표는 <b class="em" data-q="q52"><i>(</i>0, <i>b)</i></b>이다.</li>
+        </ol>
+      </section>
+
+      <section class="sec">
+        <h3 class="head"><span class="no">3</span>기울기</h3>
+        <div class="cols-2">
+          <div>
+            <p class="ctx">일반적으로 일차함수 <i>y</i> = <i>ax</i> + <i>b</i>에서 <i>x</i>의 값의 증가량에 대한
+              <i>y</i>의 값의 증가량의 <b class="em" data-q="q53">비율</b>은 항상 일정하며, 이것은 <i>x</i>의 <b class="em" data-q="q54">계수</b> <i>a</i>와 같다.</p>
+            <p class="ctx">이 증가량의 비율 <i>a</i>를 일차함수 <i>y</i> = <i>ax</i> + <i>b</i>의 그래프의 <b class="em" data-q="q55">기울기</b>라고 한다.</p>
+            <div class="ctx box"><span class="cap">일차함수 y = ax + b의 그래프에서</span>
+              (기울기) = <b class="em" data-q="q56">(<i>y</i>의 값의 증가량) / (<i>x</i>의 값의 증가량)</b> = <b class="em" data-q="q57">a</b></div>
+          </div>
+          <div class="fig" data-fig="slope"></div>
+        </div>
+        <ul>
+          <li class="ctx"><i>y</i> = 3<i>x</i> &minus; 2에서 <i>x</i>의 값이 2만큼 증가하면 <i>y</i>의 값은 <b class="em" data-q="q58">6만큼 증가한다</b>.</li>
+          <li class="ctx"><i>y</i> = &minus;2<i>x</i> + 1의 그래프의 기울기는 <b class="em" data-q="q59">&minus;2</b>이다.</li>
+          <li class="ctx">두 점 <i>(</i>1, 3<i>)</i>, <i>(</i>3, 7<i>)</i>을 지나는 직선의 기울기는 <b class="em" data-q="q60">2</b>이다.</li>
+        </ul>
+      </section>
+
+      <section class="sec">
+        <h3 class="head"><span class="no">4</span>일차함수 그래프의 성질 (1)</h3>
+        <div class="cols-2">
+          <div>
+            <p>일차함수 <i>y</i> = <i>ax</i> + <i>b</i>의 그래프는</p>
+            <ul>
+              <li class="ctx">&#9312; <i>a</i> &gt; 0이면 오른쪽 <b class="em" data-q="q61">위</b>로 향한다.</li>
+              <li class="ctx">&#9313; <i>a</i> &lt; 0이면 오른쪽 <b class="em" data-q="q62">아래</b>로 향한다.</li>
+              <li class="ctx"><i>y</i> = &minus;<i>x</i> + 4의 그래프는 <b class="em" data-q="q63">오른쪽 아래로 향한다</b>.</li>
+              <li class="ctx">다음 중 그래프가 오른쪽 위로 향하는 것은 <b class="em" data-q="q64"><i>y</i> = (1/2)<i>x</i> &minus; 3</b>이다.</li>
+            </ul>
+          </div>
+          <div>
+            <div class="fig" data-fig="aPos"></div>
+            <div class="fig" data-fig="aNeg"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="sec">
+        <h3 class="head"><span class="no">5</span>일차함수 그래프의 성질 (2)</h3>
+        <div class="cols-2">
+          <div>
+            <ul>
+              <li class="ctx">&#9312; 기울기가 같은 두 일차함수의 그래프는 서로 <b class="em" data-q="q65">평행</b>하거나 <b class="em" data-q="q66">일치</b>한다.</li>
+              <li class="ctx">&#9313; 서로 평행한 두 일차함수의 그래프의 <b class="em" data-q="q67">기울기</b>는 같다.</li>
+              <li class="ctx">두 그래프가 평행하려면 <b class="em" data-q="q68">기울기는 같고 <i>y</i>절편은 달라야 한다</b>.</li>
+              <li class="ctx">기울기가 같고 <i>y</i>절편도 같으면 두 그래프는 <b class="em" data-q="q69">일치한다</b>.</li>
+              <li class="ctx"><i>y</i> = 2<i>x</i> + 1의 그래프와 평행한 것은 <b class="em" data-q="q70"><i>y</i> = 2<i>x</i> &minus; 5</b>이다.</li>
+            </ul>
+            <div class="card"><b>평행</b> : 기울기가 같고 <i>y</i>절편이 다르다. (예: <i>y</i> = 2<i>x</i> + 1과 <i>y</i> = 2<i>x</i> &minus; 2)<br>
+              <b>일치</b> : 기울기가 같고 <i>y</i>절편도 같다.</div>
+          </div>
+          <div class="fig" data-fig="parallel"></div>
+        </div>
+      </section>
+
+      <section class="sec">
+        <h3 class="head"><span class="no">6</span>그래프 그리기와 평행 찾기 <span class="tag alt">활동</span></h3>
+        <ul>
+          <li><b>평행이동으로 그리기</b> : <i>y</i> = <i>ax</i>의 그래프를 <i>y</i>축의 방향으로 <i>b</i>만큼 옮겨 그린 뒤 <i>x</i>절편과 <i>y</i>절편을 구한다.</li>
+          <li><b>기울기와 <i>y</i>절편으로 그리기</b> : <i>y</i>절편 <i>(</i>0, <i>b)</i>을 먼저 찍고, 기울기 <i>a</i>만큼 오른쪽·위(아래)로 이동한 점을 찍어 두 점을 잇는다.</li>
+          <li><b>평행한 것끼리 짝짓기</b> : 식에서 <i>x</i>의 계수(기울기)가 같고 <i>y</i>절편이 다른 것을 찾는다.</li>
+        </ul>
+        <div class="explorer">
+          <h4>탐색기 2 <span class="tag ghost">슬라이더</span> <i>y</i> = <i>ax</i> + <i>b</i>의 그래프</h4>
+          <div class="sliders">
+            <div class="sl"><label for="e2a">기울기 <i>a</i></label><input type="range" id="e2a" min="-4" max="4" step="1" value="2"><output id="e2ao">2</output></div>
+            <div class="sl"><label for="e2b"><i>y</i>절편 <i>b</i></label><input type="range" id="e2b" min="-5" max="5" step="1" value="-4"><output id="e2bo">-4</output></div>
+          </div>
+          <div class="fig" id="e2fig"></div>
+          <div class="readout">
+            <div>식<b id="e2eq">y = 2x - 4</b></div>
+            <div><i>x</i>절편<b id="e2xi">2</b></div>
+            <div>방향<b id="e2dir">오른쪽 위</b></div>
+          </div>
+          <p class="note">점선은 <i>y</i> = <i>ax</i>의 그래프이다. 실선은 점선을 <i>y</i>축의 방향으로 <i>b</i>만큼 평행이동한 직선이다.</p>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+<section class="tab-panel" id="quiz-panel" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+    <p class="quiz-guide">💡 <b>?</b> 빈칸을 눌러 답을 넣으세요. 그림의 빈 이름표는 아래 이름표를 <b>끌어다 놓거나</b>, <b>눌러서 고른 뒤 자리를 누르면</b> 됩니다. 다 채웠으면 맨 아래 <b>[정답 확인]</b>!</p>
+    <nav class="toc" id="quiz-toc" aria-label="단원 차례"></nav>
+    <div id="quiz-body"></div>
+    <div class="quiz-bar">
+      <button id="quiz-check" class="btn primary" type="button">정답 확인</button>
+      <button id="quiz-reset" class="btn" type="button">다시 풀기</button>
+      <p id="quiz-summary" class="quiz-summary" aria-live="polite"></p>
+    </div>
+    <!-- 화면을 따라다니는 중간 점검 (퀴즈 탭에서만 보임) -->
+    <aside class="mid-check" aria-label="중간 점검">
+      <div class="mid-progress"><span>채운 빈칸</span><b><span id="mid-filled">0</span> / <span id="mid-total">0</span></b></div>
+      <div class="mid-bar" aria-hidden="true"><span id="mid-bar-fill"></span></div>
+      <p class="mid-result" id="mid-result" aria-live="polite"
+ hidden></p>
+      <button id="mid-check" class="mid-btn" type="button">✔ 중간 점검</button>
+    </aside>
+  </section>
+
+  <!-- ================= 게임 ================= -->
+  <section class="tab-panel" id="game-panel" role="tabpanel" aria-labelledby="tab-game" hidden>
+  <div class="g-setup">
+    <div class="row">
+      <b>모드</b>
+      <button class="btn fire" id="mdSolo">개인</button>
+      <button class="btn" id="mdTeam">팀 대결</button>
+      <span id="teamFields" class="hidden">
+        <input class="tname" id="t1" value="모둠 1" aria-label="첫 번째 팀 이름">
+        <span style="color:var(--sub)">vs</span>
+        <input class="tname" id="t2" value="모둠 2" aria-label="두 번째 팀 이름">
+      </span>
+    </div>
+    <p class="note">팀 대결에서는 차례가 번갈아 돌아오고, 팀별 점수가 따로 쌓입니다.</p>
+  </div>
+  <div class="g-menu" id="gMenu"></div>
+  <div id="gPlay" class="hidden">
+    <div class="g-stats" id="gStats"></div>
+    <div class="g-stage" id="gStage"></div>
+    <div class="g-row"><button class="btn ghost" id="gExit">메뉴로</button></div>
+  </div>
+</section>
+
+</main>
+
+<!-- 모달: 글자 입력 -->
+<div class="modal" id="text-modal" role="dialog" aria-modal="true" aria-labelledby="text-modal-title" hidden>
+  <div class="dialog">
+    <h2 id="text-modal-title">빈칸에 알맞은 말을 써 넣으세요.</h2>
+    <div class="ctx-view" id="text-ctx"></div>
+    <div class="actions"><button type="button" data-close>취소</button><button type="button" class="confirm" id="text-confirm">확인</button></div>
+  </div>
+</div>
+<!-- 모달: 고르기 -->
+<div class="modal" id="choice-modal" role="dialog" aria-modal="true" aria-labelledby="choice-modal-title" hidden>
+  <div class="dialog">
+    <h2 id="choice-modal-title">빈칸에 알맞은 것을 고르세요.</h2>
+    <div class="ctx-view" id="choice-ctx"></div>
+    <div class="choices" id="choice-list" role="radiogroup" aria-label="보기"></div>
+    <div class="actions"><button type="button" data-close>취소</button><button type="button" class="confirm" id="choice-confirm">확인</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite">참 잘했어요! 🎉</div>
+
+
+<script>
+
+/* ===================== 공통 그림 도구 ===================== */
+const C = {
+  main:'var(--main)', coral:'var(--coral)', blue:'var(--blue)', red:'var(--red)',
+  green:'var(--green)', grid:'#e4e7f2', axis:'#39404f', sub:'#5c6476', ink:'#1b1f2a'
+};
+
+function txt(x, y, t, size, fill, style, anchor){
+  return '<text x="' + x + '" y="' + y + '" font-size="' + (size || 11) + '" fill="' + (fill || C.ink)
+    + '" text-anchor="' + (anchor || 'middle') + '"'
+    + (style === 'italic' ? ' font-style="italic" font-family="Times New Roman,serif"' : '')
+    + ' font-family="Pretendard,sans-serif">' + t + '</text>';
+}
+
+function arrow(x1, y1, x2, y2, color, width){
+  const w = width || 1.4;
+  const ang = Math.atan2(y2 - y1, x2 - x1);
+  const h = 7;
+  const px = x2 - h * Math.cos(ang), py = y2 - h * Math.sin(ang);
+  const dx = 3.4 * Math.sin(ang), dy = 3.4 * Math.cos(ang);
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + px + '" y2="' + py + '" stroke="' + color
+    + '" stroke-width="' + w + '"/>'
+    + '<polygon points="' + x2 + ',' + y2 + ' ' + (px - dx) + ',' + (py + dy) + ' ' + (px + dx) + ',' + (py - dy)
+    + '" fill="' + color + '"/>';
+}
+
+function dot(cx, cy, color, label, dy){
+  let s = '<circle cx="' + cx + '" cy="' + cy + '" r="4.2" fill="' + color + '"/>';
+  if(label) s += txt(cx, cy + (dy === undefined ? -9 : dy), label, 11.5, color);
+  return s;
+}
+
+function plane(o){
+  const c = Object.assign({
+    w:320, h:300, xmin:-6, xmax:6, ymin:-6, ymax:6, pad:20,
+    grid:true, ticks:true, labelEvery:2, names:true
+  }, o || {});
+  const X = x => c.pad + (x - c.xmin) * (c.w - 2 * c.pad) / (c.xmax - c.xmin);
+  const Y = y => c.h - c.pad - (y - c.ymin) * (c.h - 2 * c.pad) / (c.ymax - c.ymin);
+  const iX = px => c.xmin + (px - c.pad) * (c.xmax - c.xmin) / (c.w - 2 * c.pad);
+  const iY = py => c.ymin + (c.h - c.pad - py) * (c.ymax - c.ymin) / (c.h - 2 * c.pad);
+  let s = '';
+  if(c.grid){
+    for(let x = Math.ceil(c.xmin); x <= c.xmax; x++){
+      s += '<line x1="' + X(x) + '" y1="' + Y(c.ymin) + '" x2="' + X(x) + '" y2="' + Y(c.ymax)
+        + '" stroke="' + C.grid + '" stroke-width="1"/>';
+    }
+    for(let y = Math.ceil(c.ymin); y <= c.ymax; y++){
+      s += '<line x1="' + X(c.xmin) + '" y1="' + Y(y) + '" x2="' + X(c.xmax) + '" y2="' + Y(y)
+        + '" stroke="' + C.grid + '" stroke-width="1"/>';
+    }
+  }
+  s += arrow(X(c.xmin), Y(0), X(c.xmax), Y(0), C.axis);
+  s += arrow(X(0), Y(c.ymin), X(0), Y(c.ymax), C.axis);
+  if(c.ticks){
+    for(let x = Math.ceil(c.xmin); x <= c.xmax; x++){
+      if(x === 0) continue;
+      s += '<line x1="' + X(x) + '" y1="' + (Y(0) - 3) + '" x2="' + X(x) + '" y2="' + (Y(0) + 3)
+        + '" stroke="' + C.axis + '" stroke-width="1"/>';
+      if(x % c.labelEvery === 0) s += txt(X(x), Y(0) + 14, x, 9.5, C.sub);
+    }
+    for(let y = Math.ceil(c.ymin); y <= c.ymax; y++){
+      if(y === 0) continue;
+      s += '<line x1="' + (X(0) - 3) + '" y1="' + Y(y) + '" x2="' + (X(0) + 3) + '" y2="' + Y(y)
+        + '" stroke="' + C.axis + '" stroke-width="1"/>';
+      if(y % c.labelEvery === 0) s += txt(X(0) - 10, Y(y) + 3.5, y, 9.5, C.sub, null, 'end');
+    }
+  }
+  s += txt(X(0) - 9, Y(0) + 14, 'O', 11, C.ink);
+  if(c.names){
+    s += txt(X(c.xmax) - 4, Y(0) - 8, 'x', 12.5, C.ink, 'italic');
+    s += txt(X(0) + 11, Y(c.ymax) + 10, 'y', 12.5, C.ink, 'italic');
+  }
+  return { c:c, X:X, Y:Y, iX:iX, iY:iY, body:s };
+}
+
+function svgWrap(c, inner, cls){
+  return '<svg viewBox="0 0 ' + c.w + ' ' + c.h + '" width="' + c.w + '" height="' + c.h
+    + '" style="max-width:100%;height:auto" class="' + (cls || '') + '" role="img">' + inner + '</svg>';
+}
+
+function plotFn(p, f, color, opt){
+  opt = opt || {};
+  const pts = [];
+  const step = (p.c.xmax - p.c.xmin) / 240;
+  for(let x = p.c.xmin; x <= p.c.xmax + 1e-9; x += step){
+    const y = f(x);
+    if(y >= p.c.ymin - 1e-9 && y <= p.c.ymax + 1e-9) pts.push(p.X(x).toFixed(1) + ',' + p.Y(y).toFixed(1));
+  }
+  if(!pts.length) return '';
+  return '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + color
+    + '" stroke-width="' + (opt.w || 2.2) + '"'
+    + (opt.dash ? ' stroke-dasharray="6 5"' : '') + ' stroke-linecap="round"/>';
+}
+
+function dash(x1, y1, x2, y2, color){
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + color
+    + '" stroke-width="1.3" stroke-dasharray="4 4"/>';
+}
+
+function fmtEq(a, b){
+  let s = 'y = ';
+  if(a === 1) s += 'x';
+  else if(a === -1) s += '-x';
+  else s += a + 'x';
+  if(b > 0) s += ' + ' + b;
+  else if(b < 0) s += ' - ' + Math.abs(b);
+  return s;
+}
+
+/* ===================== 정리 탭 그림 ===================== */
+const FIGS = {
+  pairDiff: function(){
+    const p = plane({ w:280, h:260, xmin:-3, xmax:4, ymin:-3, ymax:4, labelEvery:1 });
+    let s = p.body;
+    s += dot(p.X(1), p.Y(2), C.main, '(1, 2)', -10);
+    s += dot(p.X(2), p.Y(1), C.coral, '(2, 1)', 18);
+    return svgWrap(p.c, s) + '<div class="cap">순서를 바꾸면 다른 점이 된다</div>';
+  },
+  planeAxes: function(){
+    const p = plane({ w:300, h:270, xmin:-5, xmax:5, ymin:-5, ymax:5 });
+    let s = p.body;
+    s += txt(p.X(3.4), p.Y(0) - 10, 'x축(가로)', 11, C.main);
+    s += txt(p.X(0) + 34, p.Y(3.6), 'y축(세로)', 11, C.main);
+    s += txt(p.X(-2.6), p.Y(-3.6), '원점 O', 11, C.coral);
+    s += dash(p.X(-2.3), p.Y(-3.4), p.X(-0.3), p.Y(-0.25), C.coral);
+    return svgWrap(p.c, s) + '<div class="cap">두 좌표축과 원점</div>';
+  },
+  planePoint: function(){
+    const p = plane({ w:300, h:270, xmin:-5, xmax:5, ymin:-5, ymax:5 });
+    let s = p.body;
+    s += dash(p.X(3), p.Y(2), p.X(3), p.Y(0), C.main);
+    s += dash(p.X(3), p.Y(2), p.X(0), p.Y(2), C.main);
+    s += dot(p.X(3), p.Y(2), C.main, 'P(3, 2)', -10);
+    s += txt(p.X(3), p.Y(0) + 15, 'a = 3', 10.5, C.main);
+    s += txt(p.X(0) - 16, p.Y(2) + 3, 'b = 2', 10.5, C.main, null, 'end');
+    return svgWrap(p.c, s) + '<div class="cap">수선을 내려 x좌표와 y좌표를 읽는다</div>';
+  },
+  quadrants: function(){
+    const p = plane({ w:300, h:270, xmin:-5, xmax:5, ymin:-5, ymax:5, grid:false, ticks:false });
+    let s = p.body;
+    const q = [['제1사분면', 2.6, 3.2, '(+, +)'], ['제2사분면', -2.6, 3.2, '(-, +)'],
+               ['제3사분면', -2.6, -3.2, '(-, -)'], ['제4사분면', 2.6, -3.2, '(+, -)']];
+    q.forEach(function(it){
+      s += txt(p.X(it[1]), p.Y(it[2]), it[0], 12, C.main);
+      s += txt(p.X(it[1]), p.Y(it[2]) + 15, it[3], 10.5, C.sub);
+    });
+    return svgWrap(p.c, s) + '<div class="cap">좌표축은 어느 사분면에도 포함되지 않는다</div>';
+  },
+  translate: function(){
+    const p = plane({ w:300, h:280, xmin:-4, xmax:4, ymin:-5, ymax:7 });
+    let s = p.body;
+    s += plotFn(p, x => 2 * x, C.sub, { dash:true, w:1.8 });
+    s += plotFn(p, x => 2 * x + 3, C.main);
+    s += arrow(p.X(-1.5), p.Y(-3), p.X(-1.5), p.Y(0), C.coral, 1.6);
+    s += txt(p.X(-1.5) - 20, p.Y(-1.5), 'b = 3', 10.5, C.coral);
+    s += txt(p.X(1.9), p.Y(5.6), 'y = 2x + 3', 11, C.main);
+    s += txt(p.X(2.9), p.Y(3.1), 'y = 2x', 11, C.sub);
+    s += dot(p.X(0), p.Y(3), C.main, '', 0);
+    return svgWrap(p.c, s) + '<div class="cap">y축의 방향으로 b만큼 평행이동</div>';
+  },
+  intercepts: function(){
+    const p = plane({ w:300, h:280, xmin:-3, xmax:5, ymin:-6, ymax:4 });
+    let s = p.body;
+    s += plotFn(p, x => 2 * x - 4, C.main);
+    s += dot(p.X(2), p.Y(0), C.coral, '', 0);
+    s += dot(p.X(0), p.Y(-4), C.blue, '', 0);
+    s += txt(p.X(2) + 28, p.Y(0) - 10, 'x절편 2', 11, C.coral);
+    s += txt(p.X(0) + 36, p.Y(-4) + 4, 'y절편 -4', 11, C.blue);
+    s += txt(p.X(3.6), p.Y(2.6), 'y = 2x - 4', 11, C.main);
+    return svgWrap(p.c, s) + '<div class="cap">x축·y축과 만나는 점에서 읽는다</div>';
+  },
+  slope: function(){
+    const p = plane({ w:300, h:290, xmin:-2, xmax:5, ymin:-2, ymax:9 });
+    let s = p.body;
+    s += plotFn(p, x => 2 * x + 1, C.main);
+    s += '<polyline points="' + p.X(1) + ',' + p.Y(3) + ' ' + p.X(3) + ',' + p.Y(3) + ' '
+      + p.X(3) + ',' + p.Y(7) + '" fill="none" stroke="' + C.coral + '" stroke-width="1.6" stroke-dasharray="5 4"/>';
+    s += txt(p.X(2), p.Y(3) + 14, 'x 증가량 2', 10.5, C.coral);
+    s += txt(p.X(3) + 32, p.Y(5), 'y 증가량 4', 10.5, C.coral);
+    s += dot(p.X(1), p.Y(3), C.main, '', 0);
+    s += dot(p.X(3), p.Y(7), C.main, '', 0);
+    s += txt(p.X(1.1), p.Y(8), 'y = 2x + 1', 11, C.main);
+    return svgWrap(p.c, s) + '<div class="cap">4 ÷ 2 = 2, 기울기는 x의 계수와 같다</div>';
+  },
+  aPos: function(){
+    const p = plane({ w:250, h:220, xmin:-4, xmax:4, ymin:-4, ymax:4, labelEvery:4 });
+    let s = p.body + plotFn(p, x => x + 1, C.coral);
+    s += txt(p.X(1.9), p.Y(3.4), 'a > 0', 11.5, C.coral);
+    return svgWrap(p.c, s) + '<div class="cap">오른쪽 위로 향한다</div>';
+  },
+  aNeg: function(){
+    const p = plane({ w:250, h:220, xmin:-4, xmax:4, ymin:-4, ymax:4, labelEvery:4 });
+    let s = p.body + plotFn(p, x => -x + 1, C.blue);
+    s += txt(p.X(-1.9), p.Y(3.4), 'a < 0', 11.5, C.blue);
+    return svgWrap(p.c, s) + '<div class="cap">오른쪽 아래로 향한다</div>';
+  },
+  parallel: function(){
+    const p = plane({ w:300, h:280, xmin:-4, xmax:4, ymin:-6, ymax:6 });
+    let s = p.body;
+    s += plotFn(p, x => 2 * x + 1, C.main);
+    s += plotFn(p, x => 2 * x - 2, C.coral);
+    s += txt(p.X(-1.6), p.Y(3.4), 'y = 2x + 1', 10.5, C.main);
+    s += txt(p.X(2.3), p.Y(-3.6), 'y = 2x - 2', 10.5, C.coral);
+    return svgWrap(p.c, s) + '<div class="cap">기울기가 같으면 평행하다</div>';
+  }
+};
+
+document.querySelectorAll('[data-fig]').forEach(function(el){
+  const f = FIGS[el.getAttribute('data-fig')];
+  if(f) el.innerHTML = f();
+});
+
+/* ===================== 탐색기 ===================== */
+function quadName(a, b){
+  if(a === 0 || b === 0) return '사분면 아님';
+  if(a > 0 && b > 0) return '제1사분면';
+  if(a < 0 && b > 0) return '제2사분면';
+  if(a < 0 && b < 0) return '제3사분면';
+  return '제4사분면';
+}
+function sgn(n){ return n > 0 ? '+' : (n < 0 ? '-' : '0'); }
+
+function initExp1(){
+  const sa = document.getElementById('e1a'), sb = document.getElementById('e1b');
+  function draw(){
+    const a = +sa.value, b = +sb.value;
+    document.getElementById('e1ao').textContent = a;
+    document.getElementById('e1bo').textContent = b;
+    const p = plane({ w:300, h:270, xmin:-6, xmax:6, ymin:-6, ymax:6 });
+    let s = p.body;
+    s += dash(p.X(a), p.Y(b), p.X(a), p.Y(0), C.main);
+    s += dash(p.X(a), p.Y(b), p.X(0), p.Y(b), C.main);
+    s += dot(p.X(a), p.Y(b), C.main, 'P(' + a + ', ' + b + ')', b >= 0 ? -10 : 18);
+    document.getElementById('e1fig').innerHTML = svgWrap(p.c, s);
+    document.getElementById('e1coord').textContent = 'P(' + a + ', ' + b + ')';
+    document.getElementById('e1sign').textContent = '(' + sgn(a) + ', ' + sgn(b) + ')';
+    document.getElementById('e1quad').textContent = (a === 0 && b === 0) ? '원점'
+      : (b === 0 ? 'x축 위' : (a === 0 ? 'y축 위' : quadName(a, b)));
+  }
+  sa.addEventListener('input', draw);
+  sb.addEventListener('input', draw);
+  draw();
+}
+
+function initExp2(){
+  const sa = document.getElementById('e2a'), sb = document.getElementById('e2b');
+  function draw(){
+    let a = +sa.value;
+    if(a === 0) a = 1;
+    const b = +sb.value;
+    document.getElementById('e2ao').textContent = a;
+    document.getElementById('e2bo').textContent = b;
+    const p = plane({ w:320, h:290, xmin:-6, xmax:6, ymin:-8, ymax:8, labelEvery:2 });
+    let s = p.body;
+    s += plotFn(p, x => a * x, C.sub, { dash:true, w:1.7 });
+    s += plotFn(p, x => a * x + b, C.main);
+    const xi = -b / a;
+    if(xi >= p.c.xmin && xi <= p.c.xmax) s += dot(p.X(xi), p.Y(0), C.coral, '', 0);
+    if(b >= p.c.ymin && b <= p.c.ymax) s += dot(p.X(0), p.Y(b), C.blue, '', 0);
+    document.getElementById('e2fig').innerHTML = svgWrap(p.c, s);
+    document.getElementById('e2eq').textContent = fmtEq(a, b);
+    const r = Math.round(xi * 100) / 100;
+    document.getElementById('e2xi').textContent = (b === 0) ? '0' : r;
+    document.getElementById('e2dir').textContent = a > 0 ? '오른쪽 위' : '오른쪽 아래';
+  }
+  sa.addEventListener('input', draw);
+  sb.addEventListener('input', draw);
+  draw();
+}
+initExp1();
+initExp2();
+
+/* [수정] 없어진 id를 부르는 옛 탭 연결 제거 — 탭 전환은 initTabs()가 담당합니다 */
+
+/* ===================== 토스트 ===================== */
+var toastTimer = null;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 1800);
+}
+
+</script>
+<script>
+
+/* ===================== 게임 공통 틀 ===================== */
+const GS = {
+  mode:'solo', teams:['모둠 1', '모둠 2'], scores:[0, 0], solo:0,
+  turn:0, timers:[], keyfn:null, def:null, extra:''
+};
+
+function rnd(a, b){ return Math.floor(Math.random() * (b - a + 1)) + a; }
+function pick1(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+/* [수정] 전역에 없어 '평행 짝맞줍기'가 시작되지 못하던 shuffle 추가 */
+function shuffle(list){
+  const a = [...list];
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function bestKey(id){ return 'dogyeong5.best.' + id; }
+function getBest(id){
+  try{ const v = localStorage.getItem(bestKey(id)); return v === null ? null : +v; }
+  catch(e){ return null; }
+}
+function setBest(id, score){
+  try{
+    const b = getBest(id);
+    if(b === null || score > b) localStorage.setItem(bestKey(id), String(score));
+  }catch(e){}
+}
+
+function clearTimers(){
+  GS.timers.forEach(function(t){ clearTimeout(t); clearInterval(t); });
+  GS.timers = [];
+}
+
+function renderStats(){
+  const el = document.getElementById('gStats');
+  let s = '';
+  if(GS.mode === 'solo'){
+    s += '<span>점수 ' + GS.solo + '</span>';
+  } else {
+    s += '<span class="' + (GS.turn === 0 ? 'turn' : '') + '">' + GS.teams[0] + ' ' + GS.scores[0] + '</span>';
+    s += '<span class="' + (GS.turn === 1 ? 'turn' : '') + '">' + GS.teams[1] + ' ' + GS.scores[1] + '</span>';
+  }
+  el.innerHTML = s + GS.extra;
+}
+
+const hub = {
+  stats: function(html){ GS.extra = html || ''; renderStats(); },
+  add: function(n){
+    if(GS.mode === 'solo') GS.solo += n;
+    else GS.scores[GS.turn] += n;
+    renderStats();
+  },
+  setTurn: function(i){ GS.turn = i; renderStats(); },
+  nextTurn: function(){
+    if(GS.mode !== 'team') return;
+    GS.turn = 1 - GS.turn;
+    renderStats();
+    hub.announce(GS.teams[GS.turn] + ' 차례!');
+  },
+  announce: function(msg){ try{ toast(msg); }catch(e){ console.error('toast 실패', e); } },
+  later: function(fn, ms){ const t = setTimeout(fn, ms); GS.timers.push(t); return t; },
+  every: function(fn, ms){ const t = setInterval(fn, ms); GS.timers.push(t); return t; },
+  onKey: function(fn){ GS.keyfn = fn; },
+  finish: function(res){
+    clearTimers();
+    GS.keyfn = null;
+    const stage = document.getElementById('gStage');
+    let html = '<div class="result">';
+    if(GS.mode === 'solo'){
+      setBest(GS.def.id, GS.solo);
+      html += '<div class="score">' + GS.solo + '점</div>';
+      html += '<div class="detail">' + (res.detail || '') + '<br>최고 기록 ' + getBest(GS.def.id) + '점</div>';
+    } else {
+      const w = GS.scores[0] === GS.scores[1] ? '무승부!'
+        : (GS.scores[0] > GS.scores[1] ? GS.teams[0] + ' 승리!' : GS.teams[1] + ' 승리!');
+      html += '<div class="score">' + w + '</div>';
+      html += '<div class="detail">' + GS.teams[0] + ' ' + GS.scores[0] + '점 · '
+        + GS.teams[1] + ' ' + GS.scores[1] + '점<br>' + (res.detail || '') + '</div>';
+    }
+    html += '<div class="g-row"><button class="btn fire" id="gAgain">다시 하기</button>'
+      + '<button class="btn ghost" id="gBack">메뉴로</button></div></div>';
+    stage.innerHTML = html;
+    document.getElementById('gAgain').addEventListener('click', function(){ startGame(GS.def); });
+    document.getElementById('gBack').addEventListener('click', exitGame);
+  }
+};
+
+document.addEventListener('keydown', function(e){ if(GS.keyfn) GS.keyfn(e); });
+
+/* ===================== 게임 1 : 좌표 찍기 ===================== */
+function mountPoint(stage, hub){
+  const N = 10;
+  let i = 0, correct = 0, target = null, answered = false;
+  stage.innerHTML = '<div class="g-prompt" id="ppT"></div><div class="fig" id="ppF"></div>'
+    + '<div class="g-feedback" id="ppB"></div>'
+    + '<div class="g-row"><button class="btn fire next-btn hidden" id="ppN">다음</button></div>';
+  const T = stage.querySelector('#ppT'), F = stage.querySelector('#ppF');
+  const B = stage.querySelector('#ppB'), Nx = stage.querySelector('#ppN');
+
+  function draw(user){
+    const p = plane({ w:320, h:300, xmin:-5, xmax:5, ymin:-5, ymax:5, labelEvery:1 });
+    let s = p.body;
+    if(user){
+      s += dot(p.X(target[0]), p.Y(target[1]), C.blue, '정답', 18);
+      s += dot(p.X(user[0]), p.Y(user[1]), C.red, '내 선택', -11);
+    }
+    F.innerHTML = svgWrap(p.c, s);
+    const svg = F.querySelector('svg');
+    svg.style.cursor = 'crosshair';
+    svg.addEventListener('click', function(e){
+      if(answered) return;
+      const r = svg.getBoundingClientRect();
+      const vx = (e.clientX - r.left) * p.c.w / r.width;
+      const vy = (e.clientY - r.top) * p.c.h / r.height;
+      judge([Math.round(p.iX(vx)), Math.round(p.iY(vy))]);
+    });
+  }
+
+  function ask(){
+    answered = false;
+    target = [rnd(-5, 5), rnd(-5, 5)];
+    if(target[0] === 0 && target[1] === 0) target = [rnd(1, 5), rnd(1, 5)];
+    T.innerHTML = '점 P(' + target[0] + ', ' + target[1] + ')의 자리를 누르세요'
+      + '<small>격자점을 정확히 눌러야 정답입니다</small>';
+    B.textContent = '';
+    B.className = 'g-feedback';
+    Nx.classList.add('hidden');
+    draw(null);
+    hub.stats('<span>문제 ' + (i + 1) + '/' + N + '</span>');
+    if(GS.mode === 'team') hub.announce(GS.teams[GS.turn] + ' 차례!');
+  }
+
+  function judge(user){
+    answered = true;
+    const ok = (user[0] === target[0] && user[1] === target[1]);
+    if(ok){
+      correct++;
+      hub.add(10);
+      B.textContent = '정답! (' + target[0] + ', ' + target[1] + ')';
+      B.className = 'g-feedback ok';
+    } else {
+      B.textContent = '아쉽습니다. 누른 곳은 (' + user[0] + ', ' + user[1] + ')입니다.';
+      B.className = 'g-feedback no';
+    }
+    draw(user);
+    Nx.classList.remove('hidden');
+  }
+
+  Nx.addEventListener('click', function(){
+    i++;
+    if(i >= N){ hub.finish({ detail: N + '문제 중 ' + correct + '문제 정답' }); return; }
+    hub.nextTurn();
+    ask();
+  });
+  ask();
+}
+
+/* ===================== 게임 2 : 사분면 스피드 ===================== */
+function mountQuad(stage, hub){
+  const N = 12, LIMIT = 8;
+  const OPT = ['제1사분면', '제2사분면', '제3사분면', '제4사분면', 'x축 위', 'y축 위', '원점'];
+  let i = 0, correct = 0, left = LIMIT, locked = true, q = null;
+
+  stage.innerHTML = '<div class="g-prompt" id="qT"></div><div class="quad-board" id="qO"></div>'
+    + '<p class="quad-guide">사분면 또는 <b>x축 · y축 · 원점 O</b>를 직접 클릭하세요.</p>'
+    + '<div class="g-feedback" id="qB"></div>'
+    + '<div class="g-row"><button class="btn fire next-btn hidden" id="qN">다음</button></div>';
+  const T = stage.querySelector('#qT'), O = stage.querySelector('#qO');
+  const B = stage.querySelector('#qB'), Nx = stage.querySelector('#qN');
+
+  function answerOf(){
+    if(q.kind === 1) return quadName(q.sx, q.sy);
+    if(q.a === 0 && q.b === 0) return '원점';
+    if(q.b === 0) return 'x축 위';
+    if(q.a === 0) return 'y축 위';
+    return quadName(q.a, q.b);
+  }
+
+  /* 같은 문제가 반복되지 않도록 12문제를 미리 뽑아 둔다.
+     좌표축·원점 문제는 한 판에 모두 합쳐 1~2문제, 나머지는 사분면 문제(10~11문제)로 채운다. */
+  const inner = [], special = [];
+  for(let a = -4; a <= 4; a++){
+    for(let b = -4; b <= 4; b++){
+      if(a === 0 || b === 0) special.push({ kind:0, a:a, b:b });
+      else inner.push({ kind:0, a:a, b:b });
+    }
+  }
+  const signs = [];
+  [-1, 1].forEach(function(sx){ [-1, 1].forEach(function(sy){ signs.push({ kind:1, sx:sx, sy:sy }); }); });
+  const specialCount = rnd(1, 2);
+  const questions = shuffle(
+    shuffle(inner).slice(0, N - specialCount - 3)
+      .concat(shuffle(signs).slice(0, 3))
+      .concat(shuffle(special).slice(0, specialCount))
+  );
+
+  function drawBoard(){
+    const regions = [{ n:1, x:166, y:14 }, { n:2, x:14, y:14 }, { n:3, x:14, y:166 }, { n:4, x:166, y:166 }];
+    let html = '<svg viewBox="0 0 332 332" role="group" aria-label="사분면, x축, y축, 원점을 선택하는 좌표평면">';
+    regions.forEach(function(r){
+      const label = '제' + r.n + '사분면';
+      html += '<rect class="quad-choice" tabindex="0" role="button" aria-label="' + label + '" data-quad="' + label + '"'
+        + ' x="' + r.x + '" y="' + r.y + '" width="152" height="152" rx="9"/>'
+        + '<text class="quad-choice-label" x="' + (r.x + 76) + '" y="' + (r.y + 80) + '" text-anchor="middle">' + label + '</text>';
+    });
+    /* 축은 클릭 영역을 넓게 잡고, 원점은 가장 위에 그려 따로 선택할 수 있게 한다. */
+    html += '<line x1="8" y1="166" x2="324" y2="166" class="quad-axis-base"/>'
+      + '<line x1="166" y1="324" x2="166" y2="8" class="quad-axis-base"/>'
+      + '<path class="quad-axis-arrow" d="M 318 161 L 326 166 L 318 171 M 161 14 L 166 6 L 171 14" fill="none" stroke-width="2"/>'
+      + '<line class="quad-axis-hit" tabindex="0" role="button" aria-label="x축 위" data-quad="x축 위" x1="18" y1="166" x2="314" y2="166"/>'
+      + '<line class="quad-axis-hit" tabindex="0" role="button" aria-label="y축 위" data-quad="y축 위" x1="166" y1="18" x2="166" y2="314"/>'
+      + '<circle class="quad-origin-hit" tabindex="0" role="button" aria-label="원점" data-quad="원점" cx="166" cy="166" r="13"/>'
+      + '<text class="quad-axis-caption" x="297" y="153">x축</text>'
+      + '<text class="quad-axis-caption" x="177" y="35">y축</text>'
+      + '<text class="quad-origin-label" x="166" y="170" text-anchor="middle">O</text></svg>';
+    O.innerHTML = html;
+    O.querySelectorAll('[data-quad]').forEach(function(el){
+      function select(){ judge(el.dataset.quad); }
+      el.addEventListener('click', select);
+      el.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); select(); }
+      });
+    });
+  }
+
+  function ask(){
+    locked = false;
+    left = LIMIT;
+    q = questions[i];
+    if(q.kind === 0){
+      T.innerHTML = '점 (' + q.a + ', ' + q.b + ')은 어디에 있을까?<small>그림에서 위치를 선택하세요 · 8초</small>';
+    } else {
+      T.innerHTML = 'x좌표가 ' + (q.sx > 0 ? '양수' : '음수') + ', y좌표가 ' + (q.sy > 0 ? '양수' : '음수')
+        + '인 점은?<small>그림에서 위치를 선택하세요 · 8초</small>';
+    }
+    B.textContent = '';
+    B.className = 'g-feedback';
+    Nx.classList.add('hidden');
+    drawBoard();
+    hub.stats('<span>문제 ' + (i + 1) + '/' + N + '</span><span>남은 시간 ' + left + '초</span>');
+    if(GS.mode === 'team') hub.announce(GS.teams[GS.turn] + ' 차례!');
+  }
+
+  function judge(sel){
+    if(locked) return;
+    locked = true;
+    const ans = answerOf();
+    if(sel === ans){
+      correct++;
+      hub.add(10);
+      B.textContent = '정답! ' + ans;
+      B.className = 'g-feedback ok';
+    } else {
+      B.textContent = (sel === null ? '시간 초과! ' : '아쉽습니다. ') + '정답은 ' + ans;
+      B.className = 'g-feedback no';
+    }
+    O.querySelectorAll('[data-quad]').forEach(function(el){
+      el.setAttribute('tabindex', '-1');
+      el.style.pointerEvents = 'none';
+      if(el.dataset.quad === ans) el.classList.add('selected');
+    });
+    Nx.classList.remove('hidden');
+  }
+
+  hub.every(function(){
+    if(locked) return;
+    left--;
+    hub.stats('<span>문제 ' + (i + 1) + '/' + N + '</span><span>남은 시간 ' + left + '초</span>');
+    if(left <= 0) judge(null);
+  }, 1000);
+
+  hub.onKey(function(e){
+    const n = +e.key;
+    if(n >= 1 && n <= 7 && !locked) judge(OPT[n - 1]);
+  });
+
+  Nx.addEventListener('click', function(){
+    i++;
+    if(i >= N){ hub.finish({ detail: N + '문제 중 ' + correct + '문제 정답' }); return; }
+    hub.nextTurn();
+    ask();
+  });
+  ask();
+}
+
+/* ===================== 게임 3 : 기울기·절편 사냥 ===================== */
+function mountSlope(stage, hub){
+  const N = 8;
+  let i = 0, correct = 0, q = null, val = 0, locked = false;
+
+  stage.innerHTML = '<div class="g-prompt" id="sT"></div>'
+    + '<div class="stepper"><button type="button" id="sM">-</button>'
+    + '<input id="sV" type="number" inputmode="numeric" value="0">'
+    + '<button type="button" id="sP">+</button></div>'
+    + '<div class="g-row"><button class="btn fire" id="sOk">확인</button></div>'
+    + '<div class="g-feedback" id="sB"></div>'
+    + '<div class="fig" id="sF"></div>'
+    + '<div class="g-row"><button class="btn fire next-btn hidden" id="sN">다음</button></div>';
+  const T = stage.querySelector('#sT'), V = stage.querySelector('#sV');
+  const B = stage.querySelector('#sB'), F = stage.querySelector('#sF');
+  const Nx = stage.querySelector('#sN'), OkB = stage.querySelector('#sOk');
+
+  function ask(){
+    locked = false;
+    const a = pick1([-4, -3, -2, -1, 1, 2, 3, 4]);
+    const k = pick1([-4, -3, -2, -1, 1, 2, 3, 4]);
+    const b = -a * k;
+    const kind = rnd(0, 2);
+    q = { a:a, b:b, k:k, kind:kind };
+    const what = kind === 0 ? '기울기' : (kind === 1 ? 'y절편' : 'x절편');
+    T.innerHTML = '일차함수 <span style="font-family:Times New Roman,serif;font-style:italic">'
+      + fmtEq(a, b) + '</span> 의 ' + what + '은?'
+      + '<small>+ - 또는 직접 입력한 뒤 확인을 누르세요</small>';
+    val = 0;
+    V.value = '0';
+    B.textContent = '';
+    B.className = 'g-feedback';
+    F.innerHTML = '';
+    Nx.classList.add('hidden');
+    OkB.disabled = false;
+    hub.stats('<span>문제 ' + (i + 1) + '/' + N + '</span>');
+    if(GS.mode === 'team') hub.announce(GS.teams[GS.turn] + ' 차례!');
+  }
+
+  function target(){ return q.kind === 0 ? q.a : (q.kind === 1 ? q.b : q.k); }
+
+  function judge(){
+    if(locked) return;
+    locked = true;
+    OkB.disabled = true;
+    const v = Math.round(+V.value || 0);
+    const t = target();
+    if(v === t){
+      correct++;
+      hub.add(10);
+      B.textContent = '정답! ' + t;
+      B.className = 'g-feedback ok';
+    } else {
+      B.textContent = '아쉽습니다. 정답은 ' + t;
+      B.className = 'g-feedback no';
+    }
+    const lim = Math.max(6, Math.abs(q.b) + 2, Math.abs(q.k) + 2);
+    const p = plane({ w:300, h:270, xmin:-lim, xmax:lim, ymin:-lim, ymax:lim, labelEvery: lim > 8 ? 4 : 2 });
+    let s = p.body + plotFn(p, x => q.a * x + q.b, C.main);
+    s += dot(p.X(q.k), p.Y(0), C.coral, 'x절편 ' + q.k, -11);
+    s += dot(p.X(0), p.Y(q.b), C.blue, 'y절편 ' + q.b, 18);
+    F.innerHTML = svgWrap(p.c, s) + '<div class="cap">기울기 ' + q.a + ' · ' + fmtEq(q.a, q.b) + '</div>';
+    Nx.classList.remove('hidden');
+  }
+
+  stage.querySelector('#sM').addEventListener('click', function(){ V.value = (Math.round(+V.value || 0) - 1); });
+  stage.querySelector('#sP').addEventListener('click', function(){ V.value = (Math.round(+V.value || 0) + 1); });
+  OkB.addEventListener('click', judge);
+  V.addEventListener('keydown', function(e){ if(e.key === 'Enter') judge(); });
+  Nx.addEventListener('click', function(){
+    i++;
+    if(i >= N){ hub.finish({ detail: N + '문제 중 ' + correct + '문제 정답' }); return; }
+    hub.nextTurn();
+    ask();
+  });
+  ask();
+}
+
+/* ===================== 게임 4 : 평행 짝맞추기 ===================== */
+function mountPara(stage, hub){
+  const PAIRS = 10;
+  let cards = [], sel = [], found = 0, tries = 0;
+
+  stage.innerHTML = '<div class="g-prompt" id="rT">기울기가 같은(평행한) 두 식을 찾아 두 장씩 누르세요'
+    + '<small>4열 × 5행 · 총 20장 · 10쌍을 모두 찾아보세요</small></div>'
+    + '<div class="memory-board" id="rO"></div><div class="g-feedback" id="rB"></div>';
+  const O = stage.querySelector('#rO'), B = stage.querySelector('#rB');
+
+  /* 서로 다른 기울기 10종마다 y절편이 다른 두 식을 만들어, 각 쌍의 정답이 하나로 정해지게 한다. */
+  shuffle([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]).forEach(function(a, pair){
+    shuffle([-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]).slice(0, 2).forEach(function(b){
+      cards.push({ a:a, b:b, pair:pair, done:false });
+    });
+  });
+  cards = shuffle(cards);
+
+  function render(){
+    O.innerHTML = '';
+    cards.forEach(function(c, k){
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'memory-card faceup' + (c.done ? ' matched' : '');
+      b.textContent = fmtEq(c.a, c.b);
+      b.setAttribute('aria-pressed', sel.indexOf(k) >= 0 ? 'true' : 'false');
+      b.disabled = c.done;
+      b.addEventListener('click', function(){ tap(k); });
+      O.appendChild(b);
+    });
+    hub.stats('<span>찾은 쌍 ' + found + '/' + PAIRS + '</span><span>시도 ' + tries + '회</span>');
+  }
+
+  function tap(k){
+    if(cards[k].done) return;
+    if(sel.indexOf(k) >= 0){
+      sel = sel.filter(function(x){ return x !== k; });
+      render();
+      return;
+    }
+    sel.push(k);
+    if(sel.length === 2){
+      tries++;
+      const c1 = cards[sel[0]], c2 = cards[sel[1]];
+      if(c1.a === c2.a){
+        c1.done = true;
+        c2.done = true;
+        found++;
+        hub.add(10);
+        B.textContent = '평행! 두 직선의 기울기가 모두 ' + c1.a + '입니다.';
+        B.className = 'g-feedback ok';
+      } else {
+        B.textContent = '기울기 ' + c1.a + '와 ' + c2.a + '는 다릅니다.';
+        B.className = 'g-feedback no';
+        if(GS.mode === 'team') hub.nextTurn();
+      }
+      sel = [];
+    }
+    render();
+    if(found === PAIRS){
+      hub.later(function(){ hub.finish({ detail: '10쌍 완성 · 시도 ' + tries + '회' }); }, 700);
+    }
+  }
+  render();
+}
+
+/* ===================== 게임 메뉴 ===================== */
+const GAMES = [
+  { id:'point', name:'좌표 찍기', desc:'주어진 좌표의 자리를 좌표평면에서 찾아 누릅니다. 10문제.', mount:mountPoint },
+  { id:'quad', name:'사분면 스피드', desc:'좌표평면 그림을 직접 눌러 8초 안에 위치를 고릅니다. 12문제 중 축·원점은 합쳐서 1~2문제만 나옵니다.', mount:mountQuad },
+  { id:'slope', name:'기울기·절편 사냥', desc:'식을 보고 기울기, x절편, y절편을 구해 입력합니다. 8문제.', mount:mountSlope },
+  { id:'para', name:'평행 짝맞추기', desc:'항상 펼쳐진 카드 20장(4열×5행)에서 기울기가 같은 식 10쌍을 찾습니다.', mount:mountPara }
+];
+
+function renderMenu(){
+  const m = document.getElementById('gMenu');
+  m.innerHTML = '';
+  GAMES.forEach(function(g){
+    const best = getBest(g.id);
+    const d = document.createElement('div');
+    d.className = 'g-card';
+    d.innerHTML = '<h4>' + g.name + '</h4><p>' + g.desc + '</p>'
+      + '<div class="best">개인 모드 최고 기록 ' + (best === null ? '-' : best + '점') + '</div>'
+      + '<button class="btn fire">시작하기</button>';
+    d.querySelector('button').addEventListener('click', function(){ startGame(g); });
+    m.appendChild(d);
+  });
+}
+
+function startGame(def){
+  clearTimers();
+  GS.keyfn = null;
+  GS.def = def;
+  GS.solo = 0;
+  GS.scores = [0, 0];
+  GS.turn = 0;
+  GS.extra = '';
+  if(GS.mode === 'team'){
+    GS.teams = [
+      document.getElementById('t1').value.trim() || '모둠 1',
+      document.getElementById('t2').value.trim() || '모둠 2'
+    ];
+  }
+  document.getElementById('gMenu').classList.add('hidden');
+  document.getElementById('gPlay').classList.remove('hidden');
+  renderStats();
+  def.mount(document.getElementById('gStage'), hub);
+}
+
+function exitGame(){
+  clearTimers();
+  GS.keyfn = null;
+  document.getElementById('gStage').innerHTML = '';
+  document.getElementById('gPlay').classList.add('hidden');
+  document.getElementById('gMenu').classList.remove('hidden');
+  renderMenu();
+}
+
+document.getElementById('gExit').addEventListener('click', exitGame);
+document.getElementById('mdSolo').addEventListener('click', function(){
+  GS.mode = 'solo';
+  this.classList.add('fire');
+  document.getElementById('mdTeam').classList.remove('fire');
+  document.getElementById('teamFields').classList.add('hidden');
+  toast('개인 모드');
+});
+document.getElementById('mdTeam').addEventListener('click', function(){
+  GS.mode = 'team';
+  this.classList.add('fire');
+  document.getElementById('mdSolo').classList.remove('fire');
+  document.getElementById('teamFields').classList.remove('hidden');
+  toast('팀 대결 모드');
+});
+renderMenu();
+
+</script>
+<script>
+
+(() => {
+'use strict';
+const $ = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+function shuffle(list) { const a=[...list]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const QUIZ = [{"id": "q1", "type": "text", "answers": ["순서쌍"]}, {"id": "q2", "type": "text", "answers": ["순서"]}, {"id": "q3", "type": "text", "answers": ["다르다", "서로다르다"]}, {"id": "q4", "type": "choice", "options": ["서로 다른 두 점이 된다", "완전히 같은 한 점이 된다", "항상 원점에서 만난다", "모두 <i>y</i>축 위의 점이 된다"], "answer": 0}, {"id": "q5", "type": "text", "answers": ["원점"]}, {"id": "q6", "type": "text", "answers": ["수직"]}, {"id": "q7", "type": "text", "answers": ["x축", "엑스축"]}, {"id": "q8", "type": "text", "answers": ["y축", "와이축"]}, {"id": "q9", "type": "text", "answers": ["좌표축"]}, {"id": "q10", "type": "text", "answers": ["원점"]}, {"id": "q11", "type": "text", "answers": ["좌표평면"]}, {"id": "q12", "type": "place", "extra": ["좌표축"]}, {"id": "q13", "type": "text", "answers": ["수선"]}, {"id": "q14", "type": "text", "answers": ["좌표"]}, {"id": "q15", "type": "choice", "options": ["P<i>(a</i>, <i>b)</i>", "P[<i>a</i>, <i>b</i>]", "P{<i>a</i>, <i>b</i>}", "(P, <i>a</i>, <i>b</i>)"], "answer": 0}, {"id": "q16", "type": "text", "answers": ["x좌표", "엑스좌표"]}, {"id": "q17", "type": "text", "answers": ["y좌표", "와이좌표"]}, {"id": "q18", "type": "choice", "options": ["&minus;2", "5", "2", "&minus;5"], "answer": 0}, {"id": "q19", "type": "choice", "options": ["<i>(</i>3, &minus;1<i>)</i>", "<i>(</i>&minus;1, 3<i>)</i>", "<i>(</i>3, 1<i>)</i>", "<i>(</i>&minus;3, 1<i>)</i>"], "answer": 0}, {"id": "q20", "type": "text", "answers": ["좌표축"]}, {"id": "q21", "type": "text", "answers": ["네", "4", "네개", "4개", "네개의", "4개의"]}, {"id": "q22", "type": "place", "extra": ["좌표축"]}, {"id": "q23", "type": "text", "answers": ["좌표축"]}, {"id": "q24", "type": "choice", "options": ["(&minus;, +)", "(+, &minus;)", "(+, +)", "(&minus;, &minus;)"], "answer": 0}, {"id": "q25", "type": "choice", "options": ["제4사분면", "제2사분면", "제3사분면", "제1사분면"], "answer": 0}, {"id": "q26", "type": "choice", "options": ["어느 사분면에도 속하지 않는다", "제3사분면에 속한다", "제4사분면에 속한다", "제2사분면에 속한다"], "answer": 0}, {"id": "q27", "type": "text", "answers": ["양수", "+", "양의수", "플러스"]}, {"id": "q28", "type": "choice", "options": ["<i>y</i> = <i>ax</i> + <i>b</i>", "<i>y</i> = <i>ax</i><sup>2</sup> + <i>b</i>", "<i>y</i> = <i>a</i>/<i>x</i> + <i>b</i>", "<i>x</i> = <i>ay</i> + <i>b</i>"], "answer": 0}, {"id": "q29", "type": "choice", "options": ["<i>a</i> &ne; 0", "<i>b</i> &ne; 0", "<i>a</i> = 0", "<i>a</i> &gt; 0"], "answer": 0}, {"id": "q30", "type": "text", "answers": ["일차식"]}, {"id": "q31", "type": "text", "answers": ["일차함수"]}, {"id": "q32", "type": "choice", "options": ["<i>a</i> = 0이면 <i>y</i> = <i>b</i>가 되어 일차식이 아니기 때문", "<i>b</i> = 0이면 그래프가 원점을 지나기 때문", "<i>a</i>가 0이면 그래프를 그릴 수 없기 때문", "<i>a</i>가 0이면 <i>y</i>축과 만나지 않기 때문"], "answer": 0}, {"id": "q33", "type": "choice", "options": ["<i>y</i> = 2<i>x</i> &minus; 1", "<i>y</i> = 5", "<i>y</i> = <i>x</i><sup>2</sup> + 1", "<i>y</i> = 1/<i>x</i>"], "answer": 0}, {"id": "q34", "type": "choice", "options": ["<i>y</i> = <i>ax</i>", "<i>y</i> = <i>x</i>", "<i>y</i> = <i>b</i>", "<i>y</i> = <i>a</i>(<i>x</i> + <i>b</i>)"], "answer": 0}, {"id": "q35", "type": "choice", "options": ["<i>y</i>축", "<i>x</i>축", "좌표축", "원점"], "answer": 0}, {"id": "q36", "type": "choice", "options": ["<i>b</i>만큼", "<i>a</i>만큼", "&minus;<i>b</i>만큼", "&minus;<i>b</i>/<i>a</i>만큼"], "answer": 0}, {"id": "q37", "type": "text", "answers": ["평행이동"]}, {"id": "q38", "type": "text", "answers": ["평행이동"]}, {"id": "q39", "type": "text", "answers": ["방향"]}, {"id": "q40", "type": "text", "answers": ["거리"]}, {"id": "q41", "type": "text", "answers": ["x절편", "엑스절편"]}, {"id": "q42", "type": "text", "answers": ["x좌표", "엑스좌표"]}, {"id": "q43", "type": "text", "answers": ["y절편", "와이절편"]}, {"id": "q44", "type": "text", "answers": ["y좌표", "와이좌표"]}, {"id": "q45", "type": "choice", "options": ["&minus;<i>b</i>/<i>a</i>", "<i>b</i>/<i>a</i>", "<i>b</i>", "&minus;<i>b</i>"], "answer": 0}, {"id": "q46", "type": "choice", "options": ["<i>b</i>", "&minus;<i>b</i>", "<i>a</i>", "&minus;<i>b</i>/<i>a</i>"], "answer": 0}, {"id": "q47", "type": "place", "extra": ["원점"]}, {"id": "q48", "type": "choice", "options": ["&minus;4", "4", "2", "&minus;2"], "answer": 0}, {"id": "q49", "type": "text", "answers": ["2"]}, {"id": "q50", "type": "text", "answers": ["2"]}, {"id": "q51", "type": "choice", "options": ["2", "&minus;2", "6", "3"], "answer": 0}, {"id": "q52", "type": "choice", "options": ["<i>(</i>0, <i>b)</i>", "<i>(b</i>, 0<i>)</i>", "<i>(</i>0, <i>a)</i>", "<i>(a</i>, 0<i>)</i>"], "answer": 0}, {"id": "q53", "type": "text", "answers": ["비율"]}, {"id": "q54", "type": "text", "answers": ["계수"]}, {"id": "q55", "type": "text", "answers": ["기울기"]}, {"id": "q56", "type": "choice", "options": ["(<i>y</i>의 값의 증가량) / (<i>x</i>의 값의 증가량)", "(<i>x</i>의 값의 증가량) / (<i>y</i>의 값의 증가량)", "(<i>y</i>의 값) / (<i>x</i>의 값)", "(상수항) / (<i>x</i>의 계수)"], "answer": 0}, {"id": "q57", "type": "text", "answers": ["a"]}, {"id": "q58", "type": "choice", "options": ["6만큼 증가한다", "3만큼 증가한다", "2만큼 증가한다", "6만큼 감소한다"], "answer": 0}, {"id": "q59", "type": "choice", "options": ["&minus;2", "2", "1", "&minus;1"], "answer": 0}, {"id": "q60", "type": "choice", "options": ["2", "1/2", "4", "&minus;2"], "answer": 0}, {"id": "q61", "type": "text", "answers": ["위", "위쪽"]}, {"id": "q62", "type": "text", "answers": ["아래", "아래쪽"]}, {"id": "q63", "type": "choice", "options": ["오른쪽 아래로 향한다", "오른쪽 위로 향한다", "<i>x</i>축과 평행하다", "<i>y</i>축과 평행하다"], "answer": 0}, {"id": "q64", "type": "choice", "options": ["<i>y</i> = (1/2)<i>x</i> &minus; 3", "<i>y</i> = &minus;<i>x</i> + 1", "<i>y</i> = &minus;3<i>x</i>", "<i>y</i> = &minus;(1/2)<i>x</i> + 2"], "answer": 0}, {"id": "q65", "type": "text", "answers": ["평행", "평행하다"]}, {"id": "q66", "type": "text", "answers": ["일치", "일치하다"]}, {"id": "q67", "type": "text", "answers": ["기울기"]}, {"id": "q68", "type": "choice", "options": ["기울기는 같고 <i>y</i>절편은 달라야 한다", "기울기와 <i>y</i>절편이 모두 같아야 한다", "기울기가 서로 달라야 한다", "<i>y</i>절편만 같으면 된다"], "answer": 0}, {"id": "q69", "type": "choice", "options": ["일치한다", "평행하다", "수직이다", "원점에서 만난다"], "answer": 0}, {"id": "q70", "type": "choice", "options": ["<i>y</i> = 2<i>x</i> &minus; 5", "<i>y</i> = &minus;2<i>x</i> + 1", "<i>y</i> = <i>x</i> + 2", "<i>y</i> = 2<i>x</i> + 1"], "answer": 0}];
+const QUIZ_BY_ID = Object.fromEntries(QUIZ.map(item => [item.id,item]));
+const minus = '−';
+function signed(n) { return n < 0 ? `− ${Math.abs(n)}` : `+ ${n}`; }
+function xTerm(n) { if(n===0)return '0'; if(n===1)return '<i>x</i>'; if(n===-1)return '−<i>x</i>'; return `${n<0?'−':''}${Math.abs(n)}<i>x</i>`; }
+function plusX(n) { if(n===0)return ''; return n<0 ? ` − ${Math.abs(n)}<i>x</i>` : ` + ${n}<i>x</i>`; }
+function plusN(n) { return n===0 ? '' : n<0 ? ` − ${Math.abs(n)}` : ` + ${n}`; }
+function factor(n) { return `(<i>x</i>${plusN(n)})`; }
+function quad(s,p) { return `<i>x</i><sup>2</sup>${plusX(s)}${plusN(p)}`; }
+function escapeSvg(s) { return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function svgText(x,y,t,size=18,fill='var(--ink)') { return `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}" text-anchor="middle">${escapeSvg(t)}</text>`; }
+function svgMath(x,y,markup,size=18,fill='var(--ink)') { return `<text x="${x}" y="${y}" font-family="Cambria, Times New Roman, serif" font-size="${size}" fill="${fill}" text-anchor="middle">${markup}</text>`; }
+function svgVar(name) { return `<tspan font-style="italic">${name}</tspan>`; }
+function svgXTerm(n) { if(n===0)return '0'; return `${n<0?'−':''}${Math.abs(n)===1?'':Math.abs(n)}${svgVar('x')}`; }
+/* ---------- 퀴즈 ---------- */
+  const quizBody = $('#quiz-body');
+  const checkBtn = $('#quiz-check');
+  const summary = $('#quiz-summary');
+
+  function makePlace(root, item) {
+    const fig = root.querySelector(`[data-place-fig="${item.id}"]`);
+    if (!fig) { console.warn('퀴즈 그림을 찾을 수 없음:', item.id); return; }
+    const group = document.createElement('div');
+    group.className = 'place-group';
+    fig.replaceWith(group);
+    group.append(fig);
+    // 한 묶음에 그림이 여러 개일 수 있다 (예: 기울기 a>0, a<0). 이름표 은행은 하나로 합친다.
+    const labels = [];
+    $$('.svg-wrap', fig).forEach((wrap) => {
+      const svg = wrap.querySelector('svg');
+      const [, , W, H] = svg.getAttribute('viewBox').split(' ').map(Number);
+      $$('[data-place]', svg).forEach((t) => {
+        labels.push(t);
+        t.classList.add('ans-hidden');
+        const slot = document.createElement('button');
+        slot.type = 'button';
+        slot.className = 'slot';
+        slot.dataset.answer = t.dataset.place;
+        slot.dataset.value = '';
+        slot.textContent = '?';
+        slot.setAttribute('aria-label', '이름표를 놓을 자리');
+        slot.style.left = `${(+t.getAttribute('x') / W) * 100}%`;
+        slot.style.top = `${(+t.getAttribute('y') / H) * 100}%`;
+        wrap.append(slot);
+      });
+    });
+    const bank = document.createElement('div');
+    bank.className = 'bank';
+    shuffle([...labels.map((t) => t.dataset.place), ...(item.extra || [])]).forEach((value) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip';
+      chip.dataset.value = value;
+      chip.textContent = value;
+      bank.append(chip);
+    });
+    const hint = document.createElement('p');
+    hint.className = 'bank-hint';
+    hint.textContent = `이름표를 끌어다 놓거나, 눌러서 고른 뒤 자리를 누르세요.${item.extra ? ' (필요 없는 이름표도 있어요)' : ''}`;
+    bank.append(hint);
+    group.append(bank);
+  }
+
+  function buildQuiz() {
+    const clone = $('#study-content').cloneNode(true);
+    clone.removeAttribute('id');
+    $$('.explorer', clone).forEach((el) => el.remove());
+    $$('[id]', clone).forEach((el) => el.removeAttribute('id'));
+    QUIZ.forEach((item) => {
+      if (item.type === 'place') { makePlace(clone, item); return; }
+      const src = clone.querySelector(`[data-q="${item.id}"]`);
+      if (!src) { console.warn('퀴즈 빈칸을 찾을 수 없음:', item.id); return; }
+      const cloze = document.createElement('span');
+      cloze.className = 'cloze';
+      src.replaceWith(cloze);
+      src.classList.add('ans-src');
+      src.setAttribute('aria-hidden', 'true');
+      cloze.append(src);
+      const blank = document.createElement('button');
+      blank.type = 'button';
+      blank.className = 'blank';
+      blank.dataset.qid = item.id;
+      blank.textContent = '?';
+      blank.setAttribute('aria-label', '빈칸 (눌러서 답하기)');
+      cloze.append(blank);
+      if (item.type === 'choice') item.order = shuffle(item.options.map((_, i) => i));
+    });
+    quizBody.replaceChildren(clone);
+    selectedChip = null;
+    resetCheckState();
+  }
+
+  function resetCheckState() {
+    checkBtn.textContent = '정답 확인';
+    summary.textContent = '';
+    $('#mid-result').hidden = true;
+    updateProgress();
+  }
+  // 채운 빈칸 수 (중간 점검 패널의 진행 막대)
+  function updateProgress() {
+    const blanks = $$('.blank, .slot', quizBody);
+    const filled = blanks.filter((el) => el.dataset.value || el.dataset.pick !== undefined).length;
+    $('#mid-filled').textContent = filled;
+    $('#mid-total').textContent = blanks.length;
+    $('#mid-bar-fill').style.width = `${blanks.length ? (filled / blanks.length) * 100 : 0}%`;
+  }
+  function clearMark(el) {
+    el.classList.remove('ok', 'bad');
+    resetCheckState();
+  }
+
+  // 모달에 보여 줄 문장: 현재 빈칸은 입력칸으로, 나머지 빈칸은 작은 칸으로 바꾼다
+  function contextView(blank, activeNode) {
+    const ctx = blank.closest('.ctx');
+    const copy = ctx.cloneNode(true);
+    const originals = $$('.cloze', ctx);
+    $$('.cloze', copy).forEach((cloze, i) => {
+      if (originals[i].contains(blank)) { cloze.replaceWith(activeNode); return; }
+      const other = cloze.querySelector('.blank');
+      const span = document.createElement('span');
+      span.className = 'mini-blank';
+      span.innerHTML = other.innerHTML;
+      cloze.replaceWith(span);
+    });
+    return copy;
+  }
+
+  const textModal = $('#text-modal'), choiceModal = $('#choice-modal');
+  let activeBlank = null, pickedIndex = null;
+
+  function openModal(modal) { modal.hidden = false; }
+  function closeModals() {
+    textModal.hidden = true;
+    choiceModal.hidden = true;
+    if (activeBlank) activeBlank.focus();
+    activeBlank = null;
+  }
+
+  function openTextBlank(blank) {
+    const input = document.createElement('input');
+    input.className = 'ctx-input';
+    input.id = 'text-input';
+    input.autocomplete = 'off';
+    input.setAttribute('aria-label', '답 입력');
+    input.value = blank.dataset.value || '';
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); confirmText(); } });
+    $('#text-ctx').replaceChildren(contextView(blank, input));
+    openModal(textModal);
+    input.focus();
+    input.select();
+  }
+  function confirmText() {
+    const value = $('#text-input').value.trim();
+    if (value) { activeBlank.dataset.value = value; activeBlank.textContent = value; }
+    else { delete activeBlank.dataset.value; activeBlank.textContent = '?'; }
+    clearMark(activeBlank);
+    closeModals();
+  }
+
+  function openChoiceBlank(blank, item) {
+    pickedIndex = blank.dataset.pick !== undefined ? +blank.dataset.pick : null;
+    const preview = document.createElement('span');
+    preview.className = 'mini-blank active';
+    preview.id = 'choice-preview';
+    preview.innerHTML = pickedIndex === null ? '?' : item.options[pickedIndex];
+    $('#choice-ctx').replaceChildren(contextView(blank, preview));
+    const list = $('#choice-list');
+    list.replaceChildren();
+    item.order.forEach((orig, n) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'choice';
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', String(orig === pickedIndex));
+      btn.dataset.index = orig;
+      btn.innerHTML = `<span class="num">${n + 1}</span><span class="opt">${item.options[orig]}</span>`;
+      btn.addEventListener('click', () => {
+        pickedIndex = orig;
+        $$('.choice', list).forEach((b) => b.setAttribute('aria-checked', String(b === btn)));
+        $('#choice-preview').innerHTML = item.options[orig];
+      });
+      list.append(btn);
+    });
+    openModal(choiceModal);
+    (list.querySelector('[aria-checked="true"]') || list.firstElementChild).focus();
+  }
+  function confirmChoice() {
+    const item = QUIZ_BY_ID[activeBlank.dataset.qid];
+    if (pickedIndex !== null) {
+      activeBlank.dataset.pick = pickedIndex;
+      activeBlank.innerHTML = item.options[pickedIndex];
+      clearMark(activeBlank);
+    }
+    closeModals();
+  }
+
+  $('#text-confirm').addEventListener('click', confirmText);
+  $('#choice-confirm').addEventListener('click', confirmChoice);
+  $$('[data-close]').forEach((btn) => btn.addEventListener('click', closeModals));
+  [textModal, choiceModal].forEach((modal) => modal.addEventListener('click', (e) => { if (e.target === modal) closeModals(); }));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && (!textModal.hidden || !choiceModal.hidden)) closeModals();
+  });
+
+  /* 이름표 놓기 (마우스 드래그 + 터치 드래그 + 눌러서 놓기) */
+  let selectedChip = null, drag = null, suppressClick = false;
+  const groupOf = (el) => el.closest('.place-group');
+  function selectChip(chip) {
+    if (selectedChip) selectedChip.classList.remove('selected');
+    selectedChip = chip && chip !== selectedChip ? chip : null;
+    if (selectedChip) selectedChip.classList.add('selected');
+  }
+  // 같은 글자의 이름표가 여러 장일 수 있으므로(증가 ×3) 숨겨진 것을 먼저 돌려준다
+  function chipFor(group, value) {
+    const chips = $$('.chip', group).filter((c) => c.dataset.value === value);
+    return chips.find((c) => c.hidden) || chips[0];
+  }
+  function unplace(slot) {
+    const chip = chipFor(groupOf(slot), slot.dataset.value);
+    if (chip) chip.hidden = false;
+    slot.dataset.value = '';
+    slot.textContent = '?';
+    slot.classList.remove('filled');
+    clearMark(slot);
+  }
+  function place(chip, slot) {
+    if (slot.dataset.value) unplace(slot);
+    slot.dataset.value = chip.dataset.value;
+    slot.textContent = chip.dataset.value;
+    slot.classList.add('filled');
+    chip.hidden = true;
+    selectChip(null);
+    clearMark(slot);
+  }
+
+  quizBody.addEventListener('click', (e) => {
+    const blank = e.target.closest('.blank');
+    if (blank) {
+      const item = QUIZ_BY_ID[blank.dataset.qid];
+      activeBlank = blank;
+      if (item.type === 'text') openTextBlank(blank);
+      else openChoiceBlank(blank, item);
+      return;
+    }
+    const chip = e.target.closest('.chip');
+    if (chip) {
+      if (suppressClick) return;
+      selectChip(chip);
+      return;
+    }
+    const slot = e.target.closest('.slot');
+    if (slot) {
+      if (selectedChip && groupOf(selectedChip) === groupOf(slot)) place(selectedChip, slot);
+      else if (slot.dataset.value) unplace(slot);
+    }
+  });
+
+  quizBody.addEventListener('pointerdown', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip || e.button > 0) return;
+    drag = { chip, x0: e.clientX, y0: e.clientY, ghost: null, over: null };
+    chip.setPointerCapture(e.pointerId);
+  });
+  quizBody.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    if (!drag.ghost) {
+      if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 6) return;
+      drag.ghost = drag.chip.cloneNode(true);
+      drag.ghost.classList.add('ghost', 'selected');
+      document.body.append(drag.ghost);
+    }
+    drag.ghost.style.left = `${e.clientX}px`;
+    drag.ghost.style.top = `${e.clientY}px`;
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    const slot = target && target.closest('.slot');
+    const over = slot && groupOf(slot) === groupOf(drag.chip) ? slot : null;
+    if (over !== drag.over) {
+      if (drag.over) drag.over.classList.remove('drop-hover');
+      if (over) over.classList.add('drop-hover');
+      drag.over = over;
+    }
+  });
+  function endDrag(e, cancelled) {
+    if (!drag) return;
+    const { chip, ghost, over } = drag;
+    drag = null;
+    if (!ghost) return;
+    ghost.remove();
+    if (over) over.classList.remove('drop-hover');
+    if (!cancelled && over) place(chip, over);
+    suppressClick = true;
+    setTimeout(() => { suppressClick = false; }, 0);
+  }
+  quizBody.addEventListener('pointerup', (e) => endDrag(e, false));
+  quizBody.addEventListener('pointercancel', (e) => endDrag(e, true));
+
+  const norm = (s) => s.replace(/\s+/g, '').replace(/（/g, '(').replace(/）/g, ')').replace(/[−–]/g, '-').replace(/＝/g, '=').toLowerCase();
+  // 채운 칸만 채점해서 색을 칠하고, 개수를 돌려준다 (빈 칸은 표시하지 않음)
+  function grade() {
+    let total = 0, correct = 0, empty = 0;
+    const mark = (el, ok) => { el.classList.toggle('ok', ok); el.classList.toggle('bad', !ok); if (ok) correct++; };
+    $$('.blank', quizBody).forEach((blank) => {
+      total++;
+      const item = QUIZ_BY_ID[blank.dataset.qid];
+      const filled = item.type === 'text' ? !!blank.dataset.value : blank.dataset.pick !== undefined;
+      if (!filled) { empty++; blank.classList.remove('ok', 'bad'); return; }
+      mark(blank, item.type === 'text'
+        ? item.answers.some((ans) => norm(ans) === norm(blank.dataset.value))
+        : +blank.dataset.pick === item.answer);
+    });
+    $$('.slot', quizBody).forEach((slot) => {
+      total++;
+      if (!slot.dataset.value) { empty++; slot.classList.remove('ok', 'bad'); return; }
+      mark(slot, slot.dataset.value === slot.dataset.answer);
+    });
+    return { total, correct, empty, filled: total - empty };
+  }
+  function celebrate() {
+    checkBtn.textContent = '참 잘했어요!';
+    const toast = $('#toast');
+    toast.classList.remove('show');
+    void toast.offsetWidth;
+    toast.classList.add('show');
+  }
+  checkBtn.addEventListener('click', () => {
+    const { total, correct, empty } = grade();
+    summary.textContent = `${total}개 중 ${correct}개 정답${empty ? ` · 아직 빈칸 ${empty}개` : ''}`;
+    if (correct === total) celebrate();
+  });
+  $('#mid-check').addEventListener('click', () => {
+    const { total, correct, filled } = grade();
+    const result = $('#mid-result');
+    const wrong = filled - correct;
+    if (filled === 0) {
+      result.className = 'mid-result info';
+      result.textContent = '아직 채운 빈칸이 없어요.';
+    } else if (wrong === 0) {
+      result.className = 'mid-result good';
+      result.textContent = correct === total ? '모두 정답! 🎉' : `채운 ${filled}개 모두 정답! 👍`;
+      if (correct === total) celebrate();
+    } else {
+      result.className = 'mid-result warn';
+      result.textContent = `채운 ${filled}개 중 ${correct}개 정답. 빨간 칸 ${wrong}개를 다시 봐요!`;
+    }
+    result.hidden = false;
+  });
+  $('#toast').addEventListener('animationend', (e) => e.currentTarget.classList.remove('show'));
+  $('#quiz-reset').addEventListener('click', () => {
+    buildQuiz();
+    $('#quiz-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+/* ---------- 탭 ---------- */
+  function initTabs() {
+    $$('.tab').forEach((tab) => tab.addEventListener('click', () => {
+      $$('.tab').forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+      $$('.tab-panel').forEach((panel) => { panel.hidden = panel.id !== tab.getAttribute('aria-controls'); });
+    }));
+  }
+
+
+buildQuiz();
+initTabs();
+})();
+
+</script>
+
+<script>
+/* ---------- 단원 차례(목차): 정리·퀴즈 탭 맨 위, 누르면 그 구역으로 ---------- */
+(function () {
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const tocs = [[$('#study-toc'), () => $('#study-content')], [$('#quiz-toc'), () => $('#quiz-body')]].filter(([nav]) => nav);
+  const zones = $$('#study-content .zone[data-sec]');
+  if (!tocs.length || !zones.length) return;
+  tocs.forEach(([nav, root]) => {
+    nav.innerHTML = zones.map((z) => `<button type="button" data-sec="${z.dataset.sec}">${z.dataset.toc}</button>`).join('');
+    nav.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-sec]');
+      const host = root();
+      const z = b && host && host.querySelector(`.zone[data-sec="${b.dataset.sec}"]`);
+      if (z) z.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      tocs.forEach(([nav, root]) => {
+        if (nav.closest('[hidden]')) return;
+        const host = root();
+        if (!host) return;
+        const list = $$('.zone[data-sec]', host);
+        let cur = list[0];
+        list.forEach((z) => { if (z.getBoundingClientRect().top < 120) cur = z; });
+        $$('button', nav).forEach((b) => {
+          const on = cur && b.dataset.sec === cur.dataset.sec;
+          if (on && b.getAttribute('aria-current') !== 'true') nav.scrollTo({ left: b.offsetLeft - nav.clientWidth / 2 + b.offsetWidth / 2, behavior: 'smooth' });
+          b.setAttribute('aria-current', String(!!on));
+        });
+      });
+    });
+  }, { passive: true });
+})();
+
+</script>
+</body>
+</html>
+
